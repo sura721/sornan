@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    /* --- Project Structure --- */
+    "rootDir": "./src",                                  // Specifies the root directory of your source .ts files.
+    "outDir": "./dist",                                  // Redirects compiled .js output to the 'dist' folder.
+    "baseUrl": "./",                                     // Base directory for resolving non-relative module paths.
+
+    /* --- Language & Environment --- */
+    "target": "ES2020",                                  // Compile to a modern version of JavaScript compatible with current Node.js.
+    "lib": ["ES2020"],                                   // Specify the standard library files to be included.
+
+    /* --- Modules --- */
+    "module": "CommonJS",                                // Use the standard module system for Node.js (require/module.exports).
+    "moduleResolution": "node",                          // How to resolve modules, 'node' is standard for Node.js.
+    "esModuleInterop": true,                             // Enables compatibility with CommonJS modules, allowing `import express from 'express'`.
+
+    /* --- Type Checking & Strictness (Best Practices) --- */
+    "strict": true,                                      // Enables all strict type-checking options for higher code quality.
+    "forceConsistentCasingInFileNames": true,            // Prevents bugs on case-sensitive file systems (e.g., Linux servers).
+    "skipLibCheck": true,                                // Skips type checking of declaration files in node_modules for faster builds.
+
+    /* --- Other Options --- */
+    "resolveJsonModule": true,                           // Allows importing .json files directly.
+    "sourceMap": true,                                   // Generates source map files for easier debugging in development.
+  },
+  "include": [
+   "src/**/*"                                    // Tells the compiler to include all .ts files within the src directory.
+  ],
+  "exclude": [
+    "node_modules"                                       // Excludes the node_modules directory from compilation.
+  ]
+}

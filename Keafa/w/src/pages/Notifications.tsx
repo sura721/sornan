@@ -16,21 +16,24 @@ const Notifications = () => {
   const { individuals, families, dismissedNotificationIds, dismissNotification } = useData();
 
   const activeNotifications = useMemo(() => {
-const today = parseISO(new Date().toISOString().split('T')[0]);
-today.setHours(0, 0, 0, 0);    const notificationDays = new Set([1, 4, 7, 15]);
+    // This logic is now an EXACT MIRROR of the DataContext logic
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    
+    const notificationDays = new Set([1, 4, 7, 15]);
     const upcomingNotifications: Notification[] = [];
     const allOrders = [...individuals, ...families];
+
     allOrders.forEach((order) => {
       if (!order.deliveryDate) return;
 
-const deliveryDate = parseISO(order.deliveryDate);
-        if (deliveryDate < today) {
-        return;
-      }
- 
+      const deliveryDate = new Date(order.deliveryDate + 'T00:00:00Z');
+
       const daysLeft = differenceInCalendarDays(deliveryDate, today);
 
-       if (notificationDays.has(daysLeft)) {
+      if (daysLeft < 0) return;
+
+      if (notificationDays.has(daysLeft)) {
         const name = 'firstName' in order ? `${order.firstName} ${order.lastName}` : order.familyName;
         const uniqueId = `${order._id}-${daysLeft}`;  
         if (!dismissedNotificationIds.includes(uniqueId)) {
@@ -44,10 +47,8 @@ const deliveryDate = parseISO(order.deliveryDate);
       }
     });
     
-    // Sort by soonest first
     return upcomingNotifications.sort((a, b) => a.daysLeft - b.daysLeft);
   }, [individuals, families, dismissedNotificationIds]);
-
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>

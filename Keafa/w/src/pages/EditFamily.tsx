@@ -106,16 +106,28 @@ const EditFamily = () => {
         toast({ title: "Member Removed" });
     }
   };
-
-  const handleFamilySubmit = (e: React.FormEvent) => {
+  const handleFamilySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!familyData) return;
-    const finalFamilyData = { ...familyData, tilefImageUrl: existingTilefUrl };
-    updateFamily(finalFamilyData);
-    toast({ title: "Success", description: "Family group updated successfully" });
-    navigate("/orders");
-  };
 
+    // This function will now correctly call your new powerful backend endpoint.
+    // The logic inside the component doesn't need to change because the backend
+    // is now smart enough to figure out what's new, what's edited, and what's deleted.
+    try {
+      await updateFamily(familyData);
+      toast({
+        title: "Success",
+        description: "Family group updated successfully",
+      });
+      navigate("/orders");
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: "Could not save changes to the family.",
+        variant: "destructive",
+      });
+    }
+  };
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) { setTilefFile(file); setExistingTilefUrl(URL.createObjectURL(file)); }
@@ -153,8 +165,7 @@ const EditFamily = () => {
                 {(familyData.memberIds as Individual[]).map((member) => (
                     <Card key={member._id} className="p-4 flex justify-between items-center">
                     <div><p className="font-medium">{member.firstName} {member.lastName}</p><p className="text-sm text-muted-foreground">{member.sex}</p></div>
-                    <div className="flex gap-2"><Button type="button" variant="outline" size="sm" onClick={() => handleOpenMemberForm(member.id)}>Edit</Button><Button type="button" variant="destructive" size="sm" onClick={() => handleDeleteMember(member.id)}><Trash2 className="w-4 h-4" /></Button></div>
-                    </Card>
+<Button type="button" variant="outline" size="sm" onClick={() => handleOpenMemberForm(member._id)}>Edit</Button>                    </Card>
                 ))}
                 </div>
                 <Button type="button" className="w-full" onClick={() => handleOpenMemberForm("new")}>+ Add New Member</Button>

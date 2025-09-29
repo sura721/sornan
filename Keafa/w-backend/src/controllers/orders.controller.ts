@@ -365,3 +365,79 @@ export const searchOrders = async (req: Request, res: Response) => {
     res.status(500).send('Server Error');
   }
 };
+
+
+
+
+
+// Add this new function to your orders.controller.ts file
+
+export const updateFamilyAndMembers = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { memberIds, ...familyData } = req.body;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const originalFamily = await Family.findById(id).session(session);
+    if (!originalFamily) {
+      throw new Error('Family not found');
+    }
+
+    const memberUpdates = [];
+    const newMemberIds = [];
+
+    // Process all incoming members
+    for (const member of memberIds) {
+      if (member._id && !member._id.startsWith('mock_mem_')) {
+        // This is an existing member, prepare an update operation
+        const { _id, ...memberDetails } = member;
+        memberUpdates.push({
+          updateOne: {
+            filter: { _id: _id },
+            update: { $set: memberDetails },
+          },
+        });
+        newMemberIds.push(_id); // Keep existing ID
+      } else {
+        // This is a new member, prepare an insert operation
+        const newMember = new Individual({ ...member, isFamilyMember: true });
+        await newMember.save({ session });
+        newMemberIds.push(newMember._id); // Add the new, real ID
+      }
+    }
+
+    // Perform all member updates/creations
+    if (memberUpdates.length > 0) {
+      await Individual.bulkWrite(memberUpdates, { session });
+    }
+
+    // Determine which members were deleted
+    const originalMemberIds = originalFamily.memberIds.map(id => id.toString());
+    const currentMemberIds = newMemberIds.map(id => id.toString());
+    const deletedMemberIds = originalMemberIds.filter(id => !currentMemberIds.includes(id));
+
+    // Delete the removed members
+    if (deletedMemberIds.length > 0) {
+      await Individual.deleteMany({ _id: { $in: deletedMemberIds } }).session(session);
+    }
+
+    // Finally, update the main Family document
+    const updatedFamily = await Family.findByIdAndUpdate(
+      id,
+      { ...familyData, memberIds: newMemberIds },
+      { new: true, session }
+    ).populate('memberIds');
+
+    await session.commitTransaction();
+    res.json(updatedFamily);
+
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('Family update transaction failed:', error);
+    res.status(500).send('Server Error');
+  } finally {
+    session.endSession();
+  }
+};

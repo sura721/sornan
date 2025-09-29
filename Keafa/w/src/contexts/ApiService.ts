@@ -60,6 +60,7 @@ export const updateIndividualApi = async (individual: Individual): Promise<Indiv
 };
 
 export const updateFamilyApi = async (family: Family): Promise<Family> => {
+  // const response = await api.put(`/orders/families/${family._id}`, family);
   const response = await api.put(`/orders/families/${family._id}`, family);
   return response.data;
 };

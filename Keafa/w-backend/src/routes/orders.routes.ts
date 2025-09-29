@@ -10,17 +10,17 @@ import {
   createFamily,
   updateFamily,
   deleteFamily,
+  
   searchOrders,
 } from '../controllers/orders.controller';
 import authMiddleware from '../middleware/auth.middleware';
 import upload from '../middleware/upload.middleware';
-
 // Create a new router instance from Express
 const router = express.Router();
 
 
 router.get('/individuals', authMiddleware, getIndividuals);
-
+import { /*...,*/ updateFamilyAndMembers, /*...*/ } from '../controllers/orders.controller';
 // @route   POST /api/orders/individuals
 // @desc    Create a new individual order with an optional image upload
 // @access  Private
@@ -66,8 +66,7 @@ router.get('/families/:id', authMiddleware, getFamilyById);
 // @route   PUT /api/orders/families/:id
 // @desc    Update a family order
 // @access  Private
-router.put('/families/:id', authMiddleware, updateFamily);
-
+router.put('/families/:id', authMiddleware, updateFamilyAndMembers);
 router.get('/search', authMiddleware, searchOrders);
 router.delete('/families/:id', authMiddleware, deleteFamily);
 

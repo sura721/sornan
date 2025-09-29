@@ -204,54 +204,53 @@ export const getFamilyById = async (req: Request, res: Response) => {
  * @route   POST /api/orders/families
  * @access  Private
  */
-export const createFamily = async (req: Request, res: Response) => {
-  const { memberIds: memberData, ...familyData } = req.body;
+// In order.controller.js
 
+export const createFamily = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // FIX 1: Add type to 'member' and set the 'isFamilyMember' flag to true for each one.
+    // --- FIX START: Manually parse stringified fields from FormData ---
+    const memberData = JSON.parse(req.body.memberIds);
+    const familyData = {
+      familyName: req.body.familyName,
+      phoneNumbers: JSON.parse(req.body.phoneNumbers),
+      socials: JSON.parse(req.body.socials),
+      colors: JSON.parse(req.body.colors),
+      payment: JSON.parse(req.body.payment),
+      deliveryDate: req.body.deliveryDate,
+    };
+    // --- FIX END ---
+
     const membersToCreate = memberData.map((member: any) => ({
       ...member,
       isFamilyMember: true,
     }));
 
-    // Step 1: Create the individual documents for each member using the updated data.
-    // FIX 2: Use the new 'membersToCreate' array.
     const newMembers = await Individual.create(membersToCreate, { session, ordered: true });
     const newMemberIds = newMembers.map(member => member._id);
 
-    // Step 2: Create the family document, linking it to the new members
     const newFamily = new Family({
       ...familyData,
-      memberIds: newMemberIds, // Use the newly created member IDs
-      clothDetails: {
-        ...(familyData as any).clothDetails, // Using 'as any' to avoid potential type errors if clothDetails is not expected on familyData
-        tilefImageUrl: req.file ? req.file.path : undefined,
-      },
+      memberIds: newMemberIds,
+      // --- FIX: Get the Cloudinary URL from req.file.path and place it at the root level ---
+      tilefImageUrl: req.file ? req.file.path : undefined,
     });
 
     const savedFamily = await newFamily.save({ session });
-
-    // If all operations were successful, commit the transaction
     await session.commitTransaction();
 
-    // Populate the member details before sending the response
     const populatedFamily = await Family.findById(savedFamily._id).populate('memberIds');
-    
     res.status(201).json(populatedFamily);
   } catch (error) {
-    // If any operation fails, abort the transaction
     await session.abortTransaction();
     console.error(error);
     res.status(500).send('Server Error');
   } finally {
-    // End the session
     session.endSession();
   }
 };
-
 
 
 
@@ -374,9 +373,31 @@ export const searchOrders = async (req: Request, res: Response) => {
 
 // Add this new function to your orders.controller.ts file
 
+// The NEW and CORRECT function to paste
 export const updateFamilyAndMembers = async (req: Request, res: Response) => {
+    console.log('--- UPDATE REQUEST RECEIVED ---');
+  console.log('File received by controller:', req.file);
   const { id } = req.params;
-  const { memberIds, ...familyData } = req.body;
+
+  // This is the main change: We now manually parse the data
+  // because when a file is sent, everything else becomes a string.
+  const memberIds = JSON.parse(req.body.memberIds);
+  const familyData = {
+    familyName: req.body.familyName,
+    phoneNumbers: JSON.parse(req.body.phoneNumbers),
+    socials: JSON.parse(req.body.socials),
+    colors: JSON.parse(req.body.colors),
+    payment: JSON.parse(req.body.payment),
+    deliveryDate: req.body.deliveryDate,
+    // We get the existing image URL from the form body
+    tilefImageUrl: req.body.tilefImageUrl,
+  };
+
+  // This is the image logic: If a new file was uploaded,
+  // we update the image URL with the new path from multer.
+  if (req.file) {
+    familyData.tilefImageUrl = req.file.path;
+  }
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -390,10 +411,9 @@ export const updateFamilyAndMembers = async (req: Request, res: Response) => {
     const memberUpdates = [];
     const newMemberIds = [];
 
-    // Process all incoming members
+    // This part of the logic is UNCHANGED
     for (const member of memberIds) {
       if (member._id && !member._id.startsWith('mock_mem_')) {
-        // This is an existing member, prepare an update operation
         const { _id, ...memberDetails } = member;
         memberUpdates.push({
           updateOne: {
@@ -401,31 +421,27 @@ export const updateFamilyAndMembers = async (req: Request, res: Response) => {
             update: { $set: memberDetails },
           },
         });
-        newMemberIds.push(_id); // Keep existing ID
+        newMemberIds.push(_id);
       } else {
-        // This is a new member, prepare an insert operation
         const newMember = new Individual({ ...member, isFamilyMember: true });
         await newMember.save({ session });
-        newMemberIds.push(newMember._id); // Add the new, real ID
+        newMemberIds.push(newMember._id);
       }
     }
 
-    // Perform all member updates/creations
     if (memberUpdates.length > 0) {
       await Individual.bulkWrite(memberUpdates, { session });
     }
 
-    // Determine which members were deleted
     const originalMemberIds = originalFamily.memberIds.map(id => id.toString());
     const currentMemberIds = newMemberIds.map(id => id.toString());
     const deletedMemberIds = originalMemberIds.filter(id => !currentMemberIds.includes(id));
 
-    // Delete the removed members
     if (deletedMemberIds.length > 0) {
       await Individual.deleteMany({ _id: { $in: deletedMemberIds } }).session(session);
     }
 
-    // Finally, update the main Family document
+    // This part is also UNCHANGED
     const updatedFamily = await Family.findByIdAndUpdate(
       id,
       { ...familyData, memberIds: newMemberIds },

@@ -88,9 +88,8 @@ interface DataContextType {
   addIndividual: (individualData: FormData) => Promise<Individual | undefined>;
   updateIndividual: (individual: Individual) => Promise<void>;
   deleteIndividual: (id: string) => Promise<void>;
-addFamily: (familyData: FamilyPayload, newTilefFile: File | null) => Promise<void>;
-  updateFamily: (family: Family) => Promise<void>;
-  deleteFamily: (id: string) => Promise<void>;
+  addFamily: (familyData: FormData) => Promise<void>; 
+  updateFamily: (family: Family, tilefFile: File | null) => Promise<void>;  deleteFamily: (id: string) => Promise<void>;
   getIndividual: (id: string) => Individual | undefined;
   getFamily: (id: string) => Family | undefined;
   notificationCount: number;
@@ -244,31 +243,20 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
   
-  const addFamily = async (familyData: FamilyPayload, newTilefFile: File | null): Promise<void> => {
+  const addFamily = async (familyFormData: FormData): Promise<void> => {
     try {
-      let dataToSend: FamilyPayload | FormData = familyData;
+      // The FormData is already built, so we just pass it directly to the API service.
+      const savedFamily = await addFamilyApi(familyFormData);
 
-      // If there is a new image file, we must use FormData
-      if (newTilefFile) {
-        const formData = new FormData();
-        formData.append('tilefImage', newTilefFile);
-        
-        // Append all other family data as JSON strings
-        Object.keys(familyData).forEach(key => {
-          const value = familyData[key as keyof FamilyPayload];
-          // We stringify complex objects like memberIds and payment
-          formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
-        });
-        dataToSend = formData;
-      }
-      
-      const savedFamily = await addFamilyApi(dataToSend);
-      setFamilies(prev => [...prev, savedFamily].sort((a, b) => new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime()));
+      setFamilies(prev => 
+        [...prev, savedFamily].sort((a, b) => 
+          new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime()
+        )
+      );
     } catch (error) {
       toast({ title: "API Error", description: "Could not save family order.", variant: "destructive" });
     }
   };
-  
   const updateIndividual = async (individual: Individual) => {
     try {
         const updatedIndividual = await updateIndividualApi(individual);
@@ -287,15 +275,38 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
   
-  const updateFamily = async (family: Family) => {
-    try {
-        const updatedFamily = await updateFamilyApi(family);
-        setFamilies(prev => prev.map(fam => (fam._id === updatedFamily._id ? updatedFamily : fam)));
-    } catch (error) {
-        toast({ title: "API Error", description: "Could not update family.", variant: "destructive" });
-    }
-  };
+ // The NEW and CORRECT function to paste
+const updateFamily = async (family: Family, tilefFile: File | null) => {
+  try {
+    const formData = new FormData();
 
+    // This part packages all your text data into the form
+    formData.append('familyName', family.familyName);
+    formData.append('phoneNumbers', JSON.stringify(family.phoneNumbers));
+    formData.append('socials', JSON.stringify(family.socials || {}));
+    formData.append('colors', JSON.stringify(family.colors || []));
+    formData.append('payment', JSON.stringify(family.payment));
+    formData.append('deliveryDate', family.deliveryDate);
+    formData.append('memberIds', JSON.stringify(family.memberIds));
+
+    // This preserves the old image if you don't upload a new one
+    if (family.tilefImageUrl) {
+      formData.append('tilefImageUrl', family.tilefImageUrl);
+    }
+    
+    // This is the image logic: if a new file exists, add it
+    if (tilefFile) {
+formData.append('tilefImage', tilefFile);    }
+
+    // This now calls the API with the ID and the FormData object
+    const updatedFamily = await updateFamilyApi(family._id, formData);
+    setFamilies(prev => prev.map(fam => (fam._id === updatedFamily._id ? updatedFamily : fam)));
+
+  } catch (error) {
+    toast({ title: "API Error", description: "Could not update family.", variant: "destructive" });
+    throw error;
+  }
+};
   const deleteFamily = async (id: string) => {
     try {
       await deleteFamilyApi(id);

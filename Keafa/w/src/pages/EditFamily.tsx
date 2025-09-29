@@ -83,8 +83,7 @@ const handleFamilyChange = (field: string, value: string | number | boolean | st
         },
     };
     if (activeMemberForm === 'new') {
-        const newMember: Individual = { ...memberDetails, id: `mock_mem_${Date.now()}`, _id: `mock_mem_${Date.now()}` };
-        setFamilyData(prev => prev ? { ...prev, memberIds: [...prev.memberIds, newMember] } : null);
+const newMember: Individual = { ...memberDetails, _id: `mock_mem_${Date.now()}` };        setFamilyData(prev => prev ? { ...prev, memberIds: [...prev.memberIds, newMember] } : null);
     } else {
         setFamilyData(prev => {
             if (!prev) return null;

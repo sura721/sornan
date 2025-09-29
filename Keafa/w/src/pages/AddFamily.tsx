@@ -82,38 +82,49 @@ const AddFamily = () => {
     setActiveMemberForm(null);
   };
   
-  const handleFamilySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!familyName || !primaryPhone || !deliveryDate) {
-      toast({ title: "Error", description: "Family Name, Primary Phone, and Delivery Date are required.", variant: "destructive" });
-      return;
-    }
-    if (members.length !== numberOfMembers || numberOfMembers === 0) {
-      toast({ title: "Error", description: `Please add details for all ${numberOfMembers} family members.`, variant: "destructive" });
-      return;
-    }
-    
-    const familyPayload: FamilyPayload = {
-      familyName,
-      memberIds: members,
-      phoneNumbers: { primary: primaryPhone, secondary: secondaryPhone },
-      socials: { telegram: telegramUsername },
-      tilefImageUrl: tilefFile ? URL.createObjectURL(tilefFile) : undefined,
-      colors: colorCodes.split(',').map(c => c.trim()).filter(Boolean),
-      payment: {
-        total: parseFloat(paymentTotal) || undefined,
-        firstHalf: { paid: firstHalfPaid, amount: parseFloat(firstHalfAmount) || undefined },
-        secondHalf: { paid: secondHalfPaid, amount: parseFloat(secondHalfAmount) || undefined },
-      },
-      deliveryDate: deliveryDate.toISOString().split('T')[0],
-    };
+// In addfamily.tsx
 
-    addFamily(familyPayload);
-    
-    toast({ title: "Success", description: "Family group created successfully" });
-    navigate("/orders");
-  };
+// In AddFamily.tsx
 
+const handleFamilySubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!familyName || !primaryPhone || !deliveryDate) {
+    toast({ title: "Error", description: "Family Name, Primary Phone, and Delivery Date are required.", variant: "destructive" });
+    return;
+  }
+  if (members.length !== numberOfMembers || numberOfMembers === 0) {
+    toast({ title: "Error", description: `Please add details for all ${numberOfMembers} family members.`, variant: "destructive" });
+    return;
+  }
+
+  // --- THE FIX IS HERE ---
+  // Create a new FormData object to hold all data, including the file.
+  const formData = new FormData();
+
+  // 1. Append all text/JSON data. Objects and arrays MUST be stringified.
+  formData.append('familyName', familyName);
+  formData.append('phoneNumbers', JSON.stringify({ primary: primaryPhone, secondary: secondaryPhone }));
+  formData.append('socials', JSON.stringify({ telegram: telegramUsername }));
+  formData.append('colors', JSON.stringify(colorCodes.split(',').map(c => c.trim()).filter(Boolean)));
+  formData.append('payment', JSON.stringify({
+    total: parseFloat(paymentTotal) || undefined,
+    firstHalf: { paid: firstHalfPaid, amount: parseFloat(firstHalfAmount) || undefined },
+    secondHalf: { paid: secondHalfPaid, amount: parseFloat(secondHalfAmount) || undefined },
+  }));
+  formData.append('deliveryDate', deliveryDate.toISOString().split('T')[0]);
+  formData.append('memberIds', JSON.stringify(members)); // This sends the members array
+
+  // 2. Append the file if it exists. The key 'tilefImage' must match the key your backend route expects.
+  if (tilefFile) {
+    formData.append('tilefImage', tilefFile);
+  }
+
+  // 3. Call addFamily with the single FormData object.
+  await addFamily(formData);
+  
+  toast({ title: "Success", description: "Family group created successfully" });
+  navigate("/orders");
+};
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>

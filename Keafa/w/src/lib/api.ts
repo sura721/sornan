@@ -9,9 +9,7 @@ if (!backendUrl) {
 
 const api = axios.create({
   baseURL: backendUrl,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  
 });
 
 // --- FIX START: Add an Axios interceptor ---

@@ -63,10 +63,8 @@ router.post('/families', authMiddleware, upload.single('tilefImage'), createFami
 // @access  Private
 router.get('/families/:id', authMiddleware, getFamilyById);
 
-// @route   PUT /api/orders/families/:id
-// @desc    Update a family order
-// @access  Private
-router.put('/families/:id', authMiddleware, updateFamilyAndMembers);
+ 
+router.put('/families/update/:id', authMiddleware, upload.single('tilefImage'), updateFamilyAndMembers);
 router.get('/search', authMiddleware, searchOrders);
 router.delete('/families/:id', authMiddleware, deleteFamily);
 

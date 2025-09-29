@@ -8,13 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Upload, X, Trash2 } from "lucide-react";
+import { CalendarIcon, Upload, X, Trash2,Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useData, Family, Individual } from "@/contexts/DataContext";
 import { toast } from "@/hooks/use-toast";
 import { cn, getImageUrl } from "@/lib/utils";
-
-const initialMemberFormState = { firstName: "", lastName: "", sex: "", age: "", shirtLength: "", sholder: "", wegeb: "", rist: "", dressLength: "", sliveLength: "", breast: "", overBreast: "", underBreast: "", femaleSliveType: "", femaleWegebType: "", deret: "", anget: "", maleClothType: "", maleSliveType: "", netela: "" };
+ const initialMemberFormState = { firstName: "", lastName: "", sex: "", age: "", shirtLength: "", sholder: "", wegeb: "", rist: "", dressLength: "", sliveLength: "", breast: "", overBreast: "", underBreast: "", femaleSliveType: "", femaleWegebType: "", deret: "", anget: "", maleClothType: "", maleSliveType: "", netela: "" };
 type MemberData = Omit<Individual, 'id' | '_id' | 'payment' | 'deliveryDate' | 'phoneNumbers' | 'socials'>;
 
 const EditFamily = () => {
@@ -25,7 +24,7 @@ const EditFamily = () => {
   const [familyData, setFamilyData] = useState<Family | null>(null);
   const [activeMemberForm, setActiveMemberForm] = useState<string | null>(null); // "new" or member's ID
   const [memberFormData, setMemberFormData] = useState(initialMemberFormState);
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [tilefFile, setTilefFile] = useState<File | null>(null);
   const [existingTilefUrl, setExistingTilefUrl] = useState<string | undefined>(undefined);
 
@@ -125,8 +124,8 @@ const newMember: Individual = { ...memberDetails, _id: `mock_mem_${Date.now()}` 
     e.preventDefault();
     if (!familyData) return;
 
+    setIsSubmitting(true);  
     try {
-      // THE FIX IS HERE: Pass the tilefFile state as the second argument.
       await updateFamily(familyData, tilefFile);
       
       toast({
@@ -140,6 +139,8 @@ const newMember: Individual = { ...memberDetails, _id: `mock_mem_${Date.now()}` 
         description: "Could not save changes to the family.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false); 
     }
   };
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -202,8 +203,18 @@ const newMember: Individual = { ...memberDetails, _id: `mock_mem_${Date.now()}` 
             </CardContent>
         </Card>
 
-        <div className="flex justify-end"><Button type="submit" className="bg-gradient-primary text-secondary-foreground shadow-elegant hover:shadow-xl transition-all px-8 py-3">Update Family Group</Button></div>
-      </form>
+<div className="flex justify-end">
+  <Button 
+    type="submit" 
+    disabled={isSubmitting} // <-- Disables the button when submitting
+    className="bg-gradient-primary text-secondary-foreground shadow-elegant hover:shadow-xl transition-all px-8 py-3"
+  >
+    {isSubmitting && ( // <-- Only show spinner when submitting
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+    )}
+    {isSubmitting ? 'Updating...' : 'Update Family Group'} {/* <-- Change text */}
+  </Button>
+</div>      </form>
     </div>
   );
 };

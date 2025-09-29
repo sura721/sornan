@@ -88,7 +88,7 @@ interface DataContextType {
   addIndividual: (individualData: FormData) => Promise<Individual | undefined>;
   updateIndividual: (individual: Individual) => Promise<void>;
   deleteIndividual: (id: string) => Promise<void>;
-  addFamily: (familyData: FamilyPayload) => Promise<void>;
+addFamily: (familyData: FamilyPayload, newTilefFile: File | null) => Promise<void>;
   updateFamily: (family: Family) => Promise<void>;
   deleteFamily: (id: string) => Promise<void>;
   getIndividual: (id: string) => Individual | undefined;
@@ -146,27 +146,35 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
     fetchInitialData();
   }, [isAuthenticated]);
-
   const notificationCount = useMemo(() => {
-    const today = parseISO(new Date().toISOString().split('T')[0]);
+    const today = new Date();
     today.setHours(0, 0, 0, 0);
     const notificationDays = new Set([1, 4, 7, 15]);
     let count = 0;
     const allOrders = [...individuals, ...families];
+    
     allOrders.forEach(order => {
-      if (!order.deliveryDate) return;
-      const deliveryDate = parseISO(order.deliveryDate);
-      if (deliveryDate < today) return;
-      const daysLeft = differenceInCalendarDays(deliveryDate, today);
-      if (notificationDays.has(daysLeft)) {
-        const uniqueId = `${order._id}-${daysLeft}`;
-        if (!dismissedNotificationIds.includes(uniqueId)) {
-          count++;
+        if (!order.deliveryDate) return;
+        
+        const deliveryDate = parseISO(order.deliveryDate);
+        
+        // Skip dates that are in the past
+        if (deliveryDate < today) {
+            return;
         }
-      }
+
+        const daysLeft = differenceInCalendarDays(deliveryDate, today);
+        
+        if (notificationDays.has(daysLeft)) {
+            const uniqueId = `${order._id}-${daysLeft}`;
+            if (!dismissedNotificationIds.includes(uniqueId)) {
+                count++;
+            }
+        }
     });
     return count;
   }, [individuals, families, dismissedNotificationIds]);
+  // --- FIX END ---
 
   const dismissNotification = (notificationId: string) => {
     setDismissedNotificationIds(prev => {
@@ -236,9 +244,25 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
   
-  const addFamily = async (familyData: FamilyPayload) => {
+  const addFamily = async (familyData: FamilyPayload, newTilefFile: File | null): Promise<void> => {
     try {
-      const savedFamily = await addFamilyApi(familyData);
+      let dataToSend: FamilyPayload | FormData = familyData;
+
+      // If there is a new image file, we must use FormData
+      if (newTilefFile) {
+        const formData = new FormData();
+        formData.append('tilefImage', newTilefFile);
+        
+        // Append all other family data as JSON strings
+        Object.keys(familyData).forEach(key => {
+          const value = familyData[key as keyof FamilyPayload];
+          // We stringify complex objects like memberIds and payment
+          formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+        });
+        dataToSend = formData;
+      }
+      
+      const savedFamily = await addFamilyApi(dataToSend);
       setFamilies(prev => [...prev, savedFamily].sort((a, b) => new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime()));
     } catch (error) {
       toast({ title: "API Error", description: "Could not save family order.", variant: "destructive" });

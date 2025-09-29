@@ -42,8 +42,7 @@ const EditFamily = () => {
     }
   }, [id, getFamily, navigate]);
   
-  const handleFamilyChange = (field: string, value: any) => {
-    setFamilyData(prev => {
+const handleFamilyChange = (field: string, value: string | number | boolean | string[]) => {    setFamilyData(prev => {
       if (!prev) return null;
       const newData = JSON.parse(JSON.stringify(prev)); 
       const keys = field.split('.');
@@ -95,26 +94,42 @@ const EditFamily = () => {
     }
     setActiveMemberForm(null);
   };
-  
-  const handleDeleteMember = (memberId: string) => {
-    if (window.confirm("Are you sure you want to remove this member?")) {
-        setFamilyData(prev => {
-            if (!prev) return null;
-            const updatedMembers = prev.memberIds.filter(mem => (mem as Individual)._id !== memberId);
-            return { ...prev, memberIds: updatedMembers };
+  const handleDeleteMember = (memberIdToDelete: string) => {
+    if (window.confirm("Are you sure you want to remove this member from the family?")) {
+      setFamilyData(currentFamilyData => {
+        // Ensure we have family data to work with
+        if (!currentFamilyData) {
+          return null;
+        }
+        
+        // Create a new array of members that does NOT include the one with the matching ID
+        const updatedMemberIds = currentFamilyData.memberIds.filter(member => {
+          // Ensure we are always dealing with the full Individual object to get its _id
+          const individualMember = member as Individual;
+          return individualMember._id !== memberIdToDelete;
         });
-        toast({ title: "Member Removed" });
+
+        // Return a new state object with the updated members list
+        return {
+          ...currentFamilyData,
+          memberIds: updatedMemberIds,
+        };
+      });
+
+      toast({
+        title: "Member Removed",
+        description: "The member has been removed from the list. Click 'Update Family Group' to save this change permanently.",
+      });
     }
   };
   const handleFamilySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!familyData) return;
 
-    // This function will now correctly call your new powerful backend endpoint.
-    // The logic inside the component doesn't need to change because the backend
-    // is now smart enough to figure out what's new, what's edited, and what's deleted.
     try {
-      await updateFamily(familyData);
+      // THE FIX IS HERE: Pass the tilefFile state as the second argument.
+      await updateFamily(familyData, tilefFile);
+      
       toast({
         title: "Success",
         description: "Family group updated successfully",
@@ -165,7 +180,12 @@ const EditFamily = () => {
                 {(familyData.memberIds as Individual[]).map((member) => (
                     <Card key={member._id} className="p-4 flex justify-between items-center">
                     <div><p className="font-medium">{member.firstName} {member.lastName}</p><p className="text-sm text-muted-foreground">{member.sex}</p></div>
-<Button type="button" variant="outline" size="sm" onClick={() => handleOpenMemberForm(member._id)}>Edit</Button>                    </Card>
+                    
+<Button type="button" variant="outline" size="sm" onClick={() => handleOpenMemberForm(member._id)}>Edit</Button>  
+
+<Button type="button" variant="destructive" size="sm" onClick={() => handleDeleteMember(member._id)}><Trash2 className="w-4 h-4" /></Button></Card>
+                    
+            
                 ))}
                 </div>
                 <Button type="button" className="w-full" onClick={() => handleOpenMemberForm("new")}>+ Add New Member</Button>

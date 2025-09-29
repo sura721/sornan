@@ -195,8 +195,10 @@ export const getFamilyById = async (req: Request, res: Response) => {
 
 
 
-
-
+  
+/**
+ * Your comment would go here
+ */ // <--- FIX: Closed the block comment
 /**
  * @desc    Create a new family order
  * @route   POST /api/orders/families

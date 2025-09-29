@@ -40,11 +40,15 @@ export const addIndividualApi = async (individualData: FormData): Promise<Indivi
   });
   return response.data;
 };
-
-export const addFamilyApi = async (familyData: FamilyPayload): Promise<Family> => {
-  const response = await api.post('/orders/families', familyData);
+export const addFamilyApi = async (familyData: FamilyPayload | FormData): Promise<Family> => {
+  // Check if we are sending a file (FormData) or just JSON
+  const headers = familyData instanceof FormData 
+    ? { 'Content-Type': 'multipart/form-data' }
+    : { 'Content-Type': 'application/json' };
+  
+  const response = await api.post('/orders/families', familyData, { headers });
   return response.data;
-};
+}
 
 export const deleteIndividualApi = async (id: string): Promise<void> => {
   await api.delete(`/orders/individuals/${id}`);

@@ -15,21 +15,15 @@ import {
 } from '../controllers/orders.controller';
 import authMiddleware from '../middleware/auth.middleware';
 import upload from '../middleware/upload.middleware';
-// Create a new router instance from Express
-const router = express.Router();
+ const router = express.Router();
 
 
 router.get('/individuals', authMiddleware, getIndividuals);
 import { /*...,*/ updateFamilyAndMembers, /*...*/ } from '../controllers/orders.controller';
-// @route   POST /api/orders/individuals
-// @desc    Create a new individual order with an optional image upload
-// @access  Private
-// `upload.single('tilefImage')` will process a single file uploaded
-// in the form field named 'tilefImage'.
+ 
 router.post('/individuals', authMiddleware, upload.single('tilefImage'), createIndividual);
 
-// @route   GET /api/orders/individuals/:id
- 
+  
 router.get('/individuals/:id', authMiddleware, getIndividualById);
 
  
@@ -38,22 +32,11 @@ router.put('/individuals/:id', authMiddleware, upload.single('tilefImage'), upda
  
 router.delete('/individuals/:id', authMiddleware, deleteIndividual);
 
-
-// --- Family Order Routes ---
-
-// @route   GET /api/orders/families
-// @desc    Get all family orders
-// @access  Private
+ 
 router.get('/families', authMiddleware, getFamilies);
-
-// @route   POST /api/orders/families
-// @desc    Create a new family order with an optional image upload
-// @access  Private
+ 
 router.post('/families', authMiddleware, upload.single('tilefImage'), createFamily);
-
-// @route   GET /api/orders/families/:id
-// @desc    Get a single family order by ID (with member details)
-// @access  Private
+ 
 router.get('/families/:id', authMiddleware, getFamilyById);
 
  
@@ -61,5 +44,4 @@ router.put('/families/update/:id', authMiddleware, upload.single('tilefImage'), 
 router.get('/search', authMiddleware, searchOrders);
 router.delete('/families/:id', authMiddleware, deleteFamily);
 
-// Export the router to be used in the main server file
-export default router;
+ export default router;

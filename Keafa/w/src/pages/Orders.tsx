@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Individual, Family } from '@/contexts/DataContext';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { getImageUrl } from '@/lib/utils';
 
@@ -23,11 +23,11 @@ const Orders = () => {
   const { individuals, families, deleteIndividual, deleteFamily } = useData();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+   const hasOrders = individuals.length > 0 || families.length > 0;
   const [selectedOrder, setSelectedOrder] = useState<{ type: 'individual' | 'family'; data: Individual | Family } | null>(null);
   const [selectedMember, setSelectedMember] = useState<Individual | null>(null);
   const [fullScreenImageUrl, setFullScreenImageUrl] = useState<string | null>(null);
-
+  const today = toZonedTime(new Date(), 'UTC');
   const handleDeleteIndividual = (id: string, name: string) => {
     if (window.confirm(`Are you sure you want to delete the order for ${name}?`)) {
       deleteIndividual(id);
@@ -42,7 +42,7 @@ const Orders = () => {
     }
   };
 
-  const hasOrders = individuals.length > 0 || families.length > 0;
+  // const hasOrders = individuals.length > 0 || families.length > 0;
 
   if (!hasOrders) {
     return (
@@ -68,12 +68,46 @@ const Orders = () => {
             <h2 className="text-2xl font-semibold text-primary flex items-center gap-2"><UserCheck className="w-6 h-6" /> Individual Orders</h2>
             <div className="space-y-4">
               {individuals.map((individual) => (
-                <Card key={individual._id} className="group hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedOrder({ type: 'individual', data: individual })}>
-                  <CardContent className="p-4 flex justify-between items-center">
-                    <div className="flex-1 min-w-0"><p className="text-lg font-semibold text-foreground truncate">{individual.firstName} {individual.lastName}</p><p className="text-sm text-muted-foreground">{individual.phoneNumbers?.primary || 'No Phone'}</p><p className="text-sm text-muted-foreground">Delivery: {individual.deliveryDate ? format( toZonedTime(new Date(individual.deliveryDate), 'UTC'), "PPP") : 'N/A'}</p></div>
-                    <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); navigate(`/edit-individual/${individual._id}`); }}><Edit className="w-4 h-4" /></Button><Button variant="destructive" size="icon" onClick={(e) => { e.stopPropagation(); handleDeleteIndividual(individual._id, `${individual.firstName} ${individual.lastName}`); }}><Trash2 className="w-4 h-4" /></Button></div>
-                  </CardContent>
-                </Card>
+         
+<Card key={individual._id} className="group hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedOrder({ type: 'individual', data: individual })}>
+  <CardContent className="p-4 flex justify-between items-center">
+    <div className="flex-1 min-w-0">
+      <p className="text-lg font-semibold text-foreground truncate">{individual.firstName} {individual.lastName}</p>
+      <p className="text-sm text-muted-foreground">{individual.phoneNumbers?.primary || 'No Phone'}</p>
+      <div className="flex items-center gap-2">
+        <p className="text-sm text-muted-foreground">
+          Delivery: {individual.deliveryDate ? format(toZonedTime(new Date(individual.deliveryDate), 'UTC'), "PPP") : 'N/A'}
+        </p>
+        {/* --- COUNTDOWN LOGIC START --- */}
+        {individual.deliveryDate && (() => {
+          const delivery = toZonedTime(new Date(individual.deliveryDate), 'UTC');
+          const daysLeft = differenceInCalendarDays(delivery, today);
+
+          if (daysLeft < 0) {
+            return <span className="text-xs font-medium text-gray-500">(Past Due)</span>;
+          }
+          if (daysLeft === 0) {
+            return <span className="text-xs font-bold text-green-600">(Due Today)</span>;
+          }
+          if (daysLeft <= 3) {
+            return <span className="text-xs font-medium text-red-600">({daysLeft} {daysLeft === 1 ? 'day' : 'days'} left)</span>;
+          }
+          if (daysLeft <= 7) {
+            return <span className="text-xs font-medium text-yellow-600">({daysLeft} days left)</span>;
+          }
+          return <span className="text-xs font-medium text-gray-500">({daysLeft} days left)</span>;
+        })()}
+        {/* --- COUNTDOWN LOGIC END --- */}
+      </div>
+    </div>
+    <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); navigate(`/edit-individual/${individual._id}`); }}><Edit className="w-4 h-4" /></Button>
+      <Button variant="destructive" size="icon" onClick={(e) => { e.stopPropagation(); handleDeleteIndividual(individual._id, `${individual.firstName} ${individual.lastName}`); }}><Trash2 className="w-4 h-4" /></Button>
+    </div>
+  </CardContent>
+</Card>
+
+
               ))}
               {individuals.length === 0 && <p className="text-muted-foreground text-center py-4">No individual orders.</p>}
             </div>
@@ -84,12 +118,43 @@ const Orders = () => {
             <h2 className="text-2xl font-semibold text-primary flex items-center gap-2"><Users className="w-6 h-6" /> Family Orders</h2>
             <div className="space-y-4">
               {families.map((family) => (
-                <Card key={family._id} className="group hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedOrder({ type: 'family', data: family })}>
-                  <CardContent className="p-4 flex justify-between items-center">
-                    <div className="flex-1 min-w-0"><p className="text-lg font-semibold text-foreground truncate">{family.familyName}</p><p className="text-sm text-muted-foreground">{family.phoneNumbers?.primary || 'No Phone'}</p><p className="text-sm text-muted-foreground">Delivery: {family.deliveryDate ? format( toZonedTime(new Date(family.deliveryDate), 'UTC'), "PPP") : 'N/A'}</p></div>
-                    <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); navigate(`/edit-family/${family._id}`); }}><Edit className="w-4 h-4" /></Button><Button variant="destructive" size="icon" onClick={(e) => { e.stopPropagation(); handleDeleteFamily(family._id, family.familyName); }}><Trash2 className="w-4 h-4" /></Button></div>
-                  </CardContent>
-                </Card>
+              <Card key={family._id} className="group hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedOrder({ type: 'family', data: family })}>
+  <CardContent className="p-4 flex justify-between items-center">
+    <div className="flex-1 min-w-0">
+      <p className="text-lg font-semibold text-foreground truncate">{family.familyName}</p>
+      <p className="text-sm text-muted-foreground">{family.phoneNumbers?.primary || 'No Phone'}</p>
+      <div className="flex items-center gap-2">
+        <p className="text-sm text-muted-foreground">
+          Delivery: {family.deliveryDate ? format(toZonedTime(new Date(family.deliveryDate), 'UTC'), "PPP") : 'N/A'}
+        </p>
+        {/* --- COUNTDOWN LOGIC START --- */}
+        {family.deliveryDate && (() => {
+          const delivery = toZonedTime(new Date(family.deliveryDate), 'UTC');
+          const daysLeft = differenceInCalendarDays(delivery, today);
+
+          if (daysLeft < 0) {
+            return <span className="text-xs font-medium text-gray-500">(Past Due)</span>;
+          }
+          if (daysLeft === 0) {
+            return <span className="text-xs font-bold text-green-600">(Due Today)</span>;
+          }
+          if (daysLeft <= 3) {
+            return <span className="text-xs font-medium text-red-600">({daysLeft} {daysLeft === 1 ? 'day' : 'days'} left)</span>;
+          }
+          if (daysLeft <= 7) {
+            return <span className="text-xs font-medium text-yellow-600">({daysLeft} days left)</span>;
+          }
+          return <span className="text-xs font-medium text-gray-500">({daysLeft} days left)</span>;
+        })()}
+        {/* --- COUNTDOWN LOGIC END --- */}
+      </div>
+    </div>
+    <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); navigate(`/edit-family/${family._id}`); }}><Edit className="w-4 h-4" /></Button>
+      <Button variant="destructive" size="icon" onClick={(e) => { e.stopPropagation(); handleDeleteFamily(family._id, family.familyName); }}><Trash2 className="w-4 h-4" /></Button>
+    </div>
+  </CardContent>
+</Card>
               ))}
               {families.length === 0 && <p className="text-muted-foreground text-center py-4">No family orders.</p>}
             </div>
@@ -135,7 +200,7 @@ const Orders = () => {
 
                   <Card><CardHeader><DialogTitle className="text-lg">Members ({order.memberIds.length})</DialogTitle></CardHeader><CardContent className="space-y-2">
                     {(order.memberIds as Individual[]).map((member) => (
-                      <Card key={member.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedMember(member)}>
+                      <Card key={member._id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedMember(member)}>
                         <CardContent className="p-3 flex justify-between items-center"><div><p className="font-medium">{member.firstName} {member.lastName}</p><p className="text-sm text-muted-foreground">{member.sex}</p></div><Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button></CardContent>
                       </Card>
                     ))}

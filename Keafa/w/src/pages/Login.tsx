@@ -18,7 +18,7 @@ const Login = () => {
   // --- 1. MAKE THE FUNCTION ASYNC ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); // Disable button
+    setIsLoading(true);  
     
     // --- 2. AWAIT THE RESULT OF THE LOGIN ATTEMPT ---
     const success = await login(username, password);

@@ -13,7 +13,8 @@ import {
   deleteIndividualApi,
   deleteFamilyApi,
   updateIndividualApi,
-  updateFamilyApi
+  updateFamilyApi,
+  updateUserApi
 } from './ApiService';
 
 // --- Interfaces ---
@@ -53,6 +54,14 @@ export interface Individual {
   };
   deliveryDate?: string;
 }
+
+interface UpdateUserPayload {
+  username?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}
+
+
 export interface Family {
   _id: string;
   familyName: string;
@@ -81,6 +90,7 @@ interface DataContextType {
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   users: User[];
+    updateUser: (payload: UpdateUserPayload) => Promise<boolean>; 
   addUser: (username: string, password: string) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<void>;
   individuals: Individual[];
@@ -102,6 +112,10 @@ export const useData = () => {
   if (!context) { throw new Error('useData must be used within a DataProvider'); }
   return context;
 };
+
+
+
+
 
 // --- Data Provider Component ---
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -278,6 +292,30 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       toast({ title: "API Error", description: "Could not delete individual.", variant: "destructive" });
     }
   };
+
+  const updateUser = async (payload: UpdateUserPayload): Promise<boolean> => {
+    try {
+      // Note: This relies on an `updateUserApi` function in ApiService.ts
+      const updatedUser = await updateUserApi(payload);
+
+      // Update the current user in state and localStorage
+      setCurrentUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // Also update the user in the main `users` list
+      setUsers(prevUsers => prevUsers.map(u => u._id === updatedUser._id ? updatedUser : u));
+      
+      return true;
+    } catch (error: unknown) {
+      let message = "Profile update failed.";
+      if (typeof error === "object" && error !== null && "response" in error) {
+        const err = error as { response?: { data?: { message?: string } } };
+        message = err.response?.data?.message || message;
+      }
+      toast({ title: "Update Failed", description: message, variant: "destructive" });
+      return false;
+    }
+  };
   
  // The NEW and CORRECT function to paste
 const updateFamily = async (family: Family, tilefFile: File | null) => {
@@ -319,6 +357,9 @@ formData.append('tilefImage', tilefFile);    }
       toast({ title: "API Error", description: "Could not delete family.", variant: "destructive" });
     }
   };
+
+
+  
   
   const getIndividual = (id: string) => individuals.find(ind => ind._id === id);
   const getFamily = (id: string) => families.find(fam => fam._id === id);
@@ -330,7 +371,7 @@ formData.append('tilefImage', tilefFile);    }
       addFamily, updateFamily, deleteFamily, getIndividual, getFamily,
       notificationCount,
       dismissedNotificationIds,
-      dismissNotification,
+      dismissNotification,updateUser,
       addUser,
       deleteUser,
     }}>

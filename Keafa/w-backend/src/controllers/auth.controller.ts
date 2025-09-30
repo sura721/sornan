@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/user.model'; // Import the User model
+import User, { IUser } from '../models/user.model'; // Import the User model
 
 /**
  * @desc    Authenticate user & get token (Login)
@@ -62,6 +62,13 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(500).send('Server Error');
   }
 };
+interface IAuthRequest extends Request {
+  user?: {
+    id: string;
+    username: string;
+  };
+}
+
 
 /**
  * @desc    Add a new user
@@ -143,6 +150,59 @@ export const deleteUser = async (req: Request, res: Response) => {
     await user.deleteOne();
 
     res.json({ message: 'User removed successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+};
+
+export const updateUserProfile = async (req: IAuthRequest, res: Response) => {
+  // Now, TypeScript knows that req.user is valid, and the error is gone.
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({ message: 'Not authorized, user not found' });
+  }
+
+  const { username, currentPassword, newPassword } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // --- Update Username ---
+    if (username && username !== user.username) {
+      const existingUser = await User.findOne({ username });
+
+      if (existingUser && (existingUser as any)._id.toString() !== userId) {
+        return res.status(409).json({ message: 'Username is already taken.' });
+      }
+      user.username = username;
+    }
+
+    // --- Update Password ---
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Current password is required to set a new one.' });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password!);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Incorrect current password.' });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser.id,
+      username: updatedUser.username,
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');

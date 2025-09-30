@@ -15,6 +15,12 @@ export const fetchUsersApi = async (): Promise<User[]> => {
   return response.data;
 };
 
+
+export const updateUserApi = async (payload: { username?: string, currentPassword?: string, newPassword?: string }) => {
+  // We use PATCH to the /profile endpoint we created in the backend
+  const response = await api.patch('/auth/profile', payload);
+  return response.data;
+};
 export const addUserApi = async (username: string, password: string): Promise<User> => {
   const response = await api.post('/auth/add', { username, password });
   return response.data;

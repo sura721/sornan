@@ -1,37 +1,40 @@
 import { useState } from "react";
 import { useData } from "@/contexts/DataContext";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import loginBg from '@/assets/public.avif';
+// --- NEW: Import the required icons ---
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const { login } = useData();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // --- NEW: State for password visibility ---
+  const [showPassword, setShowPassword] = useState(false);
 
-  // --- 1. MAKE THE FUNCTION ASYNC ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);  
     
-    // --- 2. AWAIT THE RESULT OF THE LOGIN ATTEMPT ---
     const success = await login(username, password);
 
     if (success) {
-      navigate("/"); // Now this only runs AFTER the login is confirmed
+      navigate("/");
     } else {
       toast({
         title: "Login Failed",
         description: "Incorrect username or password. Please try again.",
         variant: "destructive",
       });
-      setIsLoading(false); // Re-enable button on failure
+      setIsLoading(false);
     }
   };
 
@@ -60,20 +63,40 @@ const Login = () => {
                 disabled={isLoading}
               />
             </div>
-            <div className="space-y-2">
+            {/* --- MODIFIED: Password input with visibility toggle --- */}
+            <div className="space-y-2 relative">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                className="pr-10" // Add padding for the icon
               />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute bottom-1 right-1 h-7 w-7"
+                onClick={() => setShowPassword(prev => !prev)}
+                disabled={isLoading}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
             </div>
+            {/* --- MODIFIED: Button with loading animation --- */}
             <Button type="submit" className="w-full bg-gradient-primary shadow-lg" disabled={isLoading}>
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                'Login'
+              )}
             </Button>
           </form>
         </CardContent>

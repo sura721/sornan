@@ -90,12 +90,23 @@ const Orders = () => {
             return <span className="text-xs font-bold text-green-600">(Due Today)</span>;
           }
           if (daysLeft <= 3) {
-            return <span className="text-xs font-medium text-red-600">({daysLeft} {daysLeft === 1 ? 'day' : 'days'} left)</span>;
+return (
+  <span className="text-xs font-medium text-red-600">
+    (<span className="text-lg font-bold">{daysLeft}</span>{' '}
+    {daysLeft === 1 ? 'day' : 'days'} left)
+  </span>
+);
           }
           if (daysLeft <= 7) {
-            return <span className="text-xs font-medium text-yellow-600">({daysLeft} days left)</span>;
+            return   <span className="font-medium text-yellow-600">
+    (<span className="text-xl font-bold">{daysLeft}</span> days left)
+  </span>
+
           }
-          return <span className="text-xs font-medium text-gray-500">({daysLeft} days left)</span>;
+          return  <span className="font-medium text-yellow-600">
+    (<span className="text-xl font-bold">{daysLeft}</span> days left)
+  </span>
+;
         })()}
         {/* --- COUNTDOWN LOGIC END --- */}
       </div>
@@ -139,13 +150,20 @@ const Orders = () => {
             return <span className="text-xs font-bold text-green-600">(Due Today)</span>;
           }
           if (daysLeft <= 3) {
-            return <span className="text-xs font-medium text-red-600">({daysLeft} {daysLeft === 1 ? 'day' : 'days'} left)</span>;
+return (
+  <span className="text-xs font-medium text-red-600">
+    (<span className="text-lg font-bold">{daysLeft}</span>{' '}
+    {daysLeft === 1 ? 'day' : 'days'} left)
+  </span>
+);
           }
           if (daysLeft <= 7) {
-            return <span className="text-xs font-medium text-yellow-600">({daysLeft} days left)</span>;
-          }
-          return <span className="text-xs font-medium text-gray-500">({daysLeft} days left)</span>;
-        })()}
+  return  <span className="font-medium text-yellow-600">
+    (<span className="text-xl font-bold">{daysLeft}</span> days left)
+  </span>          }
+  return  <span className="font-medium text-yellow-600">
+    (<span className="text-xl font-bold">{daysLeft}</span> days left)
+  </span>        })()}
         {/* --- COUNTDOWN LOGIC END --- */}
       </div>
     </div>

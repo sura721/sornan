@@ -1,14 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-/**
- * Middleware to protect routes by verifying a JSON Web Token (JWT).
- *
- * This function checks for a token in the 'Authorization' header.
- * If the token exists and is valid, it decodes the payload, attaches
- * it to the request object, and passes control to the next middleware.
- * If the token is missing or invalid, it sends a 401 Unauthorized response.
- */
+ 
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   // 1. Get the token from the 'Authorization' header.
   //    The header format is typically "Bearer <token>".

@@ -29,20 +29,13 @@ import { /*...,*/ updateFamilyAndMembers, /*...*/ } from '../controllers/orders.
 router.post('/individuals', authMiddleware, upload.single('tilefImage'), createIndividual);
 
 // @route   GET /api/orders/individuals/:id
-// @desc    Get a single individual order by ID
-// @access  Private
+ 
 router.get('/individuals/:id', authMiddleware, getIndividualById);
 
-// @route   PUT /api/orders/individuals/:id
-// @desc    Update an individual order
-// @access  Private
-// Note: This simple PUT route does not handle file uploads. A more complex setup
-// would be needed to update an image, but this handles all text/data updates.
-router.put('/individuals/:id', authMiddleware, updateIndividual);
+ 
+router.put('/individuals/:id', authMiddleware, upload.single('tilefImage'), updateIndividual);
 
-// @route   DELETE /api/orders/individuals/:id
-// @desc    Delete an individual order
-// @access  Private
+ 
 router.delete('/individuals/:id', authMiddleware, deleteIndividual);
 
 

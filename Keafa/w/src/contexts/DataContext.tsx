@@ -86,7 +86,7 @@ interface DataContextType {
   individuals: Individual[];
   families: Family[];
   addIndividual: (individualData: FormData) => Promise<Individual | undefined>;
-  updateIndividual: (individual: Individual) => Promise<void>;
+   updateIndividual: (id: string, data: FormData) => Promise<void>;
   deleteIndividual: (id: string) => Promise<void>;
   addFamily: (familyData: FormData) => Promise<void>; 
   updateFamily: (family: Family, tilefFile: File | null) => Promise<void>;  deleteFamily: (id: string) => Promise<void>;
@@ -257,9 +257,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       toast({ title: "API Error", description: "Could not save family order.", variant: "destructive" });
     }
   };
-  const updateIndividual = async (individual: Individual) => {
+
+
+
+
+  const updateIndividual = async (id: string, data: FormData) => {
     try {
-        const updatedIndividual = await updateIndividualApi(individual);
+        const updatedIndividual = await updateIndividualApi(id, data);
         setIndividuals(prev => prev.map(ind => (ind._id === updatedIndividual._id ? updatedIndividual : ind)));
     } catch (error) {
         toast({ title: "API Error", description: "Could not update individual.", variant: "destructive" });

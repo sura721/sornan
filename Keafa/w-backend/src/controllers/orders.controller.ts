@@ -71,12 +71,55 @@ export const createIndividual = async (req: Request, res: Response) => {
  * @route   PUT /api/orders/individuals/:id
  * @access  Private
  */
+ 
 export const updateIndividual = async (req: Request, res: Response) => {
+ 
   try {
+ 
+    const updateData = {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      sex: req.body.sex,
+      age: req.body.age,
+      deliveryDate: req.body.deliveryDate,
+      'phoneNumbers.primary': req.body['phoneNumbers[primary]'],
+      'phoneNumbers.secondary': req.body['phoneNumbers[secondary]'],
+      'socials.telegram': req.body['socials[telegram]'],
+      'socials.instagram': req.body['socials[instagram]'],
+      'clothDetails.colors': req.body['clothDetails[colors]'] ? req.body['clothDetails[colors]'].split(',') : [],
+      'clothDetails.shirtLength': req.body['clothDetails[shirtLength]'],
+      'clothDetails.sholder': req.body['clothDetails[sholder]'],
+      'clothDetails.wegeb': req.body['clothDetails[wegeb]'],
+      'clothDetails.rist': req.body['clothDetails[rist]'],
+      'clothDetails.dressLength': req.body['clothDetails[dressLength]'],
+      'clothDetails.sliveLength': req.body['clothDetails[sliveLength]'],
+      'clothDetails.breast': req.body['clothDetails[breast]'],
+      'clothDetails.overBreast': req.body['clothDetails[overBreast]'],
+      'clothDetails.underBreast': req.body['clothDetails[underBreast]'],
+      'clothDetails.femaleSliveType': req.body['clothDetails[femaleSliveType]'],
+      'clothDetails.femaleWegebType': req.body['clothDetails[femaleWegebType]'],
+      'clothDetails.deret': req.body['clothDetails[deret]'],
+      'clothDetails.anget': req.body['clothDetails[anget]'],
+      'clothDetails.maleClothType': req.body['clothDetails[maleClothType]'],
+      'clothDetails.maleSliveType': req.body['clothDetails[maleSliveType]'],
+      'clothDetails.netela': req.body['clothDetails[netela]'],
+      'clothDetails.tilefImageUrl': req.body['clothDetails[tilefImageUrl]'],
+      'payment.total': req.body['payment[total]'],
+      'payment.firstHalf.paid': req.body['payment[firstHalf][paid]'] === 'true',
+      'payment.firstHalf.amount': req.body['payment[firstHalf][amount]'],
+      'payment.secondHalf.paid': req.body['payment[secondHalf][paid]'] === 'true',
+      'payment.secondHalf.amount': req.body['payment[secondHalf][amount]'],
+    };
+
+    // THE IMAGE FIX: If a new file was uploaded, its path overwrites the old one.
+    if (req.file) {
+      updateData['clothDetails.tilefImageUrl'] = req.file.path;
+    }
+
     const individual = await Individual.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true, runValidators: true } // `new: true` returns the updated document
+      { $set: updateData }, // Use $set to update nested fields correctly
+      { new: true, runValidators: true }
     );
 
     if (!individual) {
@@ -84,11 +127,10 @@ export const updateIndividual = async (req: Request, res: Response) => {
     }
     res.json(individual);
   } catch (error) {
-    console.error(error);
+    console.error("Individual update failed:", error);
     res.status(500).send('Server Error');
   }
 };
-
 /**
  * @desc    Delete an individual order by ID
  * @route   DELETE /api/orders/individuals/:id

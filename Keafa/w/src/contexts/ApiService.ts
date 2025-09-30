@@ -58,11 +58,10 @@ export const deleteFamilyApi = async (id: string): Promise<void> => {
   await api.delete(`/orders/families/${id}`);
 };
 
-export const updateIndividualApi = async (individual: Individual): Promise<Individual> => {
-  const response = await api.put(`/orders/individuals/${individual._id}`, individual);
+export const updateIndividualApi = async (id: string, data: FormData): Promise<Individual> => {
+  const response = await api.put(`/orders/individuals/${id}`, data);
   return response.data;
-};
-
+}
 // The NEW and CORRECT function to paste in ApiService.ts
 export const updateFamilyApi = async (familyId: string, familyData: FormData): Promise<Family> => {
   // This sends the FormData to the backend route that can handle files.

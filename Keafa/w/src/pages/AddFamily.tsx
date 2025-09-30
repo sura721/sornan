@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Upload, ArrowUpRight } from "lucide-react";
+import { CalendarIcon, Upload, ArrowUpRight,Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useData } from "@/contexts/DataContext";
 import { Family, Individual } from "@/contexts/DataContext";
@@ -24,7 +24,7 @@ type FamilyPayload = Omit<Family, 'id' | '_id' | 'memberIds'> & { memberIds: Mem
 const AddFamily = () => {
   const navigate = useNavigate();
   const { addFamily } = useData();
-
+ const [isSubmitting, setIsSubmitting] = useState(false);
   const [familyName, setFamilyName] = useState("");
   const [primaryPhone, setPrimaryPhone] = useState("");
   const [secondaryPhone, setSecondaryPhone] = useState("");
@@ -97,12 +97,10 @@ const handleFamilySubmit = async (e: React.FormEvent) => {
     return;
   }
 
-  // --- THE FIX IS HERE ---
-  // Create a new FormData object to hold all data, including the file.
+   setIsSubmitting(true);
   const formData = new FormData();
 
-  // 1. Append all text/JSON data. Objects and arrays MUST be stringified.
-  formData.append('familyName', familyName);
+   formData.append('familyName', familyName);
   formData.append('phoneNumbers', JSON.stringify({ primary: primaryPhone, secondary: secondaryPhone }));
   formData.append('socials', JSON.stringify({ telegram: telegramUsername }));
   formData.append('colors', JSON.stringify(colorCodes.split(',').map(c => c.trim()).filter(Boolean)));
@@ -119,11 +117,20 @@ const handleFamilySubmit = async (e: React.FormEvent) => {
     formData.append('tilefImage', tilefFile);
   }
 
-  // 3. Call addFamily with the single FormData object.
-  await addFamily(formData);
-  
-  toast({ title: "Success", description: "Family group created successfully" });
-  navigate("/orders");
+
+
+
+try {
+    await addFamily(formData);
+    toast({ title: "Success", description: "Family group created successfully" });
+    navigate("/orders");
+  } catch (error) {
+    // This part is important in case the submission fails
+    toast({ title: "Error", description: "Failed to create family group.", variant: "destructive" });
+  } finally {
+    setIsSubmitting(false);  
+  }
+
 };
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -196,9 +203,14 @@ const handleFamilySubmit = async (e: React.FormEvent) => {
         </Card>
         
         <div className="flex justify-end">
-          <Button type="submit" className="bg-gradient-primary text-secondary-foreground shadow-elegant hover:shadow-xl transition-all px-8 py-3" disabled={members.length !== numberOfMembers || numberOfMembers === 0}>
-            Save Family Group
-          </Button>
+        <Button 
+  type="submit" 
+  className="bg-gradient-primary text-secondary-foreground shadow-elegant hover:shadow-xl transition-all px-8 py-3" 
+  disabled={isSubmitting || members.length !== numberOfMembers || numberOfMembers === 0}
+>
+  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+  {isSubmitting ? 'Saving...' : 'Save Family Group'}
+</Button>
         </div>
       </form>
     </div>

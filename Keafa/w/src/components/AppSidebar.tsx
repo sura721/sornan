@@ -21,9 +21,6 @@ const navigationItems = {
     { title: "Dashboard", url: "/", icon: Home },
     { title: "View Orders", url: "/orders", icon: Users },
     { title: "Search Orders", url: "/search", icon: Search },
-  ],
-  secondary: [
-    { title: "Notifications", url: "/notifications", icon: Bell },
   ]
 };
 
@@ -62,25 +59,7 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 ))}
                 
-                {navigationItems.secondary.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink to={item.url} end className={({ isActive }) => cn( "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 transition-all font-medium", !isActive && "text-muted-foreground hover:bg-accent", isActive && "bg-primary text-primary-foreground hover:bg-primary/90" )}>
-                        <div className="flex items-center gap-3">
-                            <item.icon className="w-4 h-4" />
-                            <span>{item.title}</span>
-                        </div>
-                        {/* This logic is correct and will now work with the fixed DataContext */}
-                        {item.title === "Notifications" && notificationCount > 0 && (
-                            <span className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-                                {notificationCount}
-                            </span>
-                        )}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-
+           
                 {isMasterUser && (
                    <SidebarMenuItem>
                      <SidebarMenuButton asChild>

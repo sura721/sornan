@@ -5,24 +5,34 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { SearchIcon, Users, UserCheck, Eye, X } from "lucide-react";
-// --- MODIFICATION START: Import necessary APIs and components ---
 import { searchOrdersApi, getIndividualByIdApi, getFamilyByIdApi } from "@/contexts/ApiService"; 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Individual, Family } from '@/contexts/DataContext';
 import { format } from 'date-fns';
 import { getImageUrl } from '@/lib/utils';
+// --- MODIFICATION START: Import Skeleton component ---
+import { Skeleton } from "@/components/ui/skeleton";
 // --- MODIFICATION END ---
 
-// --- MODIFICATION START: Copied from your Orders component for reusability ---
 const DetailRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div className="py-2 px-3 flex justify-between items-center odd:bg-muted/50 rounded-md">
     <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
     <dd className="text-sm text-foreground text-right">{value || 'N/A'}</dd>
   </div>
 );
+
+// --- MODIFICATION START: Define a skeleton component for loading state ---
+const SearchResultSkeleton = () => (
+  <div className="flex items-center space-x-4 p-3 bg-background rounded-lg border">
+    <Skeleton className="h-8 w-8 rounded-full" />
+    <div className="space-y-2 flex-grow">
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+    </div>
+  </div>
+);
 // --- MODIFICATION END ---
 
-// Define a type for our search results
 type SearchResult = {
   _id: string;
   type: 'individual' | 'family';
@@ -39,11 +49,9 @@ const Search = () => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // --- MODIFICATION START: Add state for modals, same as in Orders component ---
   const [selectedOrder, setSelectedOrder] = useState<{ type: 'individual' | 'family'; data: Individual | Family } | null>(null);
   const [selectedMember, setSelectedMember] = useState<Individual | null>(null);
   const [fullScreenImageUrl, setFullScreenImageUrl] = useState<string | null>(null);
-  // --- MODIFICATION END ---
 
   const handleSearch = async (query: string, type: 'name' | 'phone') => {
     if (!query.trim()) {
@@ -55,6 +63,8 @@ const Search = () => {
     setSearchResults([]);   
 
     try {
+      // Simulate a slightly longer delay for skeleton visibility
+      await new Promise(resolve => setTimeout(resolve, 500)); 
       const results = await searchOrdersApi(query.trim(), type);
       
       if (results.length > 0) {
@@ -82,7 +92,6 @@ const Search = () => {
     }
   };
   
-  // --- MODIFICATION START: Function to fetch full details and show modal ---
   const handleResultClick = async (result: SearchResult) => {
     try {
       let fullData;
@@ -105,19 +114,16 @@ const Search = () => {
       });
     }
   };
-  // --- MODIFICATION END ---
-
 
   return (
-    <div className="p-6"> {/* Added padding for better layout */}
-      <div className="max-w-4xl mx-auto space-y-8"> {/* Increased max-width */}
+    <div className="p-6">
+      <div className="max-w-4xl mx-auto space-y-8">
         <div>
           <h1 className="text-3xl font-serif font-bold text-primary mb-2 text-center">Search Orders</h1>
           <p className="text-muted-foreground text-center">Find an order by first name or phone number.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Search by Name */}
           <Card>
             <CardHeader><CardTitle>Search by First Name</CardTitle></CardHeader>
             <CardContent className="flex items-center gap-4">
@@ -128,7 +134,6 @@ const Search = () => {
             </CardContent>
           </Card>
 
-          {/* Search by Phone */}
           <Card>
             <CardHeader><CardTitle>Search by Phone Number</CardTitle></CardHeader>
             <CardContent className="flex items-center gap-4">
@@ -140,18 +145,31 @@ const Search = () => {
           </Card>
         </div>
 
-        {searchResults.length > 0 && (
+        {/* --- MODIFICATION START: Show skeleton when loading --- */}
+        {isLoading && (
+          <Card>
+            <CardHeader><CardTitle className="text-muted-foreground">Searching...</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <SearchResultSkeleton />
+              <SearchResultSkeleton />
+              <SearchResultSkeleton />
+            </CardContent>
+          </Card>
+        )}
+        {/* --- MODIFICATION END --- */}
+
+
+        {/* --- MODIFICATION START: Show results only when NOT loading --- */}
+        {!isLoading && searchResults.length > 0 && (
           <Card>
             <CardHeader><CardTitle>Search Results ({searchResults.length})</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               {searchResults.map((result) => (
-                // --- MODIFICATION START: Changed button action ---
                 <button
                   key={result._id}
-                  onClick={() => handleResultClick(result)} // Use the new handler
+                  onClick={() => handleResultClick(result)}
                   className="w-full text-left p-3 bg-accent/50 rounded-lg hover:bg-accent transition-colors flex items-center justify-between"
                 >
-                {/* --- MODIFICATION END --- */}
                   <div className="flex items-center gap-3">
                     {result.type === 'individual' ? <UserCheck className="w-5 h-5 text-primary" /> : <Users className="w-5 h-5 text-primary" />}
                     <div>
@@ -159,14 +177,19 @@ const Search = () => {
                       <p className="text-sm text-muted-foreground">{result.phoneNumbers?.primary || 'No Phone'}</p>
                     </div>
                   </div>
+                  {/* --- MODIFICATION START: Added type label to result card --- */}
+                  <span className="text-xs font-semibold uppercase text-muted-foreground/80 tracking-wider capitalize bg-muted px-2 py-1 rounded-md">
+                    {result.type}
+                  </span>
+                  {/* --- MODIFICATION END --- */}
                 </button>
               ))}
             </CardContent>
           </Card>
         )}
+        {/* --- MODIFICATION END --- */}
 
-        {/* --- MODIFICATION START: Added the entire modal section from Orders component --- */}
-        {/* Modal 1: For Both Individual and Family Details */}
+        {/* --- All Modals (No Changes Below This Line) --- */}
         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             {selectedOrder?.type === 'individual' && (() => {
@@ -216,7 +239,6 @@ const Search = () => {
         </Dialog>
 
         {fullScreenImageUrl && (<div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[999] cursor-pointer" onClick={() => setFullScreenImageUrl(null)}><Button variant="ghost" size="icon" className="absolute top-4 right-4 text-white"><X className="w-6 h-6" /></Button><img src={fullScreenImageUrl} alt="Full screen preview" className="max-w-[90vw] max-h-[90vh] object-contain" /></div>)}
-        {/* --- MODIFICATION END --- */}
       </div>
     </div>
   );

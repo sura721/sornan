@@ -35,6 +35,16 @@ export const fetchIndividualsApi = async (): Promise<Individual[]> => {
   return response.data;
 };
 
+export const getIndividualByIdApi = async (id: string): Promise<Individual> => {
+  const response = await api.get(`/orders/individuals/${id}`);
+  return response.data;
+};
+
+export const getFamilyByIdApi = async (id: string): Promise<Family> => {
+  const response = await api.get(`/orders/families/${id}`);
+  return response.data;
+};
+
 export const fetchFamiliesApi = async (): Promise<Family[]> => {
   const response = await api.get('/orders/families');
   return response.data;

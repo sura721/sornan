@@ -19,11 +19,16 @@ import Login from "@/pages/Login";
 import Settings from "@/pages/Settings"; // Import the Settings page
 // --- End of Edit Area 1 ---
 import { DataProvider, useData } from "@/contexts/DataContext";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoutes = () => {
-  const { isAuthenticated } = useData();
+  const { isAuthenticated,isLoading } = useData();
+  if (isLoading) {
+    return <Loader2 />;
+  }
+
   return isAuthenticated ? (
     <SidebarProvider>
       <Layout>

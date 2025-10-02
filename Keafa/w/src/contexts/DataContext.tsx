@@ -14,6 +14,8 @@ import {
   deleteFamilyApi,
   updateIndividualApi,
   updateFamilyApi,
+  getProfileApi,
+  logoutUserApi,
   updateUserApi
 } from './ApiService';
 
@@ -120,15 +122,8 @@ export const useData = () => {
 
 // --- Data Provider Component ---
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-   
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!localStorage.getItem('authToken'));
-  
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
-  // ====================================================================
-
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [individuals, setIndividuals] = useState<Individual[]>([]);
   const [families, setFamilies] = useState<Family[]>([]);
@@ -138,29 +133,43 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return savedDismissed ? JSON.parse(savedDismissed) : [];
   });
 
-  useEffect(() => {
-         setIsLoading(true);
-    const fetchInitialData = async () => {
-       if (isAuthenticated) {
-        try {
-          const [individualsData, familiesData, usersData] = await Promise.all([
-            fetchIndividualsApi(),
-            fetchFamiliesApi(),
-            fetchUsersApi(),
-          ]);
-          setIndividuals(individualsData);
-          setFamilies(familiesData);
-          setUsers(usersData);
-        } catch (error) {
-          toast({ title: "Data Error", description: "Could not load initial data.", variant: "destructive" });
-        } finally {
-                  setIsLoading(false);
+ useEffect(() => {
+    const checkUserSessionAndFetchData = async () => {
+      try {
+        // Step 1: Attempt to get the user's profile.
+        // This API call automatically sends the httpOnly cookie.
+        const userData = await getProfileApi(); 
+        
+        // Step 2: If the call succeeds, the user has a valid session.
+        // We update the state to reflect that they are logged in.
+        setCurrentUser(userData);
+        setIsAuthenticated(true);
 
-        }
+        // Step 3: Now that we are authenticated, fetch all the necessary application data.
+        const [individualsData, familiesData, usersData] = await Promise.all([
+          fetchIndividualsApi(),
+          fetchFamiliesApi(),
+          fetchUsersApi(),
+        ]);
+        setIndividuals(individualsData);
+        setFamilies(familiesData);
+        setUsers(usersData);
+
+      } catch (error) {
+        // Step 4: If getProfileApi fails (e.g., a 401 error), there is no valid session.
+        // We ensure all authentication state is cleared.
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        // Step 5: This is crucial. We signal that the initial loading and
+        // authentication check is complete, allowing the app to render.
+        setIsLoading(false);
       }
     };
-    fetchInitialData();
-  }, [isAuthenticated]);
+
+    // Execute the function.
+    checkUserSessionAndFetchData();
+  }, []);
   const notificationCount = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -199,16 +208,26 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+ const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const data = await loginUserApi(username, password);
-      const { token, ...userData } = data;
-      if (token) {
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("user", JSON.stringify(userData));
-      }
+      // The loginUserApi call now just returns user data.
+      // The server handles setting the httpOnly cookie.
+      const userData = await loginUserApi(username, password);
+      
+      // We no longer handle a token here. Just set the user state.
       setIsAuthenticated(true);
       setCurrentUser(userData);
+
+      // After a successful login, we must fetch the app's data.
+      const [individualsData, familiesData, usersData] = await Promise.all([
+        fetchIndividualsApi(),
+        fetchFamiliesApi(),
+        fetchUsersApi(),
+      ]);
+      setIndividuals(individualsData);
+      setFamilies(familiesData);
+      setUsers(usersData);
+
       return true;
     } catch (error) {
       toast({ title: "Login Failed", description: "Invalid credentials.", variant: "destructive" });
@@ -216,16 +235,25 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    localStorage.removeItem('dismissedNotifications');
-    setIsAuthenticated(false);
-    setCurrentUser(null);
-    setUsers([]);
-    setIndividuals([]);
-    setFamilies([]);
-    setDismissedNotificationIds([]);
+ const logout = async () => {
+    try {
+      // Call the backend endpoint to clear the httpOnly cookie.
+      await logoutUserApi(); 
+    } catch (error) {
+      console.error("Logout API call failed", error);
+      // We continue to clear state even if the API fails.
+    } finally {
+      // Clear all authentication and data state from the application.
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      setUsers([]);
+      setIndividuals([]);
+      setFamilies([]);
+      
+      // This is UI state, so keeping it in localStorage is fine.
+      localStorage.removeItem('dismissedNotifications'); 
+      setDismissedNotificationIds([]);
+    }
   };
   
   const addUser = async (username: string, password: string): Promise<boolean> => {

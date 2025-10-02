@@ -89,3 +89,13 @@ export const searchOrdersApi = async (query: string, type: 'name' | 'phone') => 
   const response = await api.get(`/orders/search?q=${query}&type=${type}`);
   return response.data;
 };
+
+
+export const getProfileApi = async (): Promise<User> => {
+  const { data } = await api.get('/auth/profile');
+  return data;
+};
+
+export const logoutUserApi = async (): Promise<void> => {
+  await api.post('/auth/logout');
+};

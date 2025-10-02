@@ -40,38 +40,87 @@ export const getIndividualById = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * @desc    Create a new individual order
- * @route   POST /api/orders/individuals
- * @access  Private
- */
+ 
+
 export const createIndividual = async (req: Request, res: Response) => {
   try {
-    // The request body is parsed by `multer` for form fields and files
-    const newIndividual = new Individual({
-      ...req.body,
-      // If a file was uploaded, `req.file.path` will be available
-      // It stores the path to the uploaded image (e.g., 'uploads/image-123.jpg')
-      clothDetails: {
-        ...req.body.clothDetails,
-        tilefImageUrl: req.file ? req.file.path : undefined,
-      },
-    });
+    // The body is already nested, so we access its properties directly.
+    const { body, file } = req;
 
+    // We still build a new object to handle type conversions and empty strings.
+    const individualData = {
+      firstName: body.firstName,
+      lastName: body.lastName,
+      sex: body.sex,
+      age: body.age ? parseInt(body.age, 10) : undefined,
+      deliveryDate: body.deliveryDate,
+
+      phoneNumbers: {
+        // Accessing the nested property correctly
+        primary: body.phoneNumbers.primary,
+        secondary: body.phoneNumbers.secondary || undefined,
+      },
+
+      socials: {
+        telegram: body.socials.telegram || undefined,
+        instagram: body.socials.instagram || undefined,
+      },
+
+      clothDetails: {
+        // Handle colors string -> array
+        colors: body.clothDetails.colors ? body.clothDetails.colors.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+        tilefImageUrl: file ? file.path : undefined,
+
+        // Convert all numeric measurements from strings to numbers
+        shirtLength: body.clothDetails.shirtLength ? parseFloat(body.clothDetails.shirtLength) : undefined,
+        sholder: body.clothDetails.sholder ? parseFloat(body.clothDetails.sholder) : undefined,
+        wegeb: body.clothDetails.wegeb ? parseFloat(body.clothDetails.wegeb) : undefined,
+        rist: body.clothDetails.rist ? parseFloat(body.clothDetails.rist) : undefined,
+        dressLength: body.clothDetails.dressLength ? parseFloat(body.clothDetails.dressLength) : undefined,
+        sliveLength: body.clothDetails.sliveLength ? parseFloat(body.clothDetails.sliveLength) : undefined,
+        breast: body.clothDetails.breast ? parseFloat(body.clothDetails.breast) : undefined,
+        overBreast: body.clothDetails.overBreast ? parseFloat(body.clothDetails.overBreast) : undefined,
+        underBreast: body.clothDetails.underBreast ? parseFloat(body.clothDetails.underBreast) : undefined,
+        deret: body.clothDetails.deret ? parseFloat(body.clothDetails.deret) : undefined,
+        anget: body.clothDetails.anget ? parseFloat(body.clothDetails.anget) : undefined,
+
+        // Handle optional string fields to avoid saving empty strings
+        femaleSliveType: body.clothDetails.femaleSliveType || undefined,
+        femaleWegebType: body.clothDetails.femaleWegebType || undefined,
+        maleClothType: body.clothDetails.maleClothType || undefined,
+        maleSliveType: body.clothDetails.maleSliveType || undefined,
+        // This still prevents the enum error if nothing is selected
+        netela: body.clothDetails.netela || undefined,
+      },
+
+      payment: {
+        total: body.payment.total ? parseFloat(body.payment.total) : undefined,
+        firstHalf: {
+          // Handle boolean conversion from string 'true'/'false'
+          paid: String(body.payment.firstHalf.paid) === 'true',
+          amount: body.payment.firstHalf.amount ? parseFloat(body.payment.firstHalf.amount) : undefined,
+        },
+        secondHalf: {
+          paid: String(body.payment.secondHalf.paid) === 'true',
+          amount: body.payment.secondHalf.amount ? parseFloat(body.payment.secondHalf.amount) : undefined,
+        },
+      },
+    };
+
+    const newIndividual = new Individual(individualData);
     const savedIndividual = await newIndividual.save();
     res.status(201).json(savedIndividual);
-  } catch (error) {
+
+  } catch (error: any) {
+    if (error.name === 'ValidationError') {
+      // This will now give you much clearer errors if something is wrong
+      console.error("Validation Error:", error.message);
+      return res.status(400).json({ message: "Validation Error", errors: error.errors });
+    }
     console.error("API call failed. Full error:", error);
     res.status(500).send('Server Error');
   }
 };
-
-/**
- * @desc    Update an individual order by ID
- * @route   PUT /api/orders/individuals/:id
- * @access  Private
- */
- 
 export const updateIndividual = async (req: Request, res: Response) => {
  
   try {

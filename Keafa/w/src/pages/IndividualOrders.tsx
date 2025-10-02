@@ -95,7 +95,7 @@ const IndividualOrders = () => {
       <Dialog open={!!selectedIndividualId} onOpenChange={() => setSelectedIndividualId(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedIndividualId && (() => {
-            const order = individuals.find(ind => ind.id === selectedIndividualId);
+            const order = individuals.find(ind => ind._id === selectedIndividualId);
             if (!order) return null;
             const { clothDetails, payment } = order;
             return (

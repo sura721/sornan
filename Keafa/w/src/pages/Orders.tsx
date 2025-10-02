@@ -10,6 +10,7 @@ import { Individual, Family } from '@/contexts/DataContext';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { getImageUrl } from '@/lib/utils';
+import OrdersSkeleton from '@/components/ui/OrdersSkeleton';
 
 // Reusable component for displaying details in modals
 const DetailRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
@@ -20,10 +21,9 @@ const DetailRow = ({ label, value }: { label: string; value: React.ReactNode }) 
 );
 
 const Orders = () => {
-  const { individuals, families, deleteIndividual, deleteFamily } = useData();
+  const { individuals, families, deleteIndividual, deleteFamily,isLoading } = useData();
   const navigate = useNavigate();
   const { toast } = useToast();
-   const hasOrders = individuals.length > 0 || families.length > 0;
   const [selectedOrder, setSelectedOrder] = useState<{ type: 'individual' | 'family'; data: Individual | Family } | null>(null);
   const [selectedMember, setSelectedMember] = useState<Individual | null>(null);
   const [fullScreenImageUrl, setFullScreenImageUrl] = useState<string | null>(null);
@@ -43,6 +43,11 @@ const Orders = () => {
   };
 
   // const hasOrders = individuals.length > 0 || families.length > 0;
+if (isLoading) {
+    return <OrdersSkeleton />;
+  }
+const hasOrders = individuals.length > 0 || families.length > 0;
+ 
 
   if (!hasOrders) {
     return (
@@ -55,6 +60,7 @@ const Orders = () => {
     );
   }
 
+  
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto space-y-8">

@@ -50,6 +50,32 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
+        <Card className="shadow-card border-0">
+        <CardHeader>
+          <CardTitle className="text-primary font-serif">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Button asChild className="h-16 bg-gradient-primary text-secondary-foreground shadow-elegant hover:shadow-xl transition-all">
+            <Link to="/add-individual" className="flex items-center gap-3">
+              <UserPlus className="w-6 h-6" />
+              <div className="text-left">
+                <div className="font-semibold">Add New Individual</div>
+                <div className="text-sm opacity-90">Create individual order</div>
+              </div>
+            </Link>
+          </Button>
+
+          <Button asChild variant="outline" className="h-16 border-primary hover:bg-accent transition-all">
+            <Link to="/add-family" className="flex items-center gap-3">
+              <Plus className="w-6 h-6" />
+              <div className="text-left">
+                <div className="font-semibold">Create Family Group</div>
+                <div className="text-sm text-muted-foreground">Create a new family order</div>
+              </div>
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="shadow-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -100,32 +126,7 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <Card className="shadow-card border-0">
-        <CardHeader>
-          <CardTitle className="text-primary font-serif">Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Button asChild className="h-16 bg-gradient-primary text-secondary-foreground shadow-elegant hover:shadow-xl transition-all">
-            <Link to="/add-individual" className="flex items-center gap-3">
-              <UserPlus className="w-6 h-6" />
-              <div className="text-left">
-                <div className="font-semibold">Add New Individual</div>
-                <div className="text-sm opacity-90">Create individual order</div>
-              </div>
-            </Link>
-          </Button>
-
-          <Button asChild variant="outline" className="h-16 border-primary hover:bg-accent transition-all">
-            <Link to="/add-family" className="flex items-center gap-3">
-              <Plus className="w-6 h-6" />
-              <div className="text-left">
-                <div className="font-semibold">Create Family Group</div>
-                <div className="text-sm text-muted-foreground">Create a new family order</div>
-              </div>
-            </Link>
-          </Button>
-        </CardContent>
-      </Card>
+    
     </div>
   );
 };

@@ -116,7 +116,7 @@ const FamilyOrders = () => {
                 </Card>
                 <Card><CardHeader><DialogTitle className="text-lg">Members ({selectedFamily.memberIds.length})</DialogTitle></CardHeader><CardContent className="space-y-2">
                   {(selectedFamily.memberIds as Individual[]).map((member) => (
-                    <Card key={member.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedMember(member)}>
+                    <Card key={member._id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedMember(member)}>
                       <CardContent className="p-3 flex justify-between items-center">
                         <div><p className="font-medium">{member.firstName} {member.lastName}</p><p className="text-sm text-muted-foreground">{member.sex}</p></div>
                         <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>

@@ -105,6 +105,7 @@ interface DataContextType {
   notificationCount: number;
   dismissedNotificationIds: string[];
   dismissNotification: (id: string) => void;
+  isLoading: boolean;
 }
 const DataContext = createContext<DataContextType | undefined>(undefined);
 export const useData = () => {
@@ -119,10 +120,7 @@ export const useData = () => {
 
 // --- Data Provider Component ---
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // ====================================================================
-  // --- THE FIX IS HERE ---
-  // We initialize the state by SYNCHRONOUSLY reading from localStorage.
-  // This happens instantly before the first render, preventing the redirect.
+   
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!localStorage.getItem('authToken'));
   
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
@@ -134,15 +132,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [users, setUsers] = useState<User[]>([]);
   const [individuals, setIndividuals] = useState<Individual[]>([]);
   const [families, setFamilies] = useState<Family[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState<string[]>(() => {
     const savedDismissed = localStorage.getItem('dismissedNotifications');
     return savedDismissed ? JSON.parse(savedDismissed) : [];
   });
 
   useEffect(() => {
+         setIsLoading(true);
     const fetchInitialData = async () => {
-      // This logic is now correct. It only runs if we are authenticated.
-      if (isAuthenticated) {
+       if (isAuthenticated) {
         try {
           const [individualsData, familiesData, usersData] = await Promise.all([
             fetchIndividualsApi(),
@@ -154,6 +153,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUsers(usersData);
         } catch (error) {
           toast({ title: "Data Error", description: "Could not load initial data.", variant: "destructive" });
+        } finally {
+                  setIsLoading(false);
+
         }
       }
     };
@@ -251,6 +253,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const savedIndividual = await addIndividualApi(individualData);
       setIndividuals(prev => [...prev, savedIndividual].sort((a, b) => new Date(a.deliveryDate || 0).getTime() - new Date(b.deliveryDate || 0).getTime()));
+     console.log('Saved Individual indatacontext:', savedIndividual)
       return savedIndividual;
     } catch (error) {
       toast({ title: "API Error", description: "Could not save individual order.", variant: "destructive" });
@@ -372,7 +375,8 @@ formData.append('tilefImage', tilefFile);    }
       notificationCount,
       dismissedNotificationIds,
       dismissNotification,updateUser,
-      addUser,
+      addUser,isLoading,
+         
       deleteUser,
     }}>
       {children}

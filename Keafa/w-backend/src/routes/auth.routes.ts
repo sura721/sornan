@@ -5,6 +5,7 @@ import {
   getUsers,
   deleteUser,
   updateUserProfile,
+  getUserProfile,
 } from '../controllers/auth.controller';
 import authMiddleware from '../middleware/auth.middleware';
 
@@ -26,6 +27,5 @@ router.patch('/profile', authMiddleware, updateUserProfile);
 // @desc    Delete a user by their ID.
 // @access  Private
 router.delete('/:id', authMiddleware, deleteUser);
-
-// Export the router to be used in the main server file
-export default router;
+router.get('/profile', authMiddleware, getUserProfile);
+ export default router;

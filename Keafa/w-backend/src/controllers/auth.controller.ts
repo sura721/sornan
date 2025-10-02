@@ -8,6 +8,70 @@ import User, { IUser } from '../models/user.model'; // Import the User model
  * @route   POST /api/auth/login
  * @access  Public
  */
+// export const loginUser = async (req: Request, res: Response) => {
+//   const { username, password } = req.body;
+
+//   // Basic validation
+//   if (!username || !password) {
+//     return res.status(400).json({ message: 'Please provide a username and password.' });
+//   }
+
+//   try {
+//     // Check if user exists
+//     const user = await User.findOne({ username });
+//     if (!user) {
+//       return res.status(401).json({ message: 'Invalid credentials.' });
+//     }
+
+//     // Check if password matches the hashed password in the database
+//     const isMatch = await bcrypt.compare(password, user.password!);
+//     if (!isMatch) {
+//       return res.status(401).json({ message: 'Invalid credentials.' });
+//     }
+
+//     // User is authenticated, create JWT
+//     const payload = {
+//       user: {
+//         id: user.id, // In mongoose, .id is a virtual getter for ._id.toString()
+//         username: user.username,
+//       },
+//     };
+
+//     const jwtSecret = process.env.JWT_SECRET;
+//     if (!jwtSecret) {
+//       console.error("FATAL ERROR: JWT_SECRET is not defined.");
+//       return res.status(500).send('Server Error');
+//     }
+
+//     jwt.sign(
+//       payload,
+//       jwtSecret,
+//       { expiresIn: '1d' }, // Token expires in 1 day
+//       (err, token) => {
+//         if (err) throw err;
+//         // Respond with user data (without password) and the token
+//         res.json({
+//           token,
+//           _id: user.id,
+//           username: user.username,
+//         });
+//       }
+//     );
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send('Server Error');
+//   }
+// };
+interface IAuthRequest extends Request {
+  user?: {
+    id: string;
+    username: string;
+  };
+}
+
+
+
+
 export const loginUser = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
@@ -43,31 +107,48 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(500).send('Server Error');
     }
 
-    jwt.sign(
-      payload,
-      jwtSecret,
-      { expiresIn: '1d' }, // Token expires in 1 day
-      (err, token) => {
-        if (err) throw err;
-        // Respond with user data (without password) and the token
-        res.json({
-          token,
-          _id: user.id,
-          username: user.username,
-        });
-      }
-    );
+const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
+
+    // --- MODIFIED: Set JWT in an httpOnly cookie ---
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      sameSite: 'strict', // Prevent CSRF attacks
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
+    // Respond with user data (without password)
+    res.json({
+      _id: user.id,
+      username: user.username,
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');
   }
 };
+
+/**
+ * @desc    Logout user and clear cookie
+ * @route   POST /api/auth/logout
+ * @access  Public
+ */
+export const logoutUser = (req: Request, res: Response) => {
+  res.cookie('token', '', {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({ message: 'Logged out successfully' });
+};
+
 interface IAuthRequest extends Request {
   user?: {
     id: string;
     username: string;
   };
 }
+
 
 
 /**
@@ -203,6 +284,26 @@ export const updateUserProfile = async (req: IAuthRequest, res: Response) => {
       username: updatedUser.username,
     });
 
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+export const getUserProfile = async (req: IAuthRequest, res: Response) => {
+ 
+  try {
+    const user = await User.findById(req.user?.id).select('-password');
+
+    if (user) {
+      res.json({
+        _id: user.id,
+        username: user.username,
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');

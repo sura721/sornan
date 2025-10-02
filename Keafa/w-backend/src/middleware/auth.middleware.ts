@@ -1,41 +1,45 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
- 
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  // 1. Get the token from the 'Authorization' header.
-  //    The header format is typically "Bearer <token>".
-  const authHeader = req.header('Authorization');
+// Define a custom interface to extend the Express Request type
+// This provides type safety for req.user
+interface IAuthRequest extends Request {
+  user?: { // or a more specific type for your user payload
+    id: string;
+    username: string;
+  };
+}
 
-  // 2. Check if the header or token is missing.
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+const authMiddleware = (req: IAuthRequest, res: Response, next: NextFunction) => {
+  // 1. Get the token from the cookies.
+  //    The 'cookie-parser' middleware must be used for this to work.
+  const token = req.cookies.token;
+
+  // 2. Check if the token is missing.
+  if (!token) {
     return res.status(401).json({ message: 'Not authorized, no token provided.' });
   }
 
   try {
-    // 3. Extract the token from the header ("Bearer ".length is 7).
-    const token = authHeader.substring(7);
-
-    // 4. Retrieve the JWT secret from environment variables.
+    // 3. Retrieve the JWT secret from environment variables.
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       console.error('FATAL ERROR: JWT_SECRET is not defined.');
-      return res.status(500).send('Server Error: JWT secret is missing.');
+      // It's better to send a generic server error to the client
+      return res.status(500).send('Server Error');
     }
 
-    // 5. Verify the token using the secret key.
-    //    If verification is successful, `decoded` will contain our payload (e.g., { user: { id: '...' } }).
+    // 4. Verify the token.
     const decoded = jwt.verify(token, jwtSecret);
 
-    // 6. Attach the decoded user payload to the request object.
-    //    This makes the user's information available in subsequent controllers.
-    //    We need to extend the Express Request type for this to be type-safe.
-    (req as any).user = (decoded as any).user;
+    // 5. Attach the decoded user payload to the request object.
+    //    Using our custom IAuthRequest interface makes this type-safe.
+    req.user = (decoded as any).user;
 
-    // 7. Pass control to the next function in the middleware chain (e.g., the route controller).
+    // 6. Pass control to the next middleware or controller.
     next();
   } catch (error) {
-    // 8. If `jwt.verify` fails (e.g., token is expired or malformed), it throws an error.
+    // 7. If verification fails, the token is invalid.
     console.error('Token verification failed:', error);
     res.status(401).json({ message: 'Not authorized, token is invalid.' });
   }

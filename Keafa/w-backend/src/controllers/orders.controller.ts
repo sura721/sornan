@@ -283,66 +283,67 @@ export const getFamilyById = async (req: Request, res: Response) => {
 //   }
 // };
 
-
-
-
-  
-/**
- * Your comment would go here
- */ // <--- FIX: Closed the block comment
-/**
- * @desc    Create a new family order
- * @route   POST /api/orders/families
- * @access  Private
- */
-// In order.controller.js
-
+ 
 export const createFamily = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // --- FIX START: Manually parse stringified fields from FormData ---
+    // 1. Parse the main data fields from the FormData
     const memberData = JSON.parse(req.body.memberIds);
-    const familyData = {
+    
+    // 2. Build the base data object for the Family document
+    const familyData: any = { // Using 'any' for flexibility, but a specific interface is better practice
       familyName: req.body.familyName,
       phoneNumbers: JSON.parse(req.body.phoneNumbers),
       socials: JSON.parse(req.body.socials),
       colors: JSON.parse(req.body.colors),
-      payment: JSON.parse(req.body.payment),
       deliveryDate: req.body.deliveryDate,
     };
-    // --- FIX END ---
 
+    // 3. Conditionally add the family-level payment object
+    // This 'if' block only runs if the user chose "Pay Once" on the frontend.
+    if (req.body.payment) {
+      familyData.payment = JSON.parse(req.body.payment);
+    }
+
+    // 4. Prepare the individual member documents for creation.
+    // This works for both scenarios:
+    // - If "Pay Once", member objects have no 'payment' key.
+    // - If "Pay Per Member", each member object has its own 'payment' key.
     const membersToCreate = memberData.map((member: any) => ({
       ...member,
       isFamilyMember: true,
     }));
 
+    // 5. Create all individual documents in the database
     const newMembers = await Individual.create(membersToCreate, { session, ordered: true });
     const newMemberIds = newMembers.map(member => member._id);
 
+    // 6. Create the final Family document, which may or may not have a payment key
     const newFamily = new Family({
       ...familyData,
       memberIds: newMemberIds,
-      // --- FIX: Get the Cloudinary URL from req.file.path and place it at the root level ---
       tilefImageUrl: req.file ? req.file.path : undefined,
     });
 
+    // 7. Save the family, commit the transaction, and send the response
     const savedFamily = await newFamily.save({ session });
     await session.commitTransaction();
 
     const populatedFamily = await Family.findById(savedFamily._id).populate('memberIds');
     res.status(201).json(populatedFamily);
+    
   } catch (error) {
+    // If anything fails, roll back all database changes
     await session.abortTransaction();
-    console.error(error);
+    console.error("Family creation failed:", error);
     res.status(500).send('Server Error');
   } finally {
+    // Always end the session
     session.endSession();
   }
 };
-
 
 
 

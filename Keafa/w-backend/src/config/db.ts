@@ -11,8 +11,7 @@ const connectDB = async () => {
   // Retrieve the MongoDB connection string from environment variables.
   const mongoURI = process.env.MONGO_URI;
 
-  // If the connection string is missing, log an error and exit the application.
-  // The server cannot function without a database connection.
+ 
   if (!mongoURI) {
     console.error("FATAL ERROR: MONGO_URI is not defined in the .env file.");
     process.exit(1);

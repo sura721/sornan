@@ -39,7 +39,7 @@ export interface IFamily extends Document {
   };
   tilefImageUrl?: string;
   colors: string[];
-  payment: {
+    payment?: {
     total?: number;
     firstHalf: { paid: boolean; amount?: number };
     secondHalf: { paid: boolean; amount?: number };
@@ -55,8 +55,7 @@ const FamilySchema: Schema = new Schema(
       required: [true, 'Family name is required.'],
       trim: true,
     },
-    // The `memberIds` array will store ObjectIds that link to documents in the 'Individual' collection.
-    // The `ref` property is crucial for Mongoose's `populate()` method to work.
+    
     memberIds: [{
       type: Schema.Types.ObjectId,
       ref: 'Individual',
@@ -79,9 +78,9 @@ const FamilySchema: Schema = new Schema(
       required: false,
       default: [],
     },
-    payment: {
+   payment: {
       type: PaymentSchema,
-      required: true,
+      required: false, 
     },
     deliveryDate: {
       type: String,

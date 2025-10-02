@@ -1,3 +1,4 @@
+// src/components/FamilyOrders.tsx
 import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,16 +8,23 @@ import { useData, Family, Individual } from "@/contexts/DataContext";
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import {  toZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 import { getImageUrl } from "@/lib/utils";
 
 // Helper component for the details modal
-const DetailRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
-  <div className="py-2 px-3 flex justify-between items-center odd:bg-muted/50 rounded-md">
-    <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
-    <dd className="text-sm text-foreground text-right">{value || 'N/A'}</dd>
-  </div>
-);
+const DetailRow = ({ label, value }: { label: string; value: React.ReactNode }) => {
+    // This check prevents empty rows from rendering if value is null, undefined, or an empty string
+    if (value === null || value === undefined || value === '') {
+        return null;
+    }
+  
+    return (
+        <div className="py-2 px-3 flex justify-between items-center odd:bg-muted/50 rounded-md">
+            <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
+            <dd className="text-sm text-foreground text-right">{value}</dd>
+        </div>
+    );
+};
 
 const FamilyOrders = () => {
   const { families, deleteFamily } = useData();
@@ -73,7 +81,7 @@ const FamilyOrders = () => {
                   </div>
                 </div>
                 <div className="mt-auto pt-4 space-y-4">
-                  <div className="bg-accent p-3 rounded-lg"><div className="flex justify-between items-center"><span className="text-sm font-medium">Total:</span><span className="font-bold text-primary">ETB {(family.payment?.total || 0).toLocaleString()}</span></div></div>
+                  {family.payment && <div className="bg-accent p-3 rounded-lg"><div className="flex justify-between items-center"><span className="text-sm font-medium">Total:</span><span className="font-bold text-primary">ETB {(family.payment?.total || 0).toLocaleString()}</span></div></div>}
                   <div className="flex items-center justify-between pt-2">
                     <div className="text-center w-full"><div className="flex items-center justify-center gap-1 text-sm text-muted-foreground"><Eye className="w-4 h-4" />Click to view details</div></div>
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
@@ -104,16 +112,18 @@ const FamilyOrders = () => {
                   {selectedFamily.colors && selectedFamily.colors.length > 0 && selectedFamily.colors[0] !== '' && <DetailRow label="Color Codes" value={<span className="font-mono bg-muted px-2 py-1 rounded">{selectedFamily.colors.join(', ')}</span>} />}
                   <DetailRow label="Delivery Date" value={selectedFamily.deliveryDate ? format(new Date(selectedFamily.deliveryDate), "PPP") : 'N/A'} />
                 </CardContent></Card>
-                <Card>
-                  <CardHeader><DialogTitle className="text-lg">Payment</DialogTitle></CardHeader>
-                  <CardContent>
-                    <DetailRow label="Total" value={selectedFamily.payment?.total ? `ETB ${selectedFamily.payment.total.toLocaleString()}` : 'N/A'} />
-                    <DetailRow label="First Half Status" value={selectedFamily.payment?.firstHalf.paid ? 'Paid' : 'Pending'} />
-                    <DetailRow label="First Half Amount" value={selectedFamily.payment?.firstHalf.amount ? `ETB ${selectedFamily.payment.firstHalf.amount.toLocaleString()}` : 'N/A'} />
-                    <DetailRow label="Second Half Status" value={selectedFamily.payment?.secondHalf.paid ? 'Paid' : 'Pending'} />
-                    <DetailRow label="Second Half Amount" value={selectedFamily.payment?.secondHalf.amount ? `ETB ${selectedFamily.payment.secondHalf.amount.toLocaleString()}` : 'N/A'} />
-                  </CardContent>
-                </Card>
+                {selectedFamily.payment && (
+                    <Card>
+                    <CardHeader><DialogTitle className="text-lg">Payment</DialogTitle></CardHeader>
+                    <CardContent>
+                        <DetailRow label="Total" value={selectedFamily.payment?.total ? `ETB ${selectedFamily.payment.total.toLocaleString()}` : 'N/A'} />
+                        <DetailRow label="First Half Status" value={selectedFamily.payment?.firstHalf.paid ? 'Paid' : 'Pending'} />
+                        <DetailRow label="First Half Amount" value={selectedFamily.payment?.firstHalf.amount ? `ETB ${selectedFamily.payment.firstHalf.amount.toLocaleString()}` : 'N/A'} />
+                        <DetailRow label="Second Half Status" value={selectedFamily.payment?.secondHalf.paid ? 'Paid' : 'Pending'} />
+                        <DetailRow label="Second Half Amount" value={selectedFamily.payment?.secondHalf.amount ? `ETB ${selectedFamily.payment.secondHalf.amount.toLocaleString()}` : 'N/A'} />
+                    </CardContent>
+                    </Card>
+                )}
                 <Card><CardHeader><DialogTitle className="text-lg">Members ({selectedFamily.memberIds.length})</DialogTitle></CardHeader><CardContent className="space-y-2">
                   {(selectedFamily.memberIds as Individual[]).map((member) => (
                     <Card key={member._id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedMember(member)}>
@@ -134,7 +144,7 @@ const FamilyOrders = () => {
       <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           {selectedMember && (() => {
-            const { clothDetails } = selectedMember;
+            const { clothDetails, payment } = selectedMember;
             return (
               <>
                 <DialogHeader><DialogTitle>{selectedMember.firstName} {selectedMember.lastName} - Member Details</DialogTitle></DialogHeader>
@@ -143,30 +153,47 @@ const FamilyOrders = () => {
                     <DetailRow label="Sex" value={selectedMember.sex} />
                     <DetailRow label="Age" value={selectedMember.age} />
                   </CardContent></Card>
+                  
                   <Card><CardHeader><DialogTitle className="text-base">Measurements</DialogTitle></CardHeader><CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
-                      {clothDetails.shirtLength && <DetailRow label="Shirt Length" value={clothDetails.shirtLength} />}
-                      {clothDetails.sholder && <DetailRow label="Sholder" value={clothDetails.sholder} />}
-                      {clothDetails.wegeb && <DetailRow label="Wegeb" value={clothDetails.wegeb} />}
-                      {clothDetails.rist && <DetailRow label="Rist" value={clothDetails.rist} />}
-                      {selectedMember.sex === 'Female' && (<>
-                        {clothDetails.dressLength && <DetailRow label="Dress Length" value={clothDetails.dressLength} />}
-                        {clothDetails.sliveLength && <DetailRow label="Slive Length" value={clothDetails.sliveLength} />}
-                        {clothDetails.breast && <DetailRow label="Breast" value={clothDetails.breast} />}
-                        {clothDetails.overBreast && <DetailRow label="Over Breast" value={clothDetails.overBreast} />}
-                        {clothDetails.underBreast && <DetailRow label="Under Breast" value={clothDetails.underBreast} />}
-                        {clothDetails.femaleSliveType && <DetailRow label="Slive Type" value={clothDetails.femaleSliveType} />}
-                        {clothDetails.femaleWegebType && <DetailRow label="Wegeb Type" value={clothDetails.femaleWegebType} />}
-                      </>)}
-                      {selectedMember.sex === 'Male' && (<>
-                        {clothDetails.deret && <DetailRow label="Deret" value={clothDetails.deret} />}
-                        {clothDetails.anget && <DetailRow label="Anget" value={clothDetails.anget} />}
-                        {clothDetails.maleClothType && <DetailRow label="Cloth Type" value={clothDetails.maleClothType} />}
-                        {clothDetails.maleSliveType && <DetailRow label="Slive Type" value={clothDetails.maleSliveType} />}
-                        {clothDetails.netela && <DetailRow label="Netela" value={clothDetails.netela} />}
-                      </>)}
+                      <DetailRow label="Shirt Length" value={clothDetails.shirtLength} />
+                      <DetailRow label="Sholder" value={clothDetails.sholder} />
+                      <DetailRow label="Wegeb" value={clothDetails.wegeb} />
+                      <DetailRow label="Rist" value={clothDetails.rist} />
+                      
+                      {selectedMember.sex === 'Female' && (
+                        <>
+                          <DetailRow label="Dress Length" value={clothDetails.dressLength} />
+                          <DetailRow label="Slive Length" value={clothDetails.sliveLength} />
+                          <DetailRow label="Breast" value={clothDetails.breast} />
+                          <DetailRow label="Over Breast" value={clothDetails.overBreast} />
+                          <DetailRow label="Under Breast" value={clothDetails.underBreast} />
+                          <DetailRow label="Slive Type" value={clothDetails.femaleSliveType} />
+                          <DetailRow label="Wegeb Type" value={clothDetails.femaleWegebType} />
+                        </>
+                      )}
+
+                      {selectedMember.sex === 'Male' && (
+                        <>
+                          <DetailRow label="Deret" value={clothDetails.deret} />
+                          <DetailRow label="Anget" value={clothDetails.anget} />
+                          <DetailRow label="Cloth Type" value={clothDetails.maleClothType} />
+                          <DetailRow label="Slive Type" value={clothDetails.maleSliveType} />
+                          <DetailRow label="Netela" value={clothDetails.netela} />
+                        </>
+                      )}
                     </div>
                   </CardContent></Card>
+                  
+                  {payment && (
+                    <Card><CardHeader><DialogTitle className="text-base">Payment Details</DialogTitle></CardHeader><CardContent>
+                      <DetailRow label="Total" value={payment.total ? `ETB ${payment.total.toLocaleString()}` : 'N/A'} />
+                      <DetailRow label="First Half Status" value={payment.firstHalf.paid ? 'Paid' : 'Pending'} />
+                      <DetailRow label="First Half Amount" value={payment.firstHalf.amount ? `ETB ${payment.firstHalf.amount.toLocaleString()}` : 'N/A'} />
+                      <DetailRow label="Second Half Status" value={payment.secondHalf.paid ? 'Paid' : 'Pending'} />
+                      <DetailRow label="Second Half Amount" value={payment.secondHalf.amount ? `ETB ${payment.secondHalf.amount.toLocaleString()}` : 'N/A'} />
+                    </CardContent></Card>
+                  )}
                 </div>
               </>
             );

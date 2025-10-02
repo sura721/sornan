@@ -8,7 +8,8 @@ import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import AddIndividual from "@/pages/AddIndividual";
 import EditIndividual from "@/pages/EditIndividual";
-import AddFamily from "@/pages/AddFamily";
+// import AddFamily from "@/pages/AddFamily";
+import AddFamily from "@/pages/AddFamily"
 import EditFamily from "@/pages/EditFamily";
 import Orders from "@/pages/Orders";
 import Search from "@/pages/Search";

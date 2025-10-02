@@ -102,14 +102,7 @@ const Settings = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleUpdateProfile} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-username">Username</Label>
-              <Input 
-                id="edit-username" 
-                value={editUsername} 
-                onChange={(e) => setEditUsername(e.target.value)} 
-              />
-            </div>
+            
             <div className="grid md:grid-cols-2 gap-4 border-t pt-4">
                <div className="space-y-2 relative">
                 <Label htmlFor="current-password">Current Password</Label>

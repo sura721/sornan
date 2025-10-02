@@ -21,14 +21,10 @@ const UserSchema: Schema = new Schema(
     },
   },
   {
-    // Automatically add `createdAt` and `updatedAt` fields to each document.
-    timestamps: true,
+     timestamps: true,
   }
 );
-
-// 3. Create and export the Mongoose model.
-//    This `User` object is what we will use to interact with the database
-//    (e.g., User.findOne(), new User().save()).
+ 
 const User = mongoose.model<IUser>('User', UserSchema);
 
 export default User;

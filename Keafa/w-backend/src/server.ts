@@ -18,7 +18,7 @@ connectDB();
  const app: Express = express();
  
  app.use(cors({
-  origin: 'http://localhost:8080',  
+  origin: 'https://sornan-orders.vercel.app',  
   credentials: true                 
 }));
 

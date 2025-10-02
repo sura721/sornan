@@ -112,7 +112,7 @@ const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
     // --- MODIFIED: Set JWT in an httpOnly cookie ---
     res.cookie('token', token, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'strict', // Prevent CSRF attacks
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });

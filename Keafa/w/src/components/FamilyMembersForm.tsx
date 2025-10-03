@@ -104,7 +104,7 @@ export const FamilyMembersForm = ({
   const [activeMemberForm, setActiveMemberForm] = useState<number | null>(null);
   const [memberFormData, setMemberFormData] = useState(initialMemberFormState);
 
-  const handleSaveMember = () => {
+ const handleSaveMember = () => {
     if (!memberFormData.firstName || !memberFormData.lastName || !memberFormData.sex) {
       toast({
         title: "Error",
@@ -118,44 +118,45 @@ export const FamilyMembersForm = ({
       firstName: memberFormData.firstName,
       lastName: memberFormData.lastName,
       sex: memberFormData.sex as "Male" | "Female",
-      age: parseInt(memberFormData.age) || undefined,
+      // CORRECT: `age` is a Number in the schema, so parseInt is correct.
+      age: memberFormData.age ? parseInt(memberFormData.age, 10) : undefined,
       clothDetails: {
-        colors: [],
-        // Common Measurements
-        shirtLength: parseFloat(memberFormData.shirtLength) || undefined,
-        sholder: parseFloat(memberFormData.sholder) || undefined,
-        wegeb: parseFloat(memberFormData.wegeb) || undefined,
-        rist: parseFloat(memberFormData.rist) || undefined,
-
-        // Female Measurements
-        dressLength: memberFormData.sex === "Female" ? parseFloat(memberFormData.dressLength) || undefined : undefined,
-        sliveLength: memberFormData.sex === "Female" ? parseFloat(memberFormData.sliveLength) || undefined : undefined,
-        breast: memberFormData.sex === "Female" ? parseFloat(memberFormData.breast) || undefined : undefined,
-        overBreast: memberFormData.sex === "Female" ? parseFloat(memberFormData.overBreast) || undefined : undefined,
-        underBreast: memberFormData.sex === "Female" ? parseFloat(memberFormData.underBreast) || undefined : undefined,
+        colors: [], // Assuming this is populated elsewhere or is intentionally empty
         
-        // Male Measurements
-        deret: memberFormData.sex === "Male" ? parseFloat(memberFormData.deret) || undefined : undefined,
-        anget: memberFormData.sex === "Male" ? parseFloat(memberFormData.anget) || undefined : undefined,
+        // CORRECTED: These are all Strings in the schema. Do not parse them.
+        // Use `|| undefined` to avoid sending empty strings.
+        shirtLength: memberFormData.shirtLength || undefined,
+        sholder: memberFormData.sholder || undefined,
+        wegeb: memberFormData.wegeb || undefined,
+        rist: memberFormData.rist || undefined,
 
-        // Dropdown Selections (with fix for empty strings)
+        // Female Measurements (as Strings)
+        dressLength: memberFormData.sex === "Female" ? (memberFormData.dressLength || undefined) : undefined,
+        sliveLength: memberFormData.sex === "Female" ? (memberFormData.sliveLength || undefined) : undefined,
+        breast: memberFormData.sex === "Female" ? (memberFormData.breast || undefined) : undefined,
+        overBreast: memberFormData.sex === "Female" ? (memberFormData.overBreast || undefined) : undefined,
+        underBreast: memberFormData.sex === "Female" ? (memberFormData.underBreast || undefined) : undefined,
+        
+        // Male Measurements (as Strings)
+        deret: memberFormData.sex === "Male" ? (memberFormData.deret || undefined) : undefined,
+        anget: memberFormData.sex === "Male" ? (memberFormData.anget || undefined) : undefined,
+
+        // Dropdown Selections (already correct)
         femaleSliveType: memberFormData.sex === "Female" ? (memberFormData.femaleSliveType || undefined) : undefined,
         femaleWegebType: memberFormData.sex === "Female" ? (memberFormData.femaleWegebType || undefined) : undefined,
         maleClothType: memberFormData.sex === "Male" ? (memberFormData.maleClothType || undefined) : undefined,
         maleSliveType: memberFormData.sex === "Male" ? (memberFormData.maleSliveType || undefined) : undefined,
-        netela: memberFormData.sex === "Male" ? ((memberFormData.netela as "Yes" | "No") || undefined) : undefined,
-      },
-      // Conditionally add the payment object
-      ...(paymentMethod === 'member' && {
+ netela: memberFormData.sex === "Male" ? ((memberFormData.netela as "Yes" | "No") || undefined) : undefined,      },
+       ...(paymentMethod === 'member' && {
         payment: {
-          total: parseFloat(memberFormData.paymentTotal) || undefined,
+          total: memberFormData.paymentTotal ? parseFloat(memberFormData.paymentTotal) : undefined,
           firstHalf: {
             paid: memberFormData.firstHalfPaid,
-            amount: parseFloat(memberFormData.firstHalfAmount) || undefined,
+            amount: memberFormData.firstHalfAmount ? parseFloat(memberFormData.firstHalfAmount) : undefined,
           },
           secondHalf: {
             paid: memberFormData.secondHalfPaid,
-            amount: parseFloat(memberFormData.secondHalfAmount) || undefined,
+            amount: memberFormData.secondHalfAmount ? parseFloat(memberFormData.secondHalfAmount) : undefined,
           },
         },
       }),
@@ -164,7 +165,7 @@ export const FamilyMembersForm = ({
     setMembers((prev) => [...prev, newMember]);
     setMemberFormData(initialMemberFormState);
     setActiveMemberForm(null);
-  };
+  }
 
   return (
     <Card className="shadow-card border-0">

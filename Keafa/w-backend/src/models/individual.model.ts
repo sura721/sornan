@@ -17,22 +17,22 @@ const ClothDetailsSchema = new Schema({
   colors: { type: [String], required: true },
   tilefImageUrl: { type: String, required: false },
   // Common measurements
-  shirtLength: { type: Number, required: false },
-  sholder: { type: Number, required: false },
-  wegeb: { type: Number, required: false },
+  shirtLength: { type: String, required: false },
+  sholder: { type: String, required: false },
+  wegeb: { type: String, required: false },
    
-  rist: { type: Number, required: false },
+  rist: { type: String, required: false },
   // Female-specific measurements
-  dressLength: { type: Number, required: false },
-  sliveLength: { type: Number, required: false },
-  breast: { type: Number, required: false },
-  overBreast: { type: Number, required: false },
-  underBreast: { type: Number, required: false },
+  dressLength: { type: String, required: false },
+  sliveLength: { type: String, required: false },
+  breast: { type: String, required: false },
+  overBreast: { type: String, required: false },
+  underBreast: { type: String, required: false },
   femaleSliveType: { type: String, required: false },
   femaleWegebType: { type: String, required: false },
   // Male-specific measurements
-  deret: { type: Number, required: false },
-  anget: { type: Number, required: false },
+  deret: { type: String, required: false },
+  anget: { type: String, required: false },
   maleClothType: { type: String, required: false },
   maleSliveType: { type: String, required: false },
   netela: { type: String, enum: ['Yes', 'No'], required: false },
@@ -62,19 +62,19 @@ export interface IIndividual extends Document {
   clothDetails: {
     colors: string[];
     tilefImageUrl?: string;
-    shirtLength?: number;
-    sholder?: number;
-    wegeb?: number;
-    rist?: number;
-    dressLength?: number;
-    sliveLength?: number;
-    breast?: number;
-    overBreast?: number;
-    underBreast?: number;
+    shirtLength?: string;
+    sholder?: string;
+    wegeb?: string;
+    rist?: string;
+    dressLength?: string;
+    sliveLength?: string;
+    breast?: string;
+    overBreast?: string;
+    underBreast?: string;
     femaleSliveType?: string;
     femaleWegebType?: string;
-    deret?: number;
-    anget?: number;
+    deret?: string;
+    anget?: string;
     maleClothType?: string;
     maleSliveType?: string;
     netela?: 'Yes' | 'No';
@@ -139,8 +139,7 @@ const IndividualSchema: Schema = new Schema(
 
   },
   {
-    // Automatically add createdAt and updatedAt timestamps.
-    timestamps: true,
+     timestamps: true,
   }
 );
 

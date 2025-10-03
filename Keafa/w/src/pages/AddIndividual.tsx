@@ -386,7 +386,7 @@ newIndividualData.append("notes", formData.notes);
                 <Label htmlFor="shirtLength">Shirt length</Label>
                 <Input
                   id="shirtLength"
-                  type="number"
+                  type="text"
                   value={formData.shirtLength}
                   onChange={(e) =>
                     setFormData({ ...formData, shirtLength: e.target.value })
@@ -397,7 +397,7 @@ newIndividualData.append("notes", formData.notes);
                 <Label htmlFor="sholder">Sholder</Label>
                 <Input
                   id="sholder"
-                  type="number"
+                  type="text"
                   value={formData.sholder}
                   onChange={(e) =>
                     setFormData({ ...formData, sholder: e.target.value })
@@ -408,7 +408,7 @@ newIndividualData.append("notes", formData.notes);
                 <Label htmlFor="wegeb">Wegeb</Label>
                 <Input
                   id="wegeb"
-                  type="number"
+                  type="text"
                   value={formData.wegeb}
                   onChange={(e) =>
                     setFormData({ ...formData, wegeb: e.target.value })
@@ -419,7 +419,7 @@ newIndividualData.append("notes", formData.notes);
                 <Label htmlFor="rist">Rist</Label>
                 <Input
                   id="rist"
-                  type="number"
+                  type="text"
                   value={formData.rist}
                   onChange={(e) =>
                     setFormData({ ...formData, rist: e.target.value })
@@ -433,7 +433,7 @@ newIndividualData.append("notes", formData.notes);
                     <Label htmlFor="dressLength">Dress length</Label>
                     <Input
                       id="dressLength"
-                      type="number"
+                  type="text"
                       value={formData.dressLength}
                       onChange={(e) =>
                         setFormData({
@@ -447,7 +447,7 @@ newIndividualData.append("notes", formData.notes);
                     <Label htmlFor="sliveLength">Slive length</Label>
                     <Input
                       id="sliveLength"
-                      type="number"
+                  type="text"
                       value={formData.sliveLength}
                       onChange={(e) =>
                         setFormData({
@@ -461,7 +461,7 @@ newIndividualData.append("notes", formData.notes);
                     <Label htmlFor="breast">Brest</Label>
                     <Input
                       id="breast"
-                      type="number"
+                  type="text"
                       value={formData.breast}
                       onChange={(e) =>
                         setFormData({ ...formData, breast: e.target.value })
@@ -472,7 +472,7 @@ newIndividualData.append("notes", formData.notes);
                     <Label htmlFor="overBreast">Over brest</Label>
                     <Input
                       id="overBreast"
-                      type="number"
+                  type="text"
                       value={formData.overBreast}
                       onChange={(e) =>
                         setFormData({ ...formData, overBreast: e.target.value })
@@ -483,7 +483,7 @@ newIndividualData.append("notes", formData.notes);
                     <Label htmlFor="underBreast">Under brest</Label>
                     <Input
                       id="underBreast"
-                      type="number"
+                  type="text"
                       value={formData.underBreast}
                       onChange={(e) =>
                         setFormData({
@@ -539,7 +539,7 @@ newIndividualData.append("notes", formData.notes);
                     <Label htmlFor="deret">Deret</Label>
                     <Input
                       id="deret"
-                      type="number"
+                      type="text"
                       value={formData.deret}
                       onChange={(e) =>
                         setFormData({ ...formData, deret: e.target.value })
@@ -550,7 +550,7 @@ newIndividualData.append("notes", formData.notes);
                     <Label htmlFor="anget">Anget</Label>
                     <Input
                       id="anget"
-                      type="number"
+                  type="text"
                       value={formData.anget}
                       onChange={(e) =>
                         setFormData({ ...formData, anget: e.target.value })

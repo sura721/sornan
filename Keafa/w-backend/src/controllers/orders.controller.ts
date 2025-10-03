@@ -53,11 +53,9 @@ export const createIndividual = async (req: Request, res: Response) => {
       age: body.age ? parseInt(body.age, 10) : undefined,
       deliveryDate: body.deliveryDate,
 
-      // ===============================================================
-      // ===== THE FIX IS HERE: We now read the top-level notes field ==
+      
       notes: body.notes || undefined,
-      // ===============================================================
-
+ 
       phoneNumbers: {
         primary: body.phoneNumbers.primary,
         secondary: body.phoneNumbers.secondary || undefined,
@@ -67,25 +65,27 @@ export const createIndividual = async (req: Request, res: Response) => {
         instagram: body.socials.instagram || undefined,
       },
       clothDetails: {
-        colors: body.clothDetails.colors ? body.clothDetails.colors.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
-        tilefImageUrl: file ? file.path : undefined,
-        shirtLength: body.clothDetails.shirtLength ? parseFloat(body.clothDetails.shirtLength) : undefined,
-        sholder: body.clothDetails.sholder ? parseFloat(body.clothDetails.sholder) : undefined,
-        wegeb: body.clothDetails.wegeb ? parseFloat(body.clothDetails.wegeb) : undefined,
-        rist: body.clothDetails.rist ? parseFloat(body.clothDetails.rist) : undefined,
-        dressLength: body.clothDetails.dressLength ? parseFloat(body.clothDetails.dressLength) : undefined,
-        sliveLength: body.clothDetails.sliveLength ? parseFloat(body.clothDetails.sliveLength) : undefined,
-        breast: body.clothDetails.breast ? parseFloat(body.clothDetails.breast) : undefined,
-        overBreast: body.clothDetails.overBreast ? parseFloat(body.clothDetails.overBreast) : undefined,
-        underBreast: body.clothDetails.underBreast ? parseFloat(body.clothDetails.underBreast) : undefined,
-        deret: body.clothDetails.deret ? parseFloat(body.clothDetails.deret) : undefined,
-        anget: body.clothDetails.anget ? parseFloat(body.clothDetails.anget) : undefined,
-        femaleSliveType: body.clothDetails.femaleSliveType || undefined,
-        femaleWegebType: body.clothDetails.femaleWegebType || undefined,
-        maleClothType: body.clothDetails.maleClothType || undefined,
-        maleSliveType: body.clothDetails.maleSliveType || undefined,
-        netela: body.clothDetails.netela || undefined,
-      },
+    colors: body.clothDetails.colors ? body.clothDetails.colors.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+    tilefImageUrl: file ? file.path : undefined,
+    
+     shirtLength: body.clothDetails.shirtLength || undefined,
+    sholder: body.clothDetails.sholder || undefined,
+    wegeb: body.clothDetails.wegeb || undefined,
+    rist: body.clothDetails.rist || undefined,
+    dressLength: body.clothDetails.dressLength || undefined,
+    sliveLength: body.clothDetails.sliveLength || undefined,
+    breast: body.clothDetails.breast || undefined,
+    overBreast: body.clothDetails.overBreast || undefined,
+    underBreast: body.clothDetails.underBreast || undefined,
+    deret: body.clothDetails.deret || undefined,
+    anget: body.clothDetails.anget || undefined,
+     
+    femaleSliveType: body.clothDetails.femaleSliveType || undefined,
+    femaleWegebType: body.clothDetails.femaleWegebType || undefined,
+    maleClothType: body.clothDetails.maleClothType || undefined,
+    maleSliveType: body.clothDetails.maleSliveType || undefined,
+    netela: body.clothDetails.netela || undefined,
+},
       payment: {
         total: body.payment.total ? parseFloat(body.payment.total) : undefined,
         firstHalf: {
@@ -253,64 +253,12 @@ export const getFamilyById = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * @desc    Create a new family order
- * @route   POST /api/orders/families
- * @access  Private
- */
-// export const createFamily = async (req: Request, res: Response) => {
-//   const { memberIds: memberData, ...familyData } = req.body;
-
-//   const session = await mongoose.startSession();
-//   session.startTransaction();
-
-//   try {
-//     // Step 1: Create the individual documents for each member
-//     // const newMembers = await Individual.create(memberData, { session }); //before 
-
-// const newMembers = await Individual.create(memberData, { session, ordered: true }); // after
-
-//     const newMemberIds = newMembers.map(member => member._id);
-
-//     // Step 2: Create the family document, linking it to the new members
-//     const newFamily = new Family({
-//       ...familyData,
-//       memberIds: newMemberIds, // Use the newly created member IDs
-//       clothDetails: {
-//         ...familyData.clothDetails,
-//         tilefImageUrl: req.file ? req.file.path : undefined,
-//       },
-//     });
-
-//     const savedFamily = await newFamily.save({ session });
-
-//     // If all operations were successful, commit the transaction
-//     await session.commitTransaction();
-
-//     // Populate the member details before sending the response
-//     const populatedFamily = await Family.findById(savedFamily._id).populate('memberIds');
-    
-//     res.status(201).json(populatedFamily);
-//   } catch (error) {
-//     // If any operation fails, abort the transaction
-//     await session.abortTransaction();
-//     console.error(error);
-//     res.status(500).send('Server Error');
-//   } finally {
-//     // End the session
-//     session.endSession();
-//   }
-// };
  
 export const createFamily = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
-  // =========================================================================
-  // ===== DEBUGGER #1: Log the entire raw request body ======================
-  // Check this in your terminal to see if the 'notes' field is arriving
-  // from the frontend.
-  // =========================================================================
+ 
   console.log("--- Raw Request Body for createFamily ---");
   console.log(req.body);
   console.log("-----------------------------------------");
@@ -324,11 +272,7 @@ export const createFamily = async (req: Request, res: Response) => {
       socials: JSON.parse(req.body.socials),
       colors: JSON.parse(req.body.colors),
       deliveryDate: req.body.deliveryDate,
-      // ===============================================================
-      // ===== THE FIX: Add the notes field from the request body ======
-      // It's a top-level field, so we access it directly.
-      // `|| undefined` ensures it's omitted if empty or not provided.
-      // ===============================================================
+      
       notes: req.body.notes || undefined,
     };
 
@@ -350,11 +294,7 @@ export const createFamily = async (req: Request, res: Response) => {
       tilefImageUrl: req.file ? req.file.path : undefined,
     };
 
-    // =========================================================================
-    // ===== DEBUGGER #2: Log the final object before saving ===================
-    // Check this to see if the 'notes' field was correctly added to the
-    // object that will be written to the database.
-    // =========================================================================
+  
     console.log("--- Final Family Object for Database ---");
     console.log(newFamilyData);
     console.log("----------------------------------------");
@@ -377,20 +317,10 @@ export const createFamily = async (req: Request, res: Response) => {
 };
 
 
-
-
-
-
-
-/**
- * @desc    Update a family order by ID
- * @route   PUT /api/orders/families/:id
- * @access  Private
- */
 export const updateFamily = async (req: Request, res: Response) => {
   try {
     const family = await Family.findByIdAndUpdate(
-      req.params.id,
+      req.params.id, 
       req.body,
       { new: true, runValidators: true }
     );
@@ -404,11 +334,6 @@ export const updateFamily = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * @desc    Delete a family order and its members by ID
- * @route   DELETE /api/orders/families/:id
- * @access  Private
- */
 export const deleteFamily = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -435,13 +360,7 @@ export const deleteFamily = async (req: Request, res: Response) => {
   }
 };
 
-
-
-/**
- * @desc    Search for orders by name or phone number
- * @route   GET /api/orders/search
- * @access  Private
- */
+ 
 export const searchOrders = async (req: Request, res: Response) => {
   const { q: query, type } = req.query;
 

@@ -19,6 +19,8 @@ import { DataProvider, useData } from "@/contexts/DataContext";
 
 // --- 1. IMPORT THE NEW SKELETON COMPONENT ---
 import AppSkeleton from "@/components/AppSkeleton";
+import Individuals from "./pages/IndividualsPage";
+import Families from "./pages/FamilyPage";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,9 @@ const AppRoutes = () => {
         <Route path="/edit-individual/:id" element={<EditIndividual />} />
         <Route path="/add-family" element={<AddFamily />} />
         <Route path="/edit-family/:id" element={<EditFamily />} />
+        <Route path="/individuals/" element={<Individuals />} />
+
+        <Route path="/families/" element={<Families />} />
       </Route>
       
       <Route path="*" element={<Navigate to="/login" replace />} />

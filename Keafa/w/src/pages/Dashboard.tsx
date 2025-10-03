@@ -77,7 +77,8 @@ const Dashboard = () => {
         </CardContent>
       </Card>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="shadow-card border-0">
+ <Link to="/individuals"> 
+       <Card className="shadow-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Individuals</CardTitle>
             <Users className="h-4 w-4 text-primary" />
@@ -87,6 +88,10 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
+ </Link>
+
+        <Link to="/families">
+        
         <Card className="shadow-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Families</CardTitle>
@@ -96,6 +101,7 @@ const Dashboard = () => {
             <div className="text-2xl font-bold text-primary">{families.length}</div>
           </CardContent>
         </Card>
+        </Link>
         
         {/* --- FIX START: Conditional rendering for master user --- */}
         {isMasterUser && (

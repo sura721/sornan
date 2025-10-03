@@ -136,13 +136,16 @@ const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
  * @access  Public
  */
 export const logoutUser = (req: Request, res: Response) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   res.cookie('token', '', {
     httpOnly: true,
-    expires: new Date(0),
+    secure: isProduction, // Must be true in production
+    sameSite: isProduction ? 'none' : 'lax', // Must match the login cookie settings
+    expires: new Date(0), // Set expiration to the past to delete it
   });
   res.status(200).json({ message: 'Logged out successfully' });
 };
-
 interface IAuthRequest extends Request {
   user?: {
     id: string;

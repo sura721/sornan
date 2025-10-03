@@ -106,6 +106,7 @@ export const loginUser = async (req: Request, res: Response) => {
       console.error("FATAL ERROR: JWT_SECRET is not defined.");
       return res.status(500).send('Server Error');
     }
+const isProduction = process.env.NODE_ENV === 'production';
 
 const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
 
@@ -113,7 +114,7 @@ const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-      sameSite: 'strict', // Prevent CSRF attacks
+  sameSite: isProduction ? 'none' : 'lax', 
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
 

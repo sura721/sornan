@@ -316,6 +316,7 @@ const AddIndividual = () => {
                     })
                   }
                 />
+              
                 {formData.telegramUsername && (
                   <a
                     href={`https://t.me/${getCleanUsername(

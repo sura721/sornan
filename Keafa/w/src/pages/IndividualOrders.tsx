@@ -109,7 +109,7 @@ const IndividualOrders = () => {
                     <DetailRow label="Age" value={order.age} />
                     <DetailRow label="Primary Phone" value={order.phoneNumbers?.primary} />
                     <DetailRow label="Secondary Phone" value={order.phoneNumbers?.secondary} />
-                    <DetailRow label="Telegram" value={order.socials?.telegram} />
+                    <DetailRow label="Telegram" value={`${order.socials?.telegram}`}  />
                     <DetailRow label="Instagram" value={order.socials?.instagram} />
                   </CardContent></Card>
 

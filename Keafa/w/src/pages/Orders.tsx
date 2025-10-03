@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useData } from "@/contexts/DataContext";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Users, UserCheck, Eye, X } from "lucide-react";
+import { Edit, Trash2, Users, UserCheck, Eye, X, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -16,18 +16,25 @@ import { format, differenceInCalendarDays } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { getImageUrl } from "@/lib/utils";
 import OrdersSkeleton from "@/components/ui/OrdersSkeleton";
-
+interface DetailRowProps {
+  label: string
+  value?: string
+  action?: React.ReactNode
+}
 // Reusable component for displaying details in modals
 const DetailRow = ({
   label,
   value,
+  action
 }: {
   label: string;
   value: React.ReactNode;
+    action?: React.ReactNode;
 }) => (
   <div className="py-2 px-3 flex justify-between items-center odd:bg-muted/50 rounded-md">
     <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
     <dd className="text-sm text-foreground text-right">{value || "N/A"}</dd>
+          {action}
   </div>
 );
 
@@ -56,7 +63,62 @@ const Orders = () => {
       });
     }
   };
+ 
+// Place this function below your getTelegramUsername function
 
+const getInstagramUsername = (instagramInput?: string): string | null => {
+  // Step 1: Handle empty or invalid input.
+  if (!instagramInput || instagramInput.trim() === '') {
+    return null;
+  }
+
+  // Step 2: Start with a clean, trimmed version.
+  let cleanUsername = instagramInput.trim();
+
+  // Step 3: Remove the full Instagram URL prefix if it exists.
+  if (cleanUsername.includes('instagram.com/')) {
+    // Also remove a potential trailing slash
+    cleanUsername = cleanUsername.substring(cleanUsername.lastIndexOf('/') + 1).replace(/\/$/, '');
+  }
+
+  // Step 4: Remove a leading '@' symbol.
+  if (cleanUsername.startsWith('@')) {
+    cleanUsername = cleanUsername.substring(1);
+  }
+
+  // Step 5: If the result is empty, return null.
+  if (cleanUsername.length === 0) {
+    return null;
+  }
+
+  // Step 6: Return the final, clean username.
+  return cleanUsername;
+};
+const getTelegramUsername = (telegramInput?: string): string | null => {
+   if (!telegramInput || telegramInput.trim() === '') {
+    return null;
+  }
+
+ 
+  let cleanUsername = telegramInput.trim();
+ 
+ 
+  if (cleanUsername.includes('t.me/')) {
+    cleanUsername = cleanUsername.substring(cleanUsername.lastIndexOf('/') + 1);
+  }
+ 
+  if (cleanUsername.startsWith('@')) {
+    cleanUsername = cleanUsername.substring(1);
+  }
+
+  // Step 5: After all cleaning, if the string is empty, return null.
+  if (cleanUsername.length === 0) {
+    return null;
+  }
+
+  // Step 6: Return the final, clean username.
+  return  cleanUsername;
+};
   const handleDeleteFamily = (id: string, name: string) => {
     if (
       window.confirm(
@@ -397,14 +459,53 @@ const Orders = () => {
                             label="Secondary Phone"
                             value={order.phoneNumbers?.secondary}
                           />
-                          <DetailRow
-                            label="Telegram"
-                            value={order.socials?.telegram}
-                          />
-                          <DetailRow
-                            label="Instagram"
-                            value={order.socials?.instagram}
-                          />
+                        <DetailRow
+  label="Telegram"
+  value={order.socials?.telegram}
+  action={
+    order.socials?.telegram && (
+      <a
+        href={`https://t.me/${getTelegramUsername(order.socials?.telegram)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={()=> console.log(order.socials?.telegram )}
+      >
+           
+        <Button
+          type="button"
+          size="icon"
+          className="bg-green-600 hover:bg-green-700 flex-shrink-0"
+        >
+          <ArrowUpRight className="w-4 h-4" />
+        </Button>
+      </a>
+    )
+  }
+/>
+
+                           <DetailRow
+  label="Telegram"
+  value={order.socials?.telegram}
+  action={
+    order.socials?.telegram && (
+      <a
+        href={`https://www.instagram.com/${getInstagramUsername(order.socials?.instagram)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={()=> console.log(order.socials?.telegram )}
+      >
+           
+        <Button
+          type="button"
+          size="icon"
+          className="bg-green-600 hover:bg-green-700 flex-shrink-0"
+        >
+          <ArrowUpRight className="w-4 h-4" />
+        </Button>
+      </a>
+    )
+  }
+/>
                         </CardContent>
                       </Card>
                       <Card>
@@ -645,11 +746,30 @@ const Orders = () => {
                             label="Primary Phone"
                             value={order.phoneNumbers.primary}
                           />
-                          <DetailRow
-                            label="Telegram"
-                            value={order.socials?.telegram}
-                            
-                          />
+                        <DetailRow
+  label="Telegram"
+  value={order.socials?.telegram}
+  action={
+    order.socials?.telegram && (
+      <a
+        href={`https://t.me/${getTelegramUsername(order.socials?.telegram)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={()=> console.log(order.socials?.telegram )}
+      >
+           
+        <Button
+          type="button"
+          size="icon"
+          className="bg-green-600 hover:bg-green-700 flex-shrink-0"
+        >
+          <ArrowUpRight className="w-4 h-4" />
+        </Button>
+      </a>
+    )
+  }
+/>
+
                         </CardContent>
                       </Card>
                       <Card>

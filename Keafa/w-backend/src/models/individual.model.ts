@@ -20,6 +20,7 @@ const ClothDetailsSchema = new Schema({
   shirtLength: { type: Number, required: false },
   sholder: { type: Number, required: false },
   wegeb: { type: Number, required: false },
+   
   rist: { type: Number, required: false },
   // Female-specific measurements
   dressLength: { type: Number, required: false },
@@ -77,13 +78,14 @@ export interface IIndividual extends Document {
     maleClothType?: string;
     maleSliveType?: string;
     netela?: 'Yes' | 'No';
-  };
+    };
   payment?: {
     total?: number;
     firstHalf: { paid: boolean; amount?: number };
     secondHalf: { paid: boolean; amount?: number };
   };
   deliveryDate?: string;
+  notes?: string;
 }
 
 // Define the main Mongoose schema for the Individual model.
@@ -132,6 +134,9 @@ const IndividualSchema: Schema = new Schema(
       type: String,
       required: false,
     },
+    
+      notes: { type: String, required: false }, 
+
   },
   {
     // Automatically add createdAt and updatedAt timestamps.

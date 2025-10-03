@@ -41,13 +41,11 @@ export const getIndividualById = async (req: Request, res: Response) => {
 };
 
  
-
 export const createIndividual = async (req: Request, res: Response) => {
+ 
   try {
-    // The body is already nested, so we access its properties directly.
     const { body, file } = req;
 
-    // We still build a new object to handle type conversions and empty strings.
     const individualData = {
       firstName: body.firstName,
       lastName: body.lastName,
@@ -55,23 +53,22 @@ export const createIndividual = async (req: Request, res: Response) => {
       age: body.age ? parseInt(body.age, 10) : undefined,
       deliveryDate: body.deliveryDate,
 
+      // ===============================================================
+      // ===== THE FIX IS HERE: We now read the top-level notes field ==
+      notes: body.notes || undefined,
+      // ===============================================================
+
       phoneNumbers: {
-        // Accessing the nested property correctly
         primary: body.phoneNumbers.primary,
         secondary: body.phoneNumbers.secondary || undefined,
       },
-
       socials: {
         telegram: body.socials.telegram || undefined,
         instagram: body.socials.instagram || undefined,
       },
-
       clothDetails: {
-        // Handle colors string -> array
         colors: body.clothDetails.colors ? body.clothDetails.colors.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
         tilefImageUrl: file ? file.path : undefined,
-
-        // Convert all numeric measurements from strings to numbers
         shirtLength: body.clothDetails.shirtLength ? parseFloat(body.clothDetails.shirtLength) : undefined,
         sholder: body.clothDetails.sholder ? parseFloat(body.clothDetails.sholder) : undefined,
         wegeb: body.clothDetails.wegeb ? parseFloat(body.clothDetails.wegeb) : undefined,
@@ -83,20 +80,15 @@ export const createIndividual = async (req: Request, res: Response) => {
         underBreast: body.clothDetails.underBreast ? parseFloat(body.clothDetails.underBreast) : undefined,
         deret: body.clothDetails.deret ? parseFloat(body.clothDetails.deret) : undefined,
         anget: body.clothDetails.anget ? parseFloat(body.clothDetails.anget) : undefined,
-
-        // Handle optional string fields to avoid saving empty strings
         femaleSliveType: body.clothDetails.femaleSliveType || undefined,
         femaleWegebType: body.clothDetails.femaleWegebType || undefined,
         maleClothType: body.clothDetails.maleClothType || undefined,
         maleSliveType: body.clothDetails.maleSliveType || undefined,
-        // This still prevents the enum error if nothing is selected
         netela: body.clothDetails.netela || undefined,
       },
-
       payment: {
         total: body.payment.total ? parseFloat(body.payment.total) : undefined,
         firstHalf: {
-          // Handle boolean conversion from string 'true'/'false'
           paid: String(body.payment.firstHalf.paid) === 'true',
           amount: body.payment.firstHalf.amount ? parseFloat(body.payment.firstHalf.amount) : undefined,
         },
@@ -107,13 +99,17 @@ export const createIndividual = async (req: Request, res: Response) => {
       },
     };
 
+    // DEBUGGER #2: Log the final object before it's saved
+    console.log("--- Final Object for Database ---");
+    console.log(individualData);
+    console.log("---------------------------------");
+
     const newIndividual = new Individual(individualData);
     const savedIndividual = await newIndividual.save();
     res.status(201).json(savedIndividual);
 
   } catch (error: any) {
     if (error.name === 'ValidationError') {
-      // This will now give you much clearer errors if something is wrong
       console.error("Validation Error:", error.message);
       return res.status(400).json({ message: "Validation Error", errors: error.errors });
     }
@@ -121,7 +117,6 @@ export const createIndividual = async (req: Request, res: Response) => {
     res.status(500).send('Server Error');
   }
 };
- 
  
 
 export const updateIndividual = async (req: Request, res: Response) => {

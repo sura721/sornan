@@ -23,6 +23,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
 import { toast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 const AddIndividual = () => {
   const navigate = useNavigate();
@@ -59,6 +60,7 @@ const AddIndividual = () => {
     maleSliveType: "",
     netela: "",
     colorCodes: "",
+    notes:""
   });
 
   const [deliveryDate, setDeliveryDate] = useState<Date>();
@@ -123,6 +125,7 @@ const AddIndividual = () => {
     newIndividualData.append("clothDetails[sholder]", formData.sholder);
     newIndividualData.append("clothDetails[wegeb]", formData.wegeb);
     newIndividualData.append("clothDetails[rist]", formData.rist);
+newIndividualData.append("notes", formData.notes);
 
     // Gender-specific Cloth Details
     if (formData.sex === "Female") {
@@ -659,6 +662,18 @@ const AddIndividual = () => {
                   }
                 />
               </div>
+              <div className="space-y-2">
+    <Label htmlFor="notes">Notes</Label>
+    <Textarea
+    id="notes"
+    placeholder="Add any additional notes about the design, customer requests, or specific instructions..."
+    value={formData.notes}
+    onChange={(e) =>
+        setFormData({ ...formData, notes: e.target.value })
+    }
+    className="min-h-[100px]"
+    />
+</div>
             </div>
           </CardContent>
         </Card>

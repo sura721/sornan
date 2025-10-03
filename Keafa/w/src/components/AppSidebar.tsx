@@ -1,5 +1,5 @@
 import { Users, Home, Search, Bell, LogOut, Settings } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ export function AppSidebar() {
     <Sidebar className="w-64" collapsible="icon">
       <SidebarContent className="bg-card border-r flex flex-col">
         <div className="flex-grow">
-          <div className="p-4">
+          <Link to={'/'} className="p-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <span className="text-secondary-foreground font-bold text-sm">K</span>
@@ -42,7 +42,7 @@ export function AppSidebar() {
                 <p className="text-xs text-muted-foreground">Design Studio</p>
               </div>
             </div>
-          </div>
+          </Link>
 
           <SidebarGroup>
             <SidebarGroupLabel>Navigation</SidebarGroupLabel>

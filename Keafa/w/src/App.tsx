@@ -8,25 +8,26 @@ import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import AddIndividual from "@/pages/AddIndividual";
 import EditIndividual from "@/pages/EditIndividual";
-// import AddFamily from "@/pages/AddFamily";
-import AddFamily from "@/pages/AddFamily"
+import AddFamily from "@/pages/AddFamily";
 import EditFamily from "@/pages/EditFamily";
 import Orders from "@/pages/Orders";
 import Search from "@/pages/Search";
 import Notifications from "@/pages/Notifications";
 import Login from "@/pages/Login";
-// --- Start of Edit Area 1 ---
-import Settings from "@/pages/Settings"; // Import the Settings page
-// --- End of Edit Area 1 ---
+import Settings from "@/pages/Settings";
 import { DataProvider, useData } from "@/contexts/DataContext";
-import { Loader2 } from "lucide-react";
+
+// --- 1. IMPORT THE NEW SKELETON COMPONENT ---
+import AppSkeleton from "@/components/AppSkeleton";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoutes = () => {
-  const { isAuthenticated,isLoading } = useData();
+  const { isAuthenticated, isLoading } = useData();
+
   if (isLoading) {
-    return <Loader2 />;
+    // --- 2. USE THE NEW SKELETON INSTEAD OF THE SIMPLE SPINNER ---
+    return <AppSkeleton />;
   }
 
   return isAuthenticated ? (
@@ -50,9 +51,7 @@ const AppRoutes = () => {
         <Route path="/orders" element={<Orders />} />
         <Route path="/search" element={<Search />} />
         <Route path="/notifications" element={<Notifications />} />
-        {/* --- Start of Edit Area 2 --- */}
-        <Route path="/settings" element={<Settings />} /> {/* Add the Settings route here */}
-        {/* --- End of Edit Area 2 --- */}
+        <Route path="/settings" element={<Settings />} />
         <Route path="/add-individual" element={<AddIndividual />} />
         <Route path="/edit-individual/:id" element={<EditIndividual />} />
         <Route path="/add-family" element={<AddFamily />} />

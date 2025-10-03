@@ -98,6 +98,7 @@ const IndividualOrders = () => {
             const order = individuals.find(ind => ind._id === selectedIndividualId);
             if (!order) return null;
             const { clothDetails, payment } = order;
+            const isNumberValue = (val: unknown): val is number => typeof val === 'number';
             return (
               <>
                 <DialogHeader><DialogTitle>{order.firstName} {order.lastName} - Order Details</DialogTitle></DialogHeader>
@@ -112,36 +113,65 @@ const IndividualOrders = () => {
                     <DetailRow label="Telegram" value={`${order.socials?.telegram}`}  />
                     <DetailRow label="Instagram" value={order.socials?.instagram} />
                   </CardContent></Card>
+<Card>
+  <CardHeader>
+    <DialogTitle className="text-lg">Measurements & Design</DialogTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+      {/* --- Common measurements --- */}
+      {isNumberValue(clothDetails.shirtLength) && <DetailRow label="Shirt Length" value={clothDetails.shirtLength} />}
+      {isNumberValue(clothDetails.sholder) && <DetailRow label="Sholder" value={clothDetails.sholder} />}
+      {isNumberValue(clothDetails.wegeb) && <DetailRow label="Wegeb" value={clothDetails.wegeb} />}
+      {isNumberValue(clothDetails.rist) && <DetailRow label="Rist" value={clothDetails.rist} />}
 
-                  <Card><CardHeader><DialogTitle className="text-lg">Measurements & Design</DialogTitle></CardHeader><CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-                      {clothDetails.shirtLength && <DetailRow label="Shirt Length" value={clothDetails.shirtLength} />}
-                      {clothDetails.sholder && <DetailRow label="Sholder" value={clothDetails.sholder} />}
-                      {clothDetails.wegeb && <DetailRow label="Wegeb" value={clothDetails.wegeb} />}
-                      {clothDetails.rist && <DetailRow label="Rist" value={clothDetails.rist} />}
-                      {order.sex === 'Female' && (<>
-                        {clothDetails.dressLength && <DetailRow label="Dress Length" value={clothDetails.dressLength} />}
-                        {clothDetails.sliveLength && <DetailRow label="Slive Length" value={clothDetails.sliveLength} />}
-                        {clothDetails.breast && <DetailRow label="Breast" value={clothDetails.breast} />}
-                        {clothDetails.overBreast && <DetailRow label="Over Breast" value={clothDetails.overBreast} />}
-                        {clothDetails.underBreast && <DetailRow label="Under Breast" value={clothDetails.underBreast} />}
-                        {clothDetails.femaleSliveType && <DetailRow label="Slive Type" value={clothDetails.femaleSliveType} />}
-                        {clothDetails.femaleWegebType && <DetailRow label="Wegeb Type" value={clothDetails.femaleWegebType} />}
-                      </>)}
-                      {order.sex === 'Male' && (<>
-                        {clothDetails.deret && <DetailRow label="Deret" value={clothDetails.deret} />}
-                        {clothDetails.anget && <DetailRow label="Anget" value={clothDetails.anget} />}
-                        {clothDetails.maleClothType && <DetailRow label="Cloth Type" value={clothDetails.maleClothType} />}
-                        {clothDetails.maleSliveType && <DetailRow label="Slive Type" value={clothDetails.maleSliveType} />}
-                        {clothDetails.netela && <DetailRow label="Netela" value={clothDetails.netela} />}
-                      </>)}
-                    </div>
-                    <div className="mt-4 pt-4 border-t">
-                      {clothDetails.tilefImageUrl && (<DetailRow label="Tilef Image" value={<img src={getImageUrl(clothDetails.tilefImageUrl)} alt="Tilef Pattern" className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer transition-transform hover:scale-105" onClick={() => setFullScreenImageUrl(getImageUrl(clothDetails.tilefImageUrl)!)} />} />)}
-                      {clothDetails.colors && clothDetails.colors.length > 0 && clothDetails.colors[0] !== '' && (<DetailRow label="Color Codes" value={<span className="font-mono bg-muted px-2 py-1 rounded">{clothDetails.colors.join(', ')}</span>} />)}
-                    </div>
-                  </CardContent></Card>
+      {/* --- Female-specific --- */}
+      {order.sex === 'Female' && (
+        <>
+          {isNumberValue(clothDetails.dressLength) && <DetailRow label="Dress Length" value={clothDetails.dressLength} />}
+          {isNumberValue(clothDetails.sliveLength) && <DetailRow label="Slive Length" value={clothDetails.sliveLength} />}
+          {isNumberValue(clothDetails.breast) && <DetailRow label="Breast" value={clothDetails.breast} />}
+          {isNumberValue(clothDetails.overBreast) && <DetailRow label="Over Breast" value={clothDetails.overBreast} />}
+          {isNumberValue(clothDetails.underBreast) && <DetailRow label="Under Breast" value={clothDetails.underBreast} />}
+          {clothDetails.femaleSliveType && <DetailRow label="Slive Type" value={clothDetails.femaleSliveType} />}
+          {clothDetails.femaleWegebType && <DetailRow label="Wegeb Type" value={clothDetails.femaleWegebType} />}
+        </>
+      )}
 
+      {/* --- Male-specific --- */}
+      {order.sex === 'Male' && (
+        <>
+          {isNumberValue(clothDetails.deret) && <DetailRow label="Deret" value={clothDetails.deret} />}
+          {isNumberValue(clothDetails.anget) && <DetailRow label="Anget" value={clothDetails.anget} />}
+          {clothDetails.maleClothType && <DetailRow label="Cloth Type" value={clothDetails.maleClothType} />}
+          {clothDetails.maleSliveType && <DetailRow label="Slive Type" value={clothDetails.maleSliveType} />}
+          {clothDetails.netela && <DetailRow label="Netela" value={clothDetails.netela} />}
+        </>
+      )}
+    </div>
+    <div className="mt-4 pt-4 border-t">
+      {clothDetails.tilefImageUrl && (
+        <DetailRow
+          label="Tilef Image"
+          value={
+            <img
+              src={getImageUrl(clothDetails.tilefImageUrl)}
+              alt="Tilef Pattern"
+              className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer transition-transform hover:scale-105"
+              onClick={() => setFullScreenImageUrl(getImageUrl(clothDetails.tilefImageUrl)!)}
+            />
+          }
+        />
+      )}
+      {clothDetails.colors && clothDetails.colors.length > 0 && clothDetails.colors[0] !== '' && (
+        <DetailRow
+          label="Color Codes"
+          value={<span className="font-mono bg-muted px-2 py-1 rounded">{clothDetails.colors.join(', ')}</span>}
+        />
+      )}
+    </div>
+  </CardContent>
+</Card>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Card><CardHeader><DialogTitle className="text-lg">Delivery Information</DialogTitle></CardHeader><CardContent><DetailRow label="Delivery Date" value={order.deliveryDate ? format(new Date(order.deliveryDate), "PPP") : 'N/A'} /></CardContent></Card>
                     <Card><CardHeader><DialogTitle className="text-lg">Payment Details</DialogTitle></CardHeader><CardContent>

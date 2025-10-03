@@ -121,60 +121,84 @@ export const createIndividual = async (req: Request, res: Response) => {
     res.status(500).send('Server Error');
   }
 };
-export const updateIndividual = async (req: Request, res: Response) => {
  
-  try {
  
-    const updateData = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      sex: req.body.sex,
-      age: req.body.age,
-      deliveryDate: req.body.deliveryDate,
-      'phoneNumbers.primary': req.body['phoneNumbers[primary]'],
-      'phoneNumbers.secondary': req.body['phoneNumbers[secondary]'],
-      'socials.telegram': req.body['socials[telegram]'],
-      'socials.instagram': req.body['socials[instagram]'],
-      'clothDetails.colors': req.body['clothDetails[colors]'] ? req.body['clothDetails[colors]'].split(',') : [],
-      'clothDetails.shirtLength': req.body['clothDetails[shirtLength]'],
-      'clothDetails.sholder': req.body['clothDetails[sholder]'],
-      'clothDetails.wegeb': req.body['clothDetails[wegeb]'],
-      'clothDetails.rist': req.body['clothDetails[rist]'],
-      'clothDetails.dressLength': req.body['clothDetails[dressLength]'],
-      'clothDetails.sliveLength': req.body['clothDetails[sliveLength]'],
-      'clothDetails.breast': req.body['clothDetails[breast]'],
-      'clothDetails.overBreast': req.body['clothDetails[overBreast]'],
-      'clothDetails.underBreast': req.body['clothDetails[underBreast]'],
-      'clothDetails.femaleSliveType': req.body['clothDetails[femaleSliveType]'],
-      'clothDetails.femaleWegebType': req.body['clothDetails[femaleWegebType]'],
-      'clothDetails.deret': req.body['clothDetails[deret]'],
-      'clothDetails.anget': req.body['clothDetails[anget]'],
-      'clothDetails.maleClothType': req.body['clothDetails[maleClothType]'],
-      'clothDetails.maleSliveType': req.body['clothDetails[maleSliveType]'],
-      'clothDetails.netela': req.body['clothDetails[netela]'],
-      'clothDetails.tilefImageUrl': req.body['clothDetails[tilefImageUrl]'],
-      'payment.total': req.body['payment[total]'],
-      'payment.firstHalf.paid': req.body['payment[firstHalf][paid]'] === 'true',
-      'payment.firstHalf.amount': req.body['payment[firstHalf][amount]'],
-      'payment.secondHalf.paid': req.body['payment[secondHalf][paid]'] === 'true',
-      'payment.secondHalf.amount': req.body['payment[secondHalf][amount]'],
-    };
 
-    // THE IMAGE FIX: If a new file was uploaded, its path overwrites the old one.
+export const updateIndividual = async (req: Request, res: Response) => {
+  try {
+    const {
+      firstName, lastName, sex, age, deliveryDate,
+      phoneNumbers, socials, clothDetails, payment
+    } = req.body;
+
+    const updateData: { [key: string]: any } = {};
+
+    // --- 1. Handle Top-Level Fields ---
+    if (firstName) updateData.firstName = firstName;
+    if (lastName) updateData.lastName = lastName;
+    if (sex) updateData.sex = sex;
+    if (age) updateData.age = age;
+    if (deliveryDate) updateData.deliveryDate = deliveryDate;
+
+    // --- 2. Handle Nested "phoneNumbers" Object ---
+    if (phoneNumbers) {
+      if (phoneNumbers.primary) updateData['phoneNumbers.primary'] = phoneNumbers.primary;
+      if (phoneNumbers.secondary) updateData['phoneNumbers.secondary'] = phoneNumbers.secondary;
+    }
+    
+    // --- 3. Handle Nested "socials" Object --- (This will fix your Telegram issue)
+    if (socials) {
+      if (socials.telegram) updateData['socials.telegram'] = socials.telegram;
+      if (socials.instagram) updateData['socials.instagram'] = socials.instagram;
+    }
+
+    // --- 4. Handle Nested "clothDetails" Object ---
+    if (clothDetails) {
+      // Handle all string/number fields
+      for (const key of Object.keys(clothDetails)) {
+        if (key !== 'colors' && clothDetails[key]) {
+          updateData[`clothDetails.${key}`] = clothDetails[key];
+        }
+      }
+      // Handle the 'colors' array specifically
+      if (clothDetails.colors && typeof clothDetails.colors === 'string') {
+        updateData['clothDetails.colors'] = clothDetails.colors.split(',').map((s: string) => s.trim());
+      }
+    }
+    
+    // --- 5. Handle Nested "payment" Object ---
+    if (payment) {
+      if (payment.total) updateData['payment.total'] = payment.total;
+      if (payment.firstHalf) {
+        updateData['payment.firstHalf.paid'] = payment.firstHalf.paid === 'true';
+        if (payment.firstHalf.amount) updateData['payment.firstHalf.amount'] = payment.firstHalf.amount;
+      }
+      if (payment.secondHalf) {
+        updateData['payment.secondHalf.paid'] = payment.secondHalf.paid === 'true';
+        if (payment.secondHalf.amount) updateData['payment.secondHalf.amount'] = payment.secondHalf.amount;
+      }
+    }
+
+    // --- 6. Handle File Upload ---
+    // This overrides any URL from the form if a new file is uploaded.
     if (req.file) {
       updateData['clothDetails.tilefImageUrl'] = req.file.path;
     }
 
+    // For debugging: check the final flattened object
+    console.log('Final Data for $set:', updateData);
+
     const individual = await Individual.findByIdAndUpdate(
       req.params.id,
-      { $set: updateData }, // Use $set to update nested fields correctly
-      { new: true, runValidators: true }
+      { $set: updateData },
+      { new: true, runValidators: true, omitUndefined: true } // omitUndefined is a good practice
     );
 
     if (!individual) {
       return res.status(404).json({ message: 'Individual order not found.' });
     }
     res.json(individual);
+
   } catch (error) {
     console.error("Individual update failed:", error);
     res.status(500).send('Server Error');

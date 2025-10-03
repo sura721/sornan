@@ -484,8 +484,8 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
 />
 
                            <DetailRow
-  label="Telegram"
-  value={order.socials?.telegram}
+  label="Instagram"
+  value={order.socials?.instagram}
   action={
     order.socials?.telegram && (
       <a

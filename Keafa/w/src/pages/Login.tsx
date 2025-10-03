@@ -21,8 +21,7 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);  
     
-    // The login function in your DataContext should now just make the API call
-    // and not worry about storing a token.
+   
     const success = await login(username, password);
 
     if (success) {

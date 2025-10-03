@@ -72,6 +72,7 @@ export interface Family {
   socials?: { telegram?: string; };
   tilefImageUrl?: string;
   colors: string[];
+  paymentMethod: 'family' | 'member'
   payment: {
     total?: number;
     firstHalf: { paid: boolean; amount?: number };

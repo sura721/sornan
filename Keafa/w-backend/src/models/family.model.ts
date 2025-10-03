@@ -24,6 +24,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export interface IFamily extends Document {
   familyName: string;
   memberIds: Types.ObjectId[]; 
+  paymentMethod: 'family' | 'member';
   phoneNumbers: {
     primary: string;
     secondary?: string;
@@ -62,6 +63,12 @@ export interface IFamily extends Document {
     socials: {
       type: SocialsSchema,
       required: false,
+    }, 
+
+    paymentMethod: { 
+      type: String,
+      required: true,
+      enum: ['family', 'member'],
     },
     tilefImageUrl: {
       type: String,

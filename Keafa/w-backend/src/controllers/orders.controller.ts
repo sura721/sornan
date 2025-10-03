@@ -3,13 +3,8 @@ import Individual from '../models/individual.model';
 import Family from '../models/family.model';
 import mongoose from 'mongoose';
 
-// --- INDIVIDUAL CONTROLLERS ---
 
-/**
- * @desc    Get all individual orders
- * @route   GET /api/orders/individuals
- * @access  Private
- */
+
 export const getIndividuals = async (req: Request, res: Response) => {
   try {
     // const individuals = await Individual.find().sort({ deliveryDate: 1 }); // Sort by soonest delivery // reco
@@ -272,7 +267,7 @@ export const createFamily = async (req: Request, res: Response) => {
       socials: JSON.parse(req.body.socials),
       colors: JSON.parse(req.body.colors),
       deliveryDate: req.body.deliveryDate,
-      
+      paymentMethod: req.body.paymentMethod,
       notes: req.body.notes || undefined,
     };
 
@@ -410,50 +405,74 @@ export const searchOrders = async (req: Request, res: Response) => {
 
 
 
+const safeJsonParse = (jsonString: string | undefined): any | null => {
+  if (typeof jsonString === 'string' && jsonString !== 'undefined' && jsonString.length > 2) {
+    try {
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.error('Failed to parse JSON string:', jsonString, error);
+      return null;
+    }
+  }
+  return null;
+};
 
 
 // Add this new function to your orders.controller.ts file
 
 // The NEW and CORRECT function to paste
+
 export const updateFamilyAndMembers = async (req: Request, res: Response) => {
-    console.log('--- UPDATE REQUEST RECEIVED ---');
-  console.log('File received by controller:', req.file);
+  console.log('--- UPDATE REQUEST RECEIVED ---');
+  console.log('Body:', req.body);
+  console.log('File:', req.file);
+
   const { id } = req.params;
-
-  // This is the main change: We now manually parse the data
-  // because when a file is sent, everything else becomes a string.
-  const memberIds = JSON.parse(req.body.memberIds);
-  const familyData = {
-    familyName: req.body.familyName,
-    phoneNumbers: JSON.parse(req.body.phoneNumbers),
-    socials: JSON.parse(req.body.socials),
-    colors: JSON.parse(req.body.colors),
-    payment: JSON.parse(req.body.payment),
-    deliveryDate: req.body.deliveryDate,
-    // We get the existing image URL from the form body
-    tilefImageUrl: req.body.tilefImageUrl,
-  };
-
-  // This is the image logic: If a new file was uploaded,
-  // we update the image URL with the new path from multer.
-  if (req.file) {
-    familyData.tilefImageUrl = req.file.path;
-  }
-
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
+    // --- FIX START: Use the safeJsonParse helper for all JSON fields ---
+    // This prevents the '"undefined" is not valid JSON' crash.
+    const membersData = safeJsonParse(req.body.memberIds) || [];
+    const phoneNumbers = safeJsonParse(req.body.phoneNumbers);
+    const socials = safeJsonParse(req.body.socials);
+    const colors = safeJsonParse(req.body.colors);
+    const payment = safeJsonParse(req.body.payment);
+    // --- FIX END ---
+
+    const familyUpdatePayload: any = {
+      familyName: req.body.familyName,
+      deliveryDate: req.body.deliveryDate,
+      paymentMethod: req.body.paymentMethod,
+      notes: req.body.notes || undefined,
+    };
+
+    // Conditionally add parsed objects to the payload to avoid overwriting with null
+    if (phoneNumbers) familyUpdatePayload.phoneNumbers = phoneNumbers;
+    if (socials) familyUpdatePayload.socials = socials;
+    if (colors) familyUpdatePayload.colors = colors;
+    if (payment) familyUpdatePayload.payment = payment;
+    
+    // Handle image update logic
+    if (req.file) {
+      familyUpdatePayload.tilefImageUrl = req.file.path;
+    } else {
+      // If no new file, respect the image URL sent from the frontend
+      familyUpdatePayload.tilefImageUrl = req.body.tilefImageUrl;
+    }
+    
     const originalFamily = await Family.findById(id).session(session);
     if (!originalFamily) {
       throw new Error('Family not found');
     }
 
     const memberUpdates = [];
-    const newMemberIds = [];
+    const finalMemberIds = [];
 
-    // This part of the logic is UNCHANGED
-    for (const member of memberIds) {
+    // This is your original, correct logic for handling members
+    for (const member of membersData) {
+      // If the member has a real ID, it's an update
       if (member._id && !member._id.startsWith('mock_mem_')) {
         const { _id, ...memberDetails } = member;
         memberUpdates.push({
@@ -462,30 +481,34 @@ export const updateFamilyAndMembers = async (req: Request, res: Response) => {
             update: { $set: memberDetails },
           },
         });
-        newMemberIds.push(_id);
+        finalMemberIds.push(_id);
       } else {
-        const newMember = new Individual({ ...member, isFamilyMember: true });
+        // If no ID or a mock ID, it's a new member to create
+        const { _id, ...newMemberDetails } = member; // remove mock _id
+        const newMember = new Individual({ ...newMemberDetails, isFamilyMember: true });
         await newMember.save({ session });
-        newMemberIds.push(newMember._id);
+        finalMemberIds.push(newMember._id);
       }
     }
 
+    // Execute updates for existing members
     if (memberUpdates.length > 0) {
       await Individual.bulkWrite(memberUpdates, { session });
     }
 
+    // Determine which members were removed and delete them
     const originalMemberIds = originalFamily.memberIds.map(id => id.toString());
-    const currentMemberIds = newMemberIds.map(id => id.toString());
+    const currentMemberIds = finalMemberIds.map(id => id.toString());
     const deletedMemberIds = originalMemberIds.filter(id => !currentMemberIds.includes(id));
 
     if (deletedMemberIds.length > 0) {
-      await Individual.deleteMany({ _id: { $in: deletedMemberIds } }).session(session);
+      await Individual.deleteMany({ _id: { $in: deletedMemberIds } }, { session });
     }
 
-    // This part is also UNCHANGED
+    // Finally, update the family document with the new data and the final list of member IDs
     const updatedFamily = await Family.findByIdAndUpdate(
       id,
-      { ...familyData, memberIds: newMemberIds },
+      { ...familyUpdatePayload, memberIds: finalMemberIds },
       { new: true, session }
     ).populate('memberIds');
 
@@ -499,4 +522,4 @@ export const updateFamilyAndMembers = async (req: Request, res: Response) => {
   } finally {
     session.endSession();
   }
-};
+}

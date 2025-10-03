@@ -78,7 +78,7 @@ const AddFamily = () => {
     formData.append("colors", JSON.stringify(colorCodes.split(",").map((c) => c.trim()).filter(Boolean)));
     formData.append("deliveryDate", deliveryDate.toISOString().split("T")[0]);
  formData.append("notes", notes);
-     
+     formData.append("paymentMethod", paymentMethod); 
     if (paymentMethod === 'family') {
       formData.append("payment", JSON.stringify({
         total: parseFloat(paymentTotal) || undefined,

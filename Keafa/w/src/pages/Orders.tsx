@@ -820,7 +820,7 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                       </Card>
 
                       {/* --- FIX START: Corrected Payment Details for Family Modal --- */}
-                      <Card>
+                     {order.paymentMethod === 'family' &&( <Card>
                         <CardHeader>
                           <DialogTitle className="text-lg">Payment</DialogTitle>
                         </CardHeader>
@@ -864,7 +864,7 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                             }
                           />
                         </CardContent>
-                      </Card>
+                      </Card>)}
                       {/* --- FIX END --- */}
 
                       <Card>
@@ -1048,6 +1048,47 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                           </div>
                         </CardContent>
                       </Card>
+                      {selectedMember.payment && (
+  <Card>
+    <CardHeader>
+      <DialogTitle className="text-base">Payment</DialogTitle>
+    </CardHeader>
+    <CardContent>
+      <DetailRow
+        label="Total"
+        value={
+          selectedMember.payment.total
+            ? `ETB ${selectedMember.payment.total.toLocaleString()}`
+            : "N/A"
+        }
+      />
+      <DetailRow
+        label="First Half Status"
+        value={selectedMember.payment.firstHalf.paid ? "Paid" : "Pending"}
+      />
+      <DetailRow
+        label="First Half Amount"
+        value={
+          selectedMember.payment.firstHalf.amount
+            ? `ETB ${selectedMember.payment.firstHalf.amount.toLocaleString()}`
+            : "N/A"
+        }
+      />
+      <DetailRow
+        label="Second Half Status"
+        value={selectedMember.payment.secondHalf.paid ? "Paid" : "Pending"}
+      />
+      <DetailRow
+        label="Second Half Amount"
+        value={
+          selectedMember.payment.secondHalf.amount
+            ? `ETB ${selectedMember.payment.secondHalf.amount.toLocaleString()}`
+            : "N/A"
+        }
+      />
+    </CardContent>
+  </Card>
+)}
                     </div>
                   </>
                 );

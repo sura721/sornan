@@ -88,13 +88,10 @@ const FamilySchema: Schema = new Schema(
     },
   },
   {
-    // Enable timestamps to automatically add `createdAt` and `updatedAt` fields
-    timestamps: true,
+     timestamps: true,
   }
 );
-
-// Create and export the Mongoose model.
-// This model provides the interface for querying the 'families' collection in MongoDB.
+ 
 const Family = mongoose.model<IFamily>('Family', FamilySchema);
 
 export default Family;

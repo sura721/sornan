@@ -27,14 +27,18 @@ const allowedOrigins = [
   process.env.FRONTEND_URL
 ];
 
+// In src/server.ts
+
 const corsOptions = {
-  // Add the types for 'origin' and 'callback' here
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // The '!origin' allows requests from tools like Postman where origin is undefined.
+    // Check if the origin is in our allowed list
     if (allowedOrigins.indexOf(origin!) !== -1 || !origin) {
-      callback(null, true);
+      callback(null, true); // Origin is allowed
     } else {
-      callback(new Error('This origin is not allowed by CORS'));
+      // --- THIS IS THE NEW LOGGING ---
+      // If it's not allowed, log the failing origin to the console
+      console.error(`CORS Error: The origin '${origin}' was blocked.`);
+      callback(new Error('This origin is not allowed by CORS')); // Block the request
     }
   },
   credentials: true

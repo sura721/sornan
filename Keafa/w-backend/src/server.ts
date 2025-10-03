@@ -21,7 +21,10 @@ const app: Express = express();
 
 // 1. CORS Configuration (This should be one of the first middleware)
 //    Define the list of origins that are allowed to make requests to this server.
-
+if (!process.env.FRONTEND_URL) {
+  console.warn('WARNING: FRONTEND_URL environment variable not set. CORS may block requests from the frontend.');
+}
+// -
 const allowedOrigins = [
   'http://localhost:8080',
   process.env.FRONTEND_URL

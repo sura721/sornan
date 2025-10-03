@@ -51,7 +51,7 @@ const AddFamily = () => {
   const [firstHalfAmount, setFirstHalfAmount] = useState("");
   const [secondHalfPaid, setSecondHalfPaid] = useState(false);
   const [secondHalfAmount, setSecondHalfAmount] = useState("");
-
+ const [notes, setNotes] = useState("");
   // State for other forms (no change)
   const [deliveryDate, setDeliveryDate] = useState<Date>();
   const [numberOfMembers, setNumberOfMembers] = useState<number>(0);
@@ -77,9 +77,8 @@ const AddFamily = () => {
     formData.append("socials", JSON.stringify({ telegram: telegramUsername }));
     formData.append("colors", JSON.stringify(colorCodes.split(",").map((c) => c.trim()).filter(Boolean)));
     formData.append("deliveryDate", deliveryDate.toISOString().split("T")[0]);
-
-    // NEW: Conditionally append the main payment object
-    // This will only be sent if the user chose "Pay Once"
+ formData.append("notes", notes);
+     
     if (paymentMethod === 'family') {
       formData.append("payment", JSON.stringify({
         total: parseFloat(paymentTotal) || undefined,
@@ -118,12 +117,15 @@ const AddFamily = () => {
 
       <form onSubmit={handleFamilySubmit} className="space-y-8">
         <FamilyInformationForm
+        notes={notes}          
+            setNotes={setNotes} 
           familyName={familyName} setFamilyName={setFamilyName}
           primaryPhone={primaryPhone} setPrimaryPhone={setPrimaryPhone}
           secondaryPhone={secondaryPhone} setSecondaryPhone={setSecondaryPhone}
           telegramUsername={telegramUsername} setTelegramUsername={setTelegramUsername}
           tilefFile={tilefFile} setTilefFile={setTilefFile}
           colorCodes={colorCodes} setColorCodes={setColorCodes}
+          
         />
 
         {/* NEW: Payment Method Choice */}

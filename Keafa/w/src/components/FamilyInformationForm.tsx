@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload, ArrowUpRight } from "lucide-react";
+import { Textarea } from "./ui/textarea";
 
 interface FamilyInformationFormProps {
   familyName: string;
@@ -18,6 +19,9 @@ interface FamilyInformationFormProps {
   setTilefFile: (file: File | null) => void;
   colorCodes: string;
   setColorCodes: (value: string) => void;
+  notes: string;
+  setNotes: (value: string) => void;
+
 }
 
 const getCleanUsername = (urlOrUsername: string) => {
@@ -42,6 +46,8 @@ export const FamilyInformationForm = ({
   tilefFile,
   setTilefFile,
   colorCodes,
+   notes,
+  setNotes,
   setColorCodes,
 }: FamilyInformationFormProps) => {
   return (
@@ -152,6 +158,17 @@ export const FamilyInformationForm = ({
             onChange={(e) => setColorCodes(e.target.value)}
           />
         </div>
+         <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="family-notes">Notes</Label>
+          <Textarea
+            id="family-notes"
+            placeholder="Add any general notes for the entire family order..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="min-h-[100px]"
+          />
+        </div>
+        
       </CardContent>
     </Card>
   );

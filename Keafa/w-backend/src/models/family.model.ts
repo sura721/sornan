@@ -45,6 +45,7 @@ export interface IFamily extends Document {
     secondHalf: { paid: boolean; amount?: number };
   };
   deliveryDate: string;
+   notes?: string;
 }
 
 // Define the Mongoose schema for the Family model
@@ -85,6 +86,10 @@ const FamilySchema: Schema = new Schema(
     deliveryDate: {
       type: String,
       required: [true, 'Delivery date is required.'],
+    },
+    notes: {
+      type: String,
+      required: false,
     },
   },
   {

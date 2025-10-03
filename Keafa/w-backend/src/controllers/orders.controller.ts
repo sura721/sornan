@@ -301,52 +301,66 @@ export const getFamilyById = async (req: Request, res: Response) => {
 //     session.endSession();
 //   }
 // };
-
  
 export const createFamily = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
+  // =========================================================================
+  // ===== DEBUGGER #1: Log the entire raw request body ======================
+  // Check this in your terminal to see if the 'notes' field is arriving
+  // from the frontend.
+  // =========================================================================
+  console.log("--- Raw Request Body for createFamily ---");
+  console.log(req.body);
+  console.log("-----------------------------------------");
+
   try {
-    // 1. Parse the main data fields from the FormData
     const memberData = JSON.parse(req.body.memberIds);
     
-    // 2. Build the base data object for the Family document
-    const familyData: any = { // Using 'any' for flexibility, but a specific interface is better practice
+    const familyData: any = {
       familyName: req.body.familyName,
       phoneNumbers: JSON.parse(req.body.phoneNumbers),
       socials: JSON.parse(req.body.socials),
       colors: JSON.parse(req.body.colors),
       deliveryDate: req.body.deliveryDate,
+      // ===============================================================
+      // ===== THE FIX: Add the notes field from the request body ======
+      // It's a top-level field, so we access it directly.
+      // `|| undefined` ensures it's omitted if empty or not provided.
+      // ===============================================================
+      notes: req.body.notes || undefined,
     };
 
-    // 3. Conditionally add the family-level payment object
-    // This 'if' block only runs if the user chose "Pay Once" on the frontend.
     if (req.body.payment) {
       familyData.payment = JSON.parse(req.body.payment);
     }
 
-    // 4. Prepare the individual member documents for creation.
-    // This works for both scenarios:
-    // - If "Pay Once", member objects have no 'payment' key.
-    // - If "Pay Per Member", each member object has its own 'payment' key.
     const membersToCreate = memberData.map((member: any) => ({
       ...member,
       isFamilyMember: true,
     }));
 
-    // 5. Create all individual documents in the database
     const newMembers = await Individual.create(membersToCreate, { session, ordered: true });
     const newMemberIds = newMembers.map(member => member._id);
 
-    // 6. Create the final Family document, which may or may not have a payment key
-    const newFamily = new Family({
+    const newFamilyData = {
       ...familyData,
       memberIds: newMemberIds,
       tilefImageUrl: req.file ? req.file.path : undefined,
-    });
+    };
 
-    // 7. Save the family, commit the transaction, and send the response
+    // =========================================================================
+    // ===== DEBUGGER #2: Log the final object before saving ===================
+    // Check this to see if the 'notes' field was correctly added to the
+    // object that will be written to the database.
+    // =========================================================================
+    console.log("--- Final Family Object for Database ---");
+    console.log(newFamilyData);
+    console.log("----------------------------------------");
+    
+    const newFamily = new Family(newFamilyData);
+
     const savedFamily = await newFamily.save({ session });
     await session.commitTransaction();
 
@@ -354,16 +368,13 @@ export const createFamily = async (req: Request, res: Response) => {
     res.status(201).json(populatedFamily);
     
   } catch (error) {
-    // If anything fails, roll back all database changes
     await session.abortTransaction();
     console.error("Family creation failed:", error);
     res.status(500).send('Server Error');
   } finally {
-    // Always end the session
     session.endSession();
   }
 };
-
 
 
 

@@ -109,6 +109,7 @@ interface DataContextType {
   dismissedNotificationIds: string[];
   dismissNotification: (id: string) => void;
   isLoading: boolean;
+  
 }
 const DataContext = createContext<DataContextType | undefined>(undefined);
 export const useData = () => {
@@ -362,8 +363,7 @@ const updateFamily = async (family: Family, tilefFile: File | null) => {
     formData.append('payment', JSON.stringify(family.payment));
     formData.append('deliveryDate', family.deliveryDate);
     formData.append('memberIds', JSON.stringify(family.memberIds));
-
-    // This preserves the old image if you don't upload a new one
+ formData.append('paymentMethod', family.paymentMethod);   
     if (family.tilefImageUrl) {
       formData.append('tilefImageUrl', family.tilefImageUrl);
     }

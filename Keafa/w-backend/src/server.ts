@@ -59,10 +59,20 @@ app.use(cookieParser());
 //    Serve files from the 'uploads' directory.
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
+if (process.env.RENDER || process.env.NODE_ENV === 'production') {
+  const axios = require('axios');
 
-// --- ROUTES ---
+  const URL = `${process.env.FRONTEND_URL}/health` || `https://sornan-orders.vercel.app/health`;
 
-// Health check route
+  setInterval(async () => {
+    try {
+      await axios.get(URL);
+      console.log('💓 Health ping sent successfully to:', URL);
+    } catch (error) {
+      console.error('❌ Health ping failed:', (error as any).message);
+    }
+  }, 5 * 60 * 1000); // every 5 minutes
+}
 app.get('/', (req: Request, res: Response) => {
   res.send('Keafa Design API is running successfully...');
 });

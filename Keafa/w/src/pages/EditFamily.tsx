@@ -44,10 +44,15 @@ const initialMemberFormState = {
   maleClothType: "",
   maleSliveType: "",
   netela: "",
+  paymentTotal: "",
+  paymentFirstHalfPaid: false,
+  paymentFirstHalfAmount: "",
+  paymentSecondHalfPaid: false,
+  paymentSecondHalfAmount: "",
 };
 type MemberData = Omit<
   Individual,
-  "id" | "_id" | "payment" | "deliveryDate" | "phoneNumbers" | "socials"
+  "id" | "_id"  | "deliveryDate" | "phoneNumbers" | "socials"
 >;
 
 const EditFamily = () => {
@@ -70,6 +75,9 @@ const EditFamily = () => {
       if (currentFamily) {
         setFamilyData(currentFamily);
         setExistingTilefUrl(currentFamily.tilefImageUrl);
+        if (!currentFamily.paymentMethod) {
+        currentFamily.paymentMethod = 'family'; // Set a sensible default
+      }
       } else {
         toast({
           title: "Error",
@@ -79,24 +87,36 @@ const EditFamily = () => {
         navigate("/orders");
       }
     }
-  }, [id, getFamily, navigate]);
+  }, [id,navigate,getFamily]);
+// THIS IS THE CORRECTED CODE
+const handleFamilyChange = (
+  field: string,
+  value: string | number | boolean | string[]
+) => {
+  setFamilyData((prev) => {
+    if (!prev) return null;
 
-  const handleFamilyChange = (
-    field: string,
-    value: string | number | boolean | string[]
-  ) => {
-    setFamilyData((prev) => {
-      if (!prev) return null;
-      const newData = JSON.parse(JSON.stringify(prev));
-      const keys = field.split(".");
-      let current = newData;
-      for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
+    // Create a deep copy to avoid direct state mutation
+    const newData = JSON.parse(JSON.stringify(prev));
+    const keys = field.split(".");
+    let current = newData;
+
+    // This loop now safely creates nested objects if they don't exist
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      // If the next key doesn't exist, create an empty object for it
+      if (!current[key]) {
+        current[key] = {};
       }
-      current[keys[keys.length - 1]] = value;
-      return newData;
-    });
-  };
+      // Move to the next level
+      current = current[key];
+    }
+
+    // Now it's safe to set the final value
+    current[keys[keys.length - 1]] = value;
+    return newData;
+  });
+};
 
   const handleOpenMemberForm = (memberId: string | "new" = "new") => {
     setActiveMemberForm(memberId);
@@ -105,7 +125,7 @@ const EditFamily = () => {
         (m) => (m as Individual)._id === memberId
       ) as Individual;
       if (member) {
-        setMemberFormData({
+    setMemberFormData({
           firstName: member.firstName || "",
           lastName: member.lastName || "",
           sex: member.sex || "",
@@ -126,7 +146,16 @@ const EditFamily = () => {
           maleClothType: member.clothDetails.maleClothType || "",
           maleSliveType: member.clothDetails.maleSliveType || "",
           netela: member.clothDetails.netela || "",
+          paymentTotal: member.payment?.total?.toString() || "",
+          paymentFirstHalfPaid: member.payment?.firstHalf.paid || false,
+          paymentFirstHalfAmount:
+            member.payment?.firstHalf.amount?.toString() || "",
+          paymentSecondHalfPaid: member.payment?.secondHalf.paid || false,
+          paymentSecondHalfAmount:
+            member.payment?.secondHalf.amount?.toString() || "",
         });
+
+        
       }
     } else {
       setMemberFormData(initialMemberFormState);
@@ -175,15 +204,41 @@ const EditFamily = () => {
     };
 
     // The rest of your logic for updating state remains the same.
-    if (activeMemberForm === 'new') {
-        const newMember: Individual = { ...memberDetails, _id: `mock_mem_${Date.now()}` };        
-        setFamilyData(prev => prev ? { ...prev, memberIds: [...prev.memberIds, newMember] } : null);
+  
+ if (familyData?.paymentMethod === "member") {
+      memberDetails.payment = {
+        total: parseFloat(memberFormData.paymentTotal) || undefined,
+        firstHalf: {
+          paid: memberFormData.paymentFirstHalfPaid,
+          amount: parseFloat(memberFormData.paymentFirstHalfAmount) || undefined,
+        },
+        secondHalf: {
+          paid: memberFormData.paymentSecondHalfPaid,
+          amount:
+            parseFloat(memberFormData.paymentSecondHalfAmount) || undefined,
+        },
+      };
+    }
+
+    if (activeMemberForm === "new") {
+      const newMember = {
+        ...memberDetails,
+        _id: `mock_mem_${Date.now()}`,
+      } as Individual;
+      setFamilyData(
+        (prev) =>
+          prev ? { ...prev, memberIds: [...prev.memberIds, newMember] } : null
+      );
     } else {
-        setFamilyData(prev => {
-            if (!prev) return null;
-            const updatedMembers = prev.memberIds.map(mem => (mem as Individual)._id === activeMemberForm ? { ...(mem as Individual), ...memberDetails } : mem);
-            return { ...prev, memberIds: updatedMembers };
-        });
+      setFamilyData((prev) => {
+        if (!prev) return null;
+        const updatedMembers = prev.memberIds.map((mem) =>
+          (mem as Individual)._id === activeMemberForm
+            ? { ...(mem as Individual), ...memberDetails }
+            : mem
+        );
+        return { ...prev, memberIds: updatedMembers };
+      });
     }
     setActiveMemberForm(null);
   };
@@ -255,6 +310,8 @@ const EditFamily = () => {
   const handleRemoveImage = () => {
     setTilefFile(null);
     setExistingTilefUrl(undefined);
+        handleFamilyChange("tilefImageUrl", ""); // Also clear it from the data
+
   };
 
   if (!familyData)
@@ -378,181 +435,196 @@ const EditFamily = () => {
           </CardContent>
         </Card>
         <Card className="shadow-card border-0">
-          <CardHeader>
-            <CardTitle className="text-primary font-serif">
-              Payment & Delivery
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 pt-6">
-            <div className="space-y-2">
-              <Label>Total Amount</Label>
+  <CardHeader>
+    <CardTitle className="text-primary font-serif">
+      Payment & Delivery
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-6 pt-6">
+    <div className="space-y-2">
+      <Label>Payment Method</Label>
+      <Select
+        value={familyData.paymentMethod}
+        onValueChange={(value) => handleFamilyChange("paymentMethod", value)}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="How will the payment be handled?" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="family">Pay for Whole Family</SelectItem>
+          <SelectItem value="member">Pay per Member</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    {/* Only show this entire section if payment method is 'family' */}
+    {familyData.paymentMethod === 'family' && (
+      <div className="space-y-6 border-t pt-6">
+        <div className="space-y-2">
+            <Label>Total Amount</Label>
+            <Input
+              type="number"
+              placeholder="Total Amount"
+              value={familyData.payment?.total || ""}
+              onChange={(e) =>
+                handleFamilyChange("payment.total", parseFloat(e.target.value) || 0)
+              }
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="firstHalf"
+                  checked={familyData.payment?.firstHalf?.paid}
+                  onCheckedChange={(c) => handleFamilyChange("payment.firstHalf.paid", !!c)}
+                />
+                <Label>First Half Payment</Label>
+              </div>
               <Input
                 type="number"
-                placeholder="Total Amount"
-                value={familyData.payment?.total || ""}
+                placeholder="Amount"
+                value={familyData.payment?.firstHalf?.amount || ""}
                 onChange={(e) =>
-                  handleFamilyChange(
-                    "payment.total",
-                    parseFloat(e.target.value) || 0
-                  )
+                  handleFamilyChange("payment.firstHalf.amount", parseFloat(e.target.value) || 0)
                 }
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="firstHalf"
-                    checked={familyData.payment?.firstHalf?.paid}
-                    onCheckedChange={(c) =>
-                      handleFamilyChange("payment.firstHalf.paid", !!c)
-                    }
-                  />
-                  <Label>First Half Payment</Label>
-                </div>
-                <Input
-                  type="number"
-                  placeholder="Amount"
-                  value={familyData.payment?.firstHalf?.amount || ""}
-                  onChange={(e) =>
-                    handleFamilyChange(
-                      "payment.firstHalf.amount",
-                      parseFloat(e.target.value) || 0
-                    )
-                  }
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="secondHalf"
+                  checked={familyData.payment?.secondHalf?.paid}
+                  onCheckedChange={(c) => handleFamilyChange("payment.secondHalf.paid", !!c)}
                 />
+                <Label>Second Half Payment</Label>
               </div>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="secondHalf"
-                    checked={familyData.payment?.secondHalf?.paid}
-                    onCheckedChange={(c) =>
-                      handleFamilyChange("payment.secondHalf.paid", !!c)
-                    }
-                  />
-                  <Label>Second Half Payment</Label>
-                </div>
-                <Input
-                  type="number"
-                  placeholder="Amount"
-                  value={familyData.payment?.secondHalf?.amount || ""}
-                  onChange={(e) =>
-                    handleFamilyChange(
-                      "payment.secondHalf.amount",
-                      parseFloat(e.target.value) || 0
-                    )
-                  }
-                />
-              </div>
+              <Input
+                type="number"
+                placeholder="Amount"
+                value={familyData.payment?.secondHalf?.amount || ""}
+                onChange={(e) =>
+                  handleFamilyChange("payment.secondHalf.amount", parseFloat(e.target.value) || 0)
+                }
+              />
             </div>
-            <div className="border-t pt-6">
-              <Label>Delivery Date *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !familyData.deliveryDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {familyData.deliveryDate ? (
-                      format(new Date(familyData.deliveryDate), "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      familyData.deliveryDate
-                        ? new Date(familyData.deliveryDate)
-                        : undefined
-                    }
-                    onSelect={(date) =>
-                      date &&
-                      handleFamilyChange(
-                        "deliveryDate",
-                        date.toISOString().split("T")[0]
-                      )
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card border-0">
-          <CardHeader>
-            <CardTitle className="text-primary font-serif">
-              Family Members
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(familyData.memberIds as Individual[]).map((member) => (
-                <Card
-                  key={member._id}
-                  className="p-4 flex justify-between items-center"
-                >
-                  <div>
-                    <p className="font-medium">
-                      {member.firstName} {member.lastName}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {member.sex}
-                    </p>
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleOpenMemberForm(member._id)}
-                  >
-                    Edit
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDeleteMember(member._id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </Card>
-              ))}
-            </div>
+          </div>
+      </div>
+    )}
+    
+    <div className="border-t pt-6">
+      <Label>Delivery Date *</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            type="button" // Important for preventing form submission
+            variant="outline"
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !familyData.deliveryDate && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {familyData.deliveryDate ? (
+              format(new Date(familyData.deliveryDate), "PPP")
+            ) : (
+              <span>Pick a date</span>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={
+              familyData.deliveryDate
+                ? new Date(familyData.deliveryDate)
+                : undefined
+            }
+            onSelect={(date) =>
+              date &&
+              handleFamilyChange(
+                "deliveryDate",
+                date.toISOString().split("T")[0]
+              )
+            }
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  </CardContent>
+</Card>
+        {/* =================== START: REPLACE WITH THIS BLOCK =================== */}
+<Card className="shadow-card border-0">
+  <CardHeader>
+    <CardTitle className="text-primary font-serif">
+      Family Members
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="pt-6 space-y-4">
+    {/* This is the list of existing members */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {(familyData.memberIds as Individual[]).map((member) => (
+        <Card
+          key={member._id}
+          className="p-4 flex justify-between items-center"
+        >
+          <div>
+            <p className="font-medium">
+              {member.firstName} {member.lastName}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {member.sex}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
             <Button
               type="button"
-              className="w-full"
-              onClick={() => handleOpenMemberForm("new")}
+              variant="outline"
+              size="sm"
+              onClick={() => handleOpenMemberForm(member._id)}
             >
-              + Add New Member
+              Edit
             </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => handleDeleteMember(member._id)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </Card>
+      ))}
+    </div>
 
-            {/* --- FIX START: This is the complete member editing form --- */}
-            {activeMemberForm && (
-              <div className="p-6 bg-accent border-primary rounded-lg mt-4">
-                <h3 className="text-xl font-serif text-primary mb-4">
-                  {activeMemberForm === "new"
-                    ? "Adding New Member"
-                    : `Editing Member`}
-                </h3>
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">
-                        Personal Details
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+    {/* This is the button to add a new member */}
+    <Button
+      type="button"
+      className="w-full"
+      onClick={() => handleOpenMemberForm("new")}
+    >
+      + Add New Member
+    </Button>
+
+    {/* This is the popup form for adding/editing a member */}
+    {activeMemberForm && (
+      <div className="p-6 bg-accent border-primary rounded-lg mt-4">
+        <h3 className="text-xl font-serif text-primary mb-4">
+          {activeMemberForm === "new"
+            ? "Adding New Member"
+            : `Editing Member`}
+        </h3>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">
+                Personal Details
+              </CardTitle>
+            </CardHeader>
+           <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>First Name *</Label>
                         <Input
@@ -608,14 +680,15 @@ const EditFamily = () => {
                         />
                       </div>
                     </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">
-                        Cloth & Design Details
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-4 space-y-4">
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">
+                Cloth & Design Details
+              </CardTitle>
+            </CardHeader>
+              <CardContent className="pt-4 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Shirt length</Label>
@@ -883,25 +956,77 @@ const EditFamily = () => {
                         )}
                       </div>
                     </CardContent>
-                  </Card>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setActiveMemberForm(null)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="button" onClick={handleSaveMember}>
-                      Save Member
-                    </Button>
-                  </div>
+          </Card>
+
+          {/* --- This is the conditional payment card for the member --- */}
+          {familyData.paymentMethod === 'member' && (
+            <Card>
+               <CardHeader><CardTitle className="text-lg">Member Payment</CardTitle></CardHeader>
+               <CardContent className="pt-4 space-y-4">
+                <div className="space-y-2">
+                  <Label>Total Amount for this Member</Label>
+                  <Input
+                    type="number"
+                    value={memberFormData.paymentTotal}
+                    onChange={(e) => setMemberFormData({...memberFormData, paymentTotal: e.target.value})}
+                  />
                 </div>
-              </div>
-            )}
-            {/* --- FIX END --- */}
-          </CardContent>
-        </Card>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 mb-2">
+                          <Checkbox
+                            id="memberFirstHalfPaid"
+                            checked={memberFormData.paymentFirstHalfPaid}
+                            onCheckedChange={(c) => setMemberFormData({...memberFormData, paymentFirstHalfPaid: !!c})}
+                          />
+                          <Label htmlFor="memberFirstHalfPaid">First Half Paid</Label>
+                      </div>
+                      <Input
+                        type="number"
+                        placeholder="Amount"
+                        value={memberFormData.paymentFirstHalfAmount}
+                        onChange={(e) => setMemberFormData({...memberFormData, paymentFirstHalfAmount: e.target.value})}
+                      />
+                    </div>
+                     <div className="space-y-2">
+                      <div className="flex items-center space-x-2 mb-2">
+                          <Checkbox
+                            id="memberSecondHalfPaid"
+                            checked={memberFormData.paymentSecondHalfPaid}
+                            onCheckedChange={(c) => setMemberFormData({...memberFormData, paymentSecondHalfPaid: !!c})}
+                          />
+                          <Label htmlFor="memberSecondHalfPaid">Second Half Paid</Label>
+                      </div>
+                      <Input
+                        type="number"
+                        placeholder="Amount"
+                        value={memberFormData.paymentSecondHalfAmount}
+                        onChange={(e) => setMemberFormData({...memberFormData, paymentSecondHalfAmount: e.target.value})}
+                      />
+                    </div>
+                 </div>
+               </CardContent>
+            </Card>
+          )}
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setActiveMemberForm(null)}
+            >
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleSaveMember}>
+              Save Member
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+  </CardContent>
+</Card>
+ 
         <div className="flex justify-end">
           <Button
             type="submit"

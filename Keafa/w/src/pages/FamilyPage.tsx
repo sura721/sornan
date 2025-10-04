@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -283,191 +284,255 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
         </div>
 
         {/* Modal 1: For Both Individual and Family Details */}
-        <Dialog
-          open={!!selectedOrder}
-          onOpenChange={() => setSelectedOrder(null)}
-        >
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          
-            {/* Family Details View */}
-            {selectedOrder?.type === "family" &&
-              (() => {
-                const order = selectedOrder.data as Family;
-                return (
-                  <>
-                    <DialogHeader>
-                      <DialogTitle>{order.familyName} - Details</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                      <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">
-                            Family Info & Contact
-                          </DialogTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <DetailRow
-                            label="Primary Phone"
-                            value={order.phoneNumbers.primary}
-                          />
-                        <DetailRow
-  label="Telegram"
-  value={order.socials?.telegram}
-  action={
-    order.socials?.telegram && (
-      <a
-        href={`https://t.me/${getTelegramUsername(order.socials?.telegram)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={()=> console.log(order.socials?.telegram )}
-      >
-           
-        <Button
-          type="button"
-          size="icon"
-          className="bg-green-600 hover:bg-green-700 flex-shrink-0"
-        >
-          <ArrowUpRight className="w-4 h-4" />
-        </Button>
-      </a>
-    )
-  }
-/>
-
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">
-                            Design & Delivery
-                          </DialogTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <DetailRow
-                            label="Tilef Image"
-                            value={
-                              order.tilefImageUrl ? (
-                                <img
-                                  src={getImageUrl(order.tilefImageUrl)}
-                                  alt="Tilef"
-                                  className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer"
-                                  onClick={() =>
-                                    setFullScreenImageUrl(
-                                      getImageUrl(order.tilefImageUrl!)
-                                    )
-                                  }
-                                />
-                              ) : (
-                                "No Image"
+    <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      {/* Family Details View */}
+      {selectedOrder?.type === "family" &&
+        (() => {
+          const order = selectedOrder.data as Family;
+          return (
+            <>
+              <DialogHeader>
+                <DialogTitle>{order.familyName} - Details</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6 py-4">
+                <Card>
+                  <CardHeader>
+                    <DialogTitle className="text-lg">
+                      Family Info & Contact
+                    </DialogTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DetailRow
+                      label="Primary Phone"
+                      value={order.phoneNumbers.primary}
+                    />
+                    <DetailRow
+                      label="Telegram"
+                      value={order.socials?.telegram}
+                      action={
+                        order.socials?.telegram && (
+                          <a
+                            href={`https://t.me/${getTelegramUsername(
+                              order.socials?.telegram
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button
+                              type="button"
+                              size="icon"
+                              className="bg-green-600 hover:bg-green-700 flex-shrink-0"
+                            >
+                              <ArrowUpRight className="w-4 h-4" />
+                            </Button>
+                          </a>
+                        )
+                      }
+                    />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <DialogTitle className="text-lg">
+                      Design & Delivery
+                    </DialogTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DetailRow
+                      label="Tilef Image"
+                      value={
+                        order.tilefImageUrl ? (
+                          <img
+                            src={getImageUrl(order.tilefImageUrl)}
+                            alt="Tilef"
+                            className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer"
+                            onClick={() =>
+                              setFullScreenImageUrl(
+                                getImageUrl(order.tilefImageUrl!)
                               )
                             }
                           />
-                          {order.colors && order.colors.length > 0 && (
-                            <DetailRow
-                              label="Color Codes"
-                              value={
-                                <span className="font-mono bg-muted px-2 py-1 rounded">
-                                  {order.colors.join(", ")}
-                                </span>
-                              }
-                            />
-                          )}
-                          <DetailRow
-                            label="Delivery Date"
-                            value={
-                              order.deliveryDate
-                                ? format(new Date(order.deliveryDate), "PPP")
-                                : "N/A"
-                            }
-                          />
-                        </CardContent>
-                      </Card>
+                        ) : (
+                          "No Image"
+                        )
+                      }
+                    />
+                    {order.colors && order.colors.length > 0 && (
+                      <DetailRow
+                        label="Color Codes"
+                        value={
+                          <span className="font-mono bg-muted px-2 py-1 rounded">
+                            {order.colors.join(", ")}
+                          </span>
+                        }
+                      />
+                    )}
+                    <DetailRow
+                      label="Delivery Date"
+                      value={
+                        order.deliveryDate
+                          ? format(new Date(order.deliveryDate), "PPP")
+                          : "N/A"
+                      }
+                    />
+                  </CardContent>
+                </Card>
 
-                      {/* --- FIX START: Corrected Payment Details for Family Modal --- */}
-                      <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">Payment</DialogTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <DetailRow
-                            label="Total"
-                            value={
-                              order.payment?.total
-                                ? `ETB ${order.payment.total.toLocaleString()}`
-                                : "N/A"
-                            }
-                          />
-                          <DetailRow
-                            label="First Half Status"
-                            value={
-                              order.payment?.firstHalf.paid ? "Paid" : "Pending"
-                            }
-                          />
-                          <DetailRow
-                            label="First Half Amount"
-                            value={
-                              order.payment?.firstHalf.amount
-                                ? `ETB ${order.payment.firstHalf.amount.toLocaleString()}`
-                                : "N/A"
-                            }
-                          />
-                          <DetailRow
-                            label="Second Half Status"
-                            value={
-                              order.payment?.secondHalf.paid
-                                ? "Paid"
-                                : "Pending"
-                            }
-                          />
-                          <DetailRow
-                            label="Second Half Amount"
-                            value={
-                              order.payment?.secondHalf.amount
-                                ? `ETB ${order.payment.secondHalf.amount.toLocaleString()}`
-                                : "N/A"
-                            }
-                          />
-                        </CardContent>
-                      </Card>
-                      {/* --- FIX END --- */}
+                {/* Payment Details for Family Modal */}
+                <Card>
+                  <CardHeader>
+                    <DialogTitle className="text-lg">Payment</DialogTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DetailRow
+                      label="Total"
+                      value={
+                        order.payment?.total
+                          ? `ETB ${order.payment.total.toLocaleString()}`
+                          : "N/A"
+                      }
+                    />
+                    <DetailRow
+                      label="First Half Status"
+                      value={order.payment?.firstHalf.paid ? "Paid" : "Pending"}
+                    />
+                    <DetailRow
+                      label="First Half Amount"
+                      value={
+                        order.payment?.firstHalf.amount
+                          ? `ETB ${order.payment.firstHalf.amount.toLocaleString()}`
+                          : "N/A"
+                      }
+                    />
+                    <DetailRow
+                      label="Second Half Status"
+                      value={
+                        order.payment?.secondHalf.paid ? "Paid" : "Pending"
+                      }
+                    />
+                    <DetailRow
+                      label="Second Half Amount"
+                      value={
+                        order.payment?.secondHalf.amount
+                          ? `ETB ${order.payment.secondHalf.amount.toLocaleString()}`
+                          : "N/A"
+                      }
+                    />
+                  </CardContent>
+                </Card>
 
-                      <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">
-                            Members ({order.memberIds.length})
-                          </DialogTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {(order.memberIds as Individual[]).map((member) => (
-                            <Card
-                              key={member._id}
-                              className="cursor-pointer hover:shadow-md transition-shadow"
-                              onClick={() => setSelectedMember(member)}
-                            >
-                              <CardContent className="p-3 flex justify-between items-center">
-                                <div>
-                                  <p className="font-medium">
-                                    {member.firstName} {member.lastName}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {member.sex}
-                                  </p>
-                                </div>
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                              </CardContent>
-                            </Card>
-                          ))}
+                <Card>
+                  <CardHeader>
+                    <DialogTitle className="text-lg">
+                      Members ({order.memberIds.length})
+                    </DialogTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {(order.memberIds as Individual[]).map((member) => (
+                      <Card
+                        key={member._id}
+                        className="cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => setSelectedMember(member)}
+                      >
+                        <CardContent className="p-3 flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">
+                              {member.firstName} {member.lastName}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {member.sex}
+                            </p>
+                          </div>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="w-4 h-4" />
+                          </Button>
                         </CardContent>
                       </Card>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          );
+        })()}
+    </DialogContent>
+  </Dialog>
+
+  {/* Dialog for Individual Member Details */}
+  <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
+    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      {selectedMember &&
+        (() => {
+          const { clothDetails, payment } = selectedMember;
+          return (
+            <>
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedMember.firstName} {selectedMember.lastName} - Member Details
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <Card>
+                  <CardHeader>
+                    <DialogTitle className="text-base">Personal Info</DialogTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DetailRow label="Sex" value={selectedMember.sex} />
+                    <DetailRow label="Age" value={selectedMember.age} />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <DialogTitle className="text-base">Measurements</DialogTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
+                      {/* ... all the measurement DetailRow components ... */}
                     </div>
-                  </>
-                );
-              })()}
-          </DialogContent>
-        </Dialog>
+                  </CardContent>
+                </Card>
+                {selectedMember.payment && (
+                  <Card>
+                    <CardHeader>
+                      <DialogTitle className="text-base">Payment</DialogTitle>
+                    </CardHeader>
+                    <CardContent>
+                       {/* ... all the payment DetailRow components ... */}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </>
+          );
+        })()}
+    </DialogContent>
+  </Dialog>
 
+  {/* --- FIX START: Corrected Full Screen Image Viewer --- */}
+  <Dialog open={!!fullScreenImageUrl} onOpenChange={() => setFullScreenImageUrl(null)}>
+    <DialogContent 
+      className="bg-transparent border-none shadow-none p-0 w-auto h-auto max-w-[95vw] max-h-[95vh] focus:outline-none"
+      aria-describedby={undefined}
+      aria-labelledby={undefined}
+    >
+      <img 
+        src={fullScreenImageUrl} 
+        alt="Full screen preview" 
+        className="max-w-[90vw] max-h-[90vh] object-contain" 
+      />
+      <DialogClose asChild>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute top-2 right-2 text-white hover:bg-white/20 hover:text-white"
+        >
+          <X className="w-6 h-6" />
+        </Button>
+      </DialogClose>
+    </DialogContent>
+  </Dialog>
+  {/* --- FIX END --- */}
         {/* Modal 2: Member Details */}
         <Dialog
           open={!!selectedMember}

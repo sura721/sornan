@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -419,491 +420,494 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
         </div>
 
         {/* Modal 1: For Both Individual and Family Details */}
-        <Dialog
-          open={!!selectedOrder}
-          onOpenChange={() => setSelectedOrder(null)}
-        >
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            {/* Individual Details View */}
-            {selectedOrder?.type === "individual" &&
-              (() => {
-                const order = selectedOrder.data as Individual;
-                const { clothDetails, payment } = order;
-                return (
-                  <>
-                    <DialogHeader>
-                      <DialogTitle>
-                        {order.firstName} {order.lastName} - Details
+         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        {/* Individual Details View */}
+        {selectedOrder?.type === "individual" &&
+          (() => {
+            const order = selectedOrder.data as Individual;
+            const { clothDetails, payment } = order;
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle>
+                    {order.firstName} {order.lastName} - Details
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
+                  <Card>
+                    <CardHeader>
+                      <DialogTitle className="text-lg">
+                        Personal & Contact
                       </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                      <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">
-                            Personal & Contact
-                          </DialogTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-                          <DetailRow
-                            label="First Name"
-                            value={order.firstName}
-                          />
-                          <DetailRow label="Last Name" value={order.lastName} />
-                          <DetailRow label="Sex" value={order.sex} />
-                          <DetailRow label="Age" value={order.age} />
-                          <DetailRow
-                            label="Primary Phone"
-                            value={order.phoneNumbers?.primary}
-                          />
-                          <DetailRow
-                            label="Secondary Phone"
-                            value={order.phoneNumbers?.secondary}
-                          />
-                        <DetailRow
-  label="Telegram"
-  value={order.socials?.telegram}
-  action={
-    order.socials?.telegram && (
-      <a
-        href={`https://t.me/${getTelegramUsername(order.socials?.telegram)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={()=> console.log(order.socials?.telegram )}
-      >
-           
-        <Button
-          type="button"
-          size="icon"
-          className="bg-green-600 hover:bg-green-700 flex-shrink-0"
-        >
-          <ArrowUpRight className="w-4 h-4" />
-        </Button>
-      </a>
-    )
-  }
-/>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                      <DetailRow label="First Name" value={order.firstName} />
+                      <DetailRow label="Last Name" value={order.lastName} />
+                      <DetailRow label="Sex" value={order.sex} />
+                      <DetailRow label="Age" value={order.age} />
+                      <DetailRow
+                        label="Primary Phone"
+                        value={order.phoneNumbers?.primary}
+                      />
+                      <DetailRow
+                        label="Secondary Phone"
+                        value={order.phoneNumbers?.secondary}
+                      />
+                      <DetailRow
+                        label="Telegram"
+                        value={order.socials?.telegram}
+                        action={
+                          order.socials?.telegram && (
+                            <a
+                              href={`https://t.me/${getTelegramUsername(
+                                order.socials?.telegram
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Button
+                                type="button"
+                                size="icon"
+                                className="bg-green-600 hover:bg-green-700 flex-shrink-0"
+                              >
+                                <ArrowUpRight className="w-4 h-4" />
+                              </Button>
+                            </a>
+                          )
+                        }
+                      />
 
-                           <DetailRow
-  label="Instagram"
-  value={order.socials?.instagram}
-  action={
-    order.socials?.telegram && (
-      <a
-        href={`https://www.instagram.com/${getInstagramUsername(order.socials?.instagram)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={()=> console.log(order.socials?.telegram )}
-      >
-           
-        <Button
-          type="button"
-          size="icon"
-          className="bg-green-600 hover:bg-green-700 flex-shrink-0"
-        >
-          <ArrowUpRight className="w-4 h-4" />
-        </Button>
-      </a>
-    )
-  }
-/>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">
-                            Measurements & Design
-                          </DialogTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-                            {clothDetails.shirtLength && (
+                      <DetailRow
+                        label="Instagram"
+                        value={order.socials?.instagram}
+                        action={
+                          order.socials?.instagram && (
+                            <a
+                              href={`https://www.instagram.com/${getInstagramUsername(
+                                order.socials?.instagram
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Button
+                                type="button"
+                                size="icon"
+                                className="bg-green-600 hover:bg-green-700 flex-shrink-0"
+                              >
+                                <ArrowUpRight className="w-4 h-4" />
+                              </Button>
+                            </a>
+                          )
+                        }
+                      />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <DialogTitle className="text-lg">
+                        Measurements & Design
+                      </DialogTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                        {clothDetails.shirtLength && (
+                          <DetailRow
+                            label="Shirt Length"
+                            value={clothDetails.shirtLength}
+                          />
+                        )}
+                        {clothDetails.sholder && (
+                          <DetailRow
+                            label="Sholder"
+                            value={clothDetails.sholder}
+                          />
+                        )}
+                        {clothDetails.wegeb && (
+                          <DetailRow label="Wegeb" value={clothDetails.wegeb} />
+                        )}
+                        {clothDetails.rist && (
+                          <DetailRow label="Rist" value={clothDetails.rist} />
+                        )}
+                        {order.sex === "Female" && (
+                          <>
+                            {clothDetails.dressLength && (
                               <DetailRow
-                                label="Shirt Length"
-                                value={clothDetails.shirtLength}
+                                label="Dress Length"
+                                value={clothDetails.dressLength}
                               />
                             )}
-                            {clothDetails.sholder && (
+                            {clothDetails.sliveLength && (
                               <DetailRow
-                                label="Sholder"
-                                value={clothDetails.sholder}
+                                label="Slive Length"
+                                value={clothDetails.sliveLength}
                               />
                             )}
-                            {clothDetails.wegeb && (
+                            {clothDetails.breast && (
                               <DetailRow
-                                label="Wegeb"
-                                value={clothDetails.wegeb}
+                                label="Breast"
+                                value={clothDetails.breast}
                               />
                             )}
-                            {clothDetails.rist && (
+                            {clothDetails.overBreast && (
                               <DetailRow
-                                label="Rist"
-                                value={clothDetails.rist}
+                                label="Over Breast"
+                                value={clothDetails.overBreast}
                               />
                             )}
-                            {order.sex === "Female" && (
-                              <>
-                                {clothDetails.dressLength && (
-                                  <DetailRow
-                                    label="Dress Length"
-                                    value={clothDetails.dressLength}
-                                  />
-                                )}
-                                {clothDetails.sliveLength && (
-                                  <DetailRow
-                                    label="Slive Length"
-                                    value={clothDetails.sliveLength}
-                                  />
-                                )}
-                                {clothDetails.breast && (
-                                  <DetailRow
-                                    label="Breast"
-                                    value={clothDetails.breast}
-                                  />
-                                )}
-                                {clothDetails.overBreast && (
-                                  <DetailRow
-                                    label="Over Breast"
-                                    value={clothDetails.overBreast}
-                                  />
-                                )}
-                                {clothDetails.underBreast && (
-                                  <DetailRow
-                                    label="Under Breast"
-                                    value={clothDetails.underBreast}
-                                  />
-                                )}
-                                {clothDetails.femaleSliveType && (
-                                  <DetailRow
-                                    label="Slive Type"
-                                    value={clothDetails.femaleSliveType}
-                                  />
-                                )}
-                                {clothDetails.femaleWegebType && (
-                                  <DetailRow
-                                    label="Wegeb Type"
-                                    value={clothDetails.femaleWegebType}
-                                  />
-                                )}
-                              </>
-                            )}
-                            {order.sex === "Male" && (
-                              <>
-                                {clothDetails.deret && (
-                                  <DetailRow
-                                    label="Deret"
-                                    value={clothDetails.deret}
-                                  />
-                                )}
-                                {clothDetails.anget && (
-                                  <DetailRow
-                                    label="Anget"
-                                    value={clothDetails.anget}
-                                  />
-                                )}
-                                {clothDetails.maleClothType && (
-                                  <DetailRow
-                                    label="Cloth Type"
-                                    value={clothDetails.maleClothType}
-                                  />
-                                )}
-                                {clothDetails.maleSliveType && (
-                                  <DetailRow
-                                    label="Slive Type"
-                                    value={clothDetails.maleSliveType}
-                                  />
-                                )}
-                                {clothDetails.netela && (
-                                  <DetailRow
-                                    label="Netela"
-                                    value={clothDetails.netela}
-                                  />
-                                )}
-                              </>
-                            )}
-                          </div>
-                          <div className="mt-4 pt-4 border-t">
-                            {clothDetails.tilefImageUrl && (
+                            {clothDetails.underBreast && (
                               <DetailRow
-                                label="Tilef Image"
-                                value={
-                                  <img
-                                    src={getImageUrl(
-                                      clothDetails.tilefImageUrl
-                                    )}
-                                    alt="Tilef Pattern"
-                                    className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer"
-                                    onClick={() =>
-                                      setFullScreenImageUrl(
-                                        getImageUrl(clothDetails.tilefImageUrl)!
-                                      )
-                                    }
-                                  />
-                                }
+                                label="Under Breast"
+                                value={clothDetails.underBreast}
                               />
                             )}
-                            {clothDetails.colors &&
-                              clothDetails.colors.length > 0 &&
-                              clothDetails.colors[0] !== "" && (
-                                <DetailRow
-                                  label="Color Codes"
-                                  value={
-                                    <span className="font-mono bg-muted px-2 py-1 rounded">
-                                      {clothDetails.colors.join(", ")}
-                                    </span>
-                                  }
-                                />
-                              )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
-                          <CardHeader>
-                            <DialogTitle className="text-lg">
-                              Delivery
-                            </DialogTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <DetailRow
-                              label="Delivery Date"
-                              value={
-                                order.deliveryDate
-                                  ? format(new Date(order.deliveryDate), "PPP")
-                                  : "N/A"
-                              }
-                            />
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardHeader>
-                            <DialogTitle className="text-lg">
-                              Payment
-                            </DialogTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <DetailRow
-                              label="Total"
-                              value={
-                                payment?.total
-                                  ? `ETB ${payment.total.toLocaleString()}`
-                                  : "N/A"
-                              }
-                            />
-                            <DetailRow
-                              label="First Half Status"
-                              value={
-                                payment?.firstHalf?.paid ? "Paid" : "Pending"
-                              }
-                            />
-                            <DetailRow
-                              label="First Half Amount"
-                              value={
-                                payment?.firstHalf?.amount
-                                  ? `ETB ${payment.firstHalf.amount.toLocaleString()}`
-                                  : "N/A"
-                              }
-                            />
-                            <DetailRow
-                              label="Second Half Status"
-                              value={
-                                payment?.secondHalf?.paid ? "Paid" : "Pending"
-                              }
-                            />
-                            <DetailRow
-                              label="Second Half Amount"
-                              value={
-                                payment?.secondHalf?.amount
-                                  ? `ETB ${payment.secondHalf.amount.toLocaleString()}`
-                                  : "N/A"
-                              }
-                            />
-                          </CardContent>
-                        </Card>
+                            {clothDetails.femaleSliveType && (
+                              <DetailRow
+                                label="Slive Type"
+                                value={clothDetails.femaleSliveType}
+                              />
+                            )}
+                            {clothDetails.femaleWegebType && (
+                              <DetailRow
+                                label="Wegeb Type"
+                                value={clothDetails.femaleWegebType}
+                              />
+                            )}
+                          </>
+                        )}
+                        {order.sex === "Male" && (
+                          <>
+                            {clothDetails.deret && (
+                              <DetailRow
+                                label="Deret"
+                                value={clothDetails.deret}
+                              />
+                            )}
+                            {clothDetails.anget && (
+                              <DetailRow
+                                label="Anget"
+                                value={clothDetails.anget}
+                              />
+                            )}
+                            {clothDetails.maleClothType && (
+                              <DetailRow
+                                label="Cloth Type"
+                                value={clothDetails.maleClothType}
+                              />
+                            )}
+                            {clothDetails.maleSliveType && (
+                              <DetailRow
+                                label="Slive Type"
+                                value={clothDetails.maleSliveType}
+                              />
+                            )}
+                            {clothDetails.netela && (
+                              <DetailRow
+                                label="Netela"
+                                value={clothDetails.netela}
+                              />
+                            )}
+                          </>
+                        )}
                       </div>
-                    </div>
-                  </>
-                );
-              })()}
-
-            {/* Family Details View */}
-            {selectedOrder?.type === "family" &&
-              (() => {
-                const order = selectedOrder.data as Family;
-                return (
-                  <>
-                    <DialogHeader>
-                      <DialogTitle>{order.familyName} - Details</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                      <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">
-                            Family Info & Contact
-                          </DialogTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <DetailRow
-                            label="Primary Phone"
-                            value={order.phoneNumbers.primary}
-                          />
-                        <DetailRow
-  label="Telegram"
-  value={order.socials?.telegram}
-  action={
-    order.socials?.telegram && (
-      <a
-        href={`https://t.me/${getTelegramUsername(order.socials?.telegram)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={()=> console.log(order.socials?.telegram )}
-      >
-           
-        <Button
-          type="button"
-          size="icon"
-          className="bg-green-600 hover:bg-green-700 flex-shrink-0"
-        >
-          <ArrowUpRight className="w-4 h-4" />
-        </Button>
-      </a>
-    )
-  }
-/>
-
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">
-                            Design & Delivery
-                          </DialogTitle>
-                        </CardHeader>
-                        <CardContent>
+                      <div className="mt-4 pt-4 border-t">
+                        {clothDetails.tilefImageUrl && (
                           <DetailRow
                             label="Tilef Image"
                             value={
-                              order.tilefImageUrl ? (
-                                <img
-                                  src={getImageUrl(order.tilefImageUrl)}
-                                  alt="Tilef"
-                                  className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer"
-                                  onClick={() =>
-                                    setFullScreenImageUrl(
-                                      getImageUrl(order.tilefImageUrl!)
-                                    )
-                                  }
-                                />
-                              ) : (
-                                "No Image"
-                              )
+                              <img
+                                src={getImageUrl(clothDetails.tilefImageUrl)}
+                                alt="Tilef Pattern"
+                                className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer"
+                                onClick={() =>
+                                  setFullScreenImageUrl(
+                                    getImageUrl(clothDetails.tilefImageUrl)!
+                                  )
+                                }
+                              />
                             }
                           />
-                          {order.colors && order.colors.length > 0 && (
+                        )}
+                        {clothDetails.colors &&
+                          clothDetails.colors.length > 0 &&
+                          clothDetails.colors[0] !== "" && (
                             <DetailRow
                               label="Color Codes"
                               value={
                                 <span className="font-mono bg-muted px-2 py-1 rounded">
-                                  {order.colors.join(", ")}
+                                  {clothDetails.colors.join(", ")}
                                 </span>
                               }
                             />
                           )}
-                          <DetailRow
-                            label="Delivery Date"
-                            value={
-                              order.deliveryDate
-                                ? format(new Date(order.deliveryDate), "PPP")
-                                : "N/A"
-                            }
-                          />
-                        </CardContent>
-                      </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <DialogTitle className="text-lg">Delivery</DialogTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <DetailRow
+                          label="Delivery Date"
+                          value={
+                            order.deliveryDate
+                              ? format(new Date(order.deliveryDate), "PPP")
+                              : "N/A"
+                          }
+                        />
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <DialogTitle className="text-lg">Payment</DialogTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <DetailRow
+                          label="Total"
+                          value={
+                            payment?.total
+                              ? `ETB ${payment.total.toLocaleString()}`
+                              : "N/A"
+                          }
+                        />
+                        <DetailRow
+                          label="First Half Status"
+                          value={payment?.firstHalf?.paid ? "Paid" : "Pending"}
+                        />
+                        <DetailRow
+                          label="First Half Amount"
+                          value={
+                            payment?.firstHalf?.amount
+                              ? `ETB ${payment.firstHalf.amount.toLocaleString()}`
+                              : "N/A"
+                          }
+                        />
+                        <DetailRow
+                          label="Second Half Status"
+                          value={
+                            payment?.secondHalf?.paid ? "Paid" : "Pending"
+                          }
+                        />
+                        <DetailRow
+                          label="Second Half Amount"
+                          value={
+                            payment?.secondHalf?.amount
+                              ? `ETB ${payment.secondHalf.amount.toLocaleString()}`
+                              : "N/A"
+                          }
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
 
-                      {/* --- FIX START: Corrected Payment Details for Family Modal --- */}
-                     {order.paymentMethod === 'family' &&( <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">Payment</DialogTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <DetailRow
-                            label="Total"
-                            value={
-                              order.payment?.total
-                                ? `ETB ${order.payment.total.toLocaleString()}`
-                                : "N/A"
-                            }
-                          />
-                          <DetailRow
-                            label="First Half Status"
-                            value={
-                              order.payment?.firstHalf.paid ? "Paid" : "Pending"
-                            }
-                          />
-                          <DetailRow
-                            label="First Half Amount"
-                            value={
-                              order.payment?.firstHalf.amount
-                                ? `ETB ${order.payment.firstHalf.amount.toLocaleString()}`
-                                : "N/A"
-                            }
-                          />
-                          <DetailRow
-                            label="Second Half Status"
-                            value={
-                              order.payment?.secondHalf.paid
-                                ? "Paid"
-                                : "Pending"
-                            }
-                          />
-                          <DetailRow
-                            label="Second Half Amount"
-                            value={
-                              order.payment?.secondHalf.amount
-                                ? `ETB ${order.payment.secondHalf.amount.toLocaleString()}`
-                                : "N/A"
-                            }
-                          />
-                        </CardContent>
-                      </Card>)}
-                      {/* --- FIX END --- */}
-
-                      <Card>
-                        <CardHeader>
-                          <DialogTitle className="text-lg">
-                            Members ({order.memberIds.length})
-                          </DialogTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {(order.memberIds as Individual[]).map((member) => (
-                            <Card
-                              key={member._id}
-                              className="cursor-pointer hover:shadow-md transition-shadow"
-                              onClick={() => setSelectedMember(member)}
+        {/* Family Details View */}
+        {selectedOrder?.type === "family" &&
+          (() => {
+            const order = selectedOrder.data as Family;
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{order.familyName} - Details</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
+                  <Card>
+                    <CardHeader>
+                      <DialogTitle className="text-lg">
+                        Family Info & Contact
+                      </DialogTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <DetailRow
+                        label="Primary Phone"
+                        value={order.phoneNumbers.primary}
+                      />
+                      <DetailRow
+                        label="Telegram"
+                        value={order.socials?.telegram}
+                        action={
+                          order.socials?.telegram && (
+                            <a
+                              href={`https://t.me/${getTelegramUsername(
+                                order.socials?.telegram
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
                             >
-                              <CardContent className="p-3 flex justify-between items-center">
-                                <div>
-                                  <p className="font-medium">
-                                    {member.firstName} {member.lastName}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {member.sex}
-                                  </p>
-                                </div>
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </>
-                );
-              })()}
-          </DialogContent>
-        </Dialog>
+                              <Button
+                                type="button"
+                                size="icon"
+                                className="bg-green-600 hover:bg-green-700 flex-shrink-0"
+                              >
+                                <ArrowUpRight className="w-4 h-4" />
+                              </Button>
+                            </a>
+                          )
+                        }
+                      />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <DialogTitle className="text-lg">
+                        Design & Delivery
+                      </DialogTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <DetailRow
+                        label="Tilef Image"
+                        value={
+                          order.tilefImageUrl ? (
+                            <img
+                              src={getImageUrl(order.tilefImageUrl)}
+                              alt="Tilef"
+                              className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer"
+                              onClick={() =>
+                                setFullScreenImageUrl(
+                                  getImageUrl(order.tilefImageUrl!)
+                                )
+                              }
+                            />
+                          ) : (
+                            "No Image"
+                          )
+                        }
+                      />
+                      {order.colors && order.colors.length > 0 && (
+                        <DetailRow
+                          label="Color Codes"
+                          value={
+                            <span className="font-mono bg-muted px-2 py-1 rounded">
+                              {order.colors.join(", ")}
+                            </span>
+                          }
+                        />
+                      )}
+                      <DetailRow
+                        label="Delivery Date"
+                        value={
+                          order.deliveryDate
+                            ? format(new Date(order.deliveryDate), "PPP")
+                            : "N/A"
+                        }
+                      />
+                    </CardContent>
+                  </Card>
 
+                  {order.paymentMethod === "family" && (
+                    <Card>
+                      <CardHeader>
+                        <DialogTitle className="text-lg">Payment</DialogTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <DetailRow
+                          label="Total"
+                          value={
+                            order.payment?.total
+                              ? `ETB ${order.payment.total.toLocaleString()}`
+                              : "N/A"
+                          }
+                        />
+                        <DetailRow
+                          label="First Half Status"
+                          value={
+                            order.payment?.firstHalf.paid ? "Paid" : "Pending"
+                          }
+                        />
+                        <DetailRow
+                          label="First Half Amount"
+                          value={
+                            order.payment?.firstHalf.amount
+                              ? `ETB ${order.payment.firstHalf.amount.toLocaleString()}`
+                              : "N/A"
+                          }
+                        />
+                        <DetailRow
+                          label="Second Half Status"
+                          value={
+                            order.payment?.secondHalf.paid
+                              ? "Paid"
+                              : "Pending"
+                          }
+                        />
+                        <DetailRow
+                          label="Second Half Amount"
+                          value={
+                            order.payment?.secondHalf.amount
+                              ? `ETB ${order.payment.secondHalf.amount.toLocaleString()}`
+                              : "N/A"
+                          }
+                        />
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  <Card>
+                    <CardHeader>
+                      <DialogTitle className="text-lg">
+                        Members ({order.memberIds.length})
+                      </DialogTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {(order.memberIds as Individual[]).map((member) => (
+                        <Card
+                          key={member._id}
+                          className="cursor-pointer hover:shadow-md transition-shadow"
+                          onClick={() => setSelectedMember(member)}
+                        >
+                          <CardContent className="p-3 flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">
+                                {member.firstName} {member.lastName}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {member.sex}
+                              </p>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            );
+          })()}
+      </DialogContent>
+    </Dialog>
+
+    {/* --- FIX START: Corrected Full Screen Image Viewer --- */}
+    <Dialog open={!!fullScreenImageUrl} onOpenChange={() => setFullScreenImageUrl(null)}>
+      <DialogContent 
+        className="bg-transparent border-none shadow-none p-0 w-auto h-auto max-w-[95vw] max-h-[95vh] focus:outline-none"
+        aria-describedby={undefined}
+        aria-labelledby={undefined}
+      >
+        <img 
+          src={fullScreenImageUrl} 
+          alt="Full screen tilef pattern" 
+          className="max-w-[90vw] max-h-[90vh] object-contain" 
+        />
+        <DialogClose asChild>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute top-2 right-2 text-white hover:bg-white/20 hover:text-white"
+          >
+            <X className="w-6 h-6" />
+          </Button>
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
+    {/* --- FIX END --- */}
         {/* Modal 2: Member Details */}
         <Dialog
           open={!!selectedMember}

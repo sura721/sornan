@@ -55,6 +55,7 @@ export interface Individual {
     secondHalf: { paid: boolean; amount?: number };
   };
   deliveryDate?: string;
+  notes?: string;
 }
 
 interface UpdateUserPayload {
@@ -79,6 +80,7 @@ export interface Family {
     secondHalf: { paid: boolean; amount?: number };
   };
   deliveryDate: string;
+  notes?:string
 }
 export interface User {
   _id: string;
@@ -325,6 +327,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       toast({ title: "API Error", description: "Could not delete individual.", variant: "destructive" });
     }
   };
+
+  
 
   const updateUser = async (payload: UpdateUserPayload): Promise<boolean> => {
     try {

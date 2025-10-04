@@ -702,6 +702,18 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                     </Card>
                   </div>
                 </div>
+                {order.notes && (
+  <Card>
+    <CardHeader>
+      <DialogTitle className="text-lg">Notes</DialogTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-sm text-foreground whitespace-pre-wrap">
+        {order.notes}
+      </p>
+    </CardContent>
+  </Card>
+)}
               </>
             );
           })()}
@@ -755,7 +767,7 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                   <Card>
                     <CardHeader>
                       <DialogTitle className="text-lg">
-                        Design & Delivery
+                        Design & Delivery 
                       </DialogTitle>
                     </CardHeader>
                     <CardContent>
@@ -846,6 +858,20 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                       </CardContent>
                     </Card>
                   )}
+
+                  {order.notes && (
+  <Card>
+    <CardHeader>
+      <DialogTitle className="text-lg">Notes</DialogTitle>
+    </CardHeader>
+    <CardContent>
+      {/* The 'whitespace-pre-wrap' class helps preserve any line breaks from the original note */}
+      <p className="text-sm text-foreground whitespace-pre-wrap">
+        {order.notes}
+      </p>
+    </CardContent>
+  </Card>
+)}
 
                   <Card>
                     <CardHeader>

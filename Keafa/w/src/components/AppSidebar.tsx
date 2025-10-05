@@ -32,17 +32,7 @@ export function AppSidebar() {
     <Sidebar className="w-64" collapsible="icon">
       <SidebarContent className="bg-card border-r flex flex-col">
         <div className="flex-grow">
-          <Link to={'/'} className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-secondary-foreground font-bold text-sm">K</span>
-              </div>
-              <div>
-                <h2 className="font-serif font-bold text-primary">Keafa</h2>
-                <p className="text-xs text-muted-foreground">Design Studio</p>
-              </div>
-            </div>
-          </Link>
+      <img src="\logo2.png" alt="" />
 
           <SidebarGroup>
             <SidebarGroupLabel>Navigation</SidebarGroupLabel>

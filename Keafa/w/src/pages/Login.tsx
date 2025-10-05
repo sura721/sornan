@@ -43,8 +43,7 @@ const Login = () => {
       className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center"
       style={{ backgroundImage: `url(${loginBg})` }}
     >
-      <Card className="w-full max-w-sm shadow-elegant bg-card/80 backdrop-blur-sm mt-32">
-        <CardHeader>
+<Card className="w-full max-w-sm border border-white/20 bg-white/10 backdrop-blur-md shadow-lg mt-32">        <CardHeader>
           <CardTitle className="text-center text-2xl font-serif text-primary">
             Admin Login
           </CardTitle>

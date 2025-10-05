@@ -441,21 +441,7 @@ const handleFamilyChange = (
     </CardTitle>
   </CardHeader>
   <CardContent className="space-y-6 pt-6">
-    <div className="space-y-2">
-      <Label>Payment Method</Label>
-      <Select
-        value={familyData.paymentMethod}
-        onValueChange={(value) => handleFamilyChange("paymentMethod", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="How will the payment be handled?" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="family">Pay for Whole Family</SelectItem>
-          <SelectItem value="member">Pay per Member</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+    
 
     {/* Only show this entire section if payment method is 'family' */}
     {familyData.paymentMethod === 'family' && (

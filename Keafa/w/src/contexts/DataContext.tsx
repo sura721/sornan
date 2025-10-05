@@ -364,9 +364,25 @@ const updateFamily = async (family: Family, tilefFile: File | null) => {
     formData.append('phoneNumbers', JSON.stringify(family.phoneNumbers));
     formData.append('socials', JSON.stringify(family.socials || {}));
     formData.append('colors', JSON.stringify(family.colors || []));
-    formData.append('payment', JSON.stringify(family.payment));
+    if (family.payment) {
+      formData.append('payment', JSON.stringify(family.payment));
+    }
     formData.append('deliveryDate', family.deliveryDate);
-    formData.append('memberIds', JSON.stringify(family.memberIds));
+    // Send full objects for existing members; only strip temporary ids from new ones
+    const memberIdsForUpdate = family.memberIds.map((member) => {
+      if (typeof member === 'string') return member;
+      const obj: any = { ...(member as any) };
+      if (obj._id && /^mock_mem_/.test(obj._id)) {
+        delete obj._id;
+        // mark as new family member and align required fields
+        obj.isFamilyMember = true;
+        if (!obj.deliveryDate && family.deliveryDate) {
+          obj.deliveryDate = family.deliveryDate;
+        }
+      }
+      return obj;
+    });
+    formData.append('memberIds', JSON.stringify(memberIdsForUpdate));
  formData.append('paymentMethod', family.paymentMethod);   
     if (family.tilefImageUrl) {
       formData.append('tilefImageUrl', family.tilefImageUrl);

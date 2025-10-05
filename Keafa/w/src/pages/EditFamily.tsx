@@ -168,12 +168,13 @@ const handleFamilyChange = (
       return; 
     }
     
+    const parsedAge = parseInt(memberFormData.age);
     const memberDetails: MemberData = {
         firstName: memberFormData.firstName, 
         lastName: memberFormData.lastName, 
         sex: memberFormData.sex as 'Male' | 'Female', 
-        // CORRECT: Age is a number, so parseInt is correct here.
-        age: parseInt(memberFormData.age) || undefined,
+        // Only send age if it's a valid non-negative number
+        age: Number.isFinite(parsedAge) && parsedAge >= 0 ? parsedAge : undefined,
         
         clothDetails: {
             colors: [], 
@@ -199,7 +200,8 @@ const handleFamilyChange = (
             femaleWegebType: memberFormData.femaleWegebType || undefined,
             maleClothType: memberFormData.maleClothType || undefined,
             maleSliveType: memberFormData.maleSliveType || undefined,
-            netela: memberFormData.netela as 'Yes' | 'No' | undefined,
+            // Omit netela when empty
+            netela: (memberFormData.netela || undefined) as 'Yes' | 'No' | undefined,
         },
     };
 

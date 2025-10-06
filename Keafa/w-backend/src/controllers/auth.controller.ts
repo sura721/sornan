@@ -106,17 +106,21 @@ export const loginUser = async (req: Request, res: Response) => {
       console.error("FATAL ERROR: JWT_SECRET is not defined.");
       return res.status(500).send('Server Error');
     }
-const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === 'production';
 
-const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
+    const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
 
-    // --- MODIFIED: Set JWT in an httpOnly cookie ---
-    res.cookie('token', token, {
+    // Use explicit cookie options so clearing the cookie later matches exactly.
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-  sameSite: isProduction ? 'none' : 'lax', 
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
-    });
+      secure: isProduction,
+      sameSite: isProduction ? ('none' as const) : ('lax' as const),
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    };
+
+    // --- Set JWT in an httpOnly cookie ---
+    res.cookie('token', token, cookieOptions);
 
     // Respond with user data (without password)
     res.json({
@@ -137,13 +141,18 @@ const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
  */
 export const logoutUser = (req: Request, res: Response) => {
   const isProduction = process.env.NODE_ENV === 'production';
-
-  res.cookie('token', '', {
+  const cookieOptions = {
     httpOnly: true,
-    secure: isProduction, // Must be true in production
-    sameSite: isProduction ? 'none' : 'lax', // Must match the login cookie settings
-    expires: new Date(0), // Set expiration to the past to delete it
-  });
+    secure: isProduction,
+    sameSite: isProduction ? ('none' as const) : ('lax' as const),
+    path: '/',
+  };
+
+  // Clear the cookie by name using the same options used to set it.
+  res.clearCookie('token', cookieOptions);
+  if (!isProduction) {
+    console.log('Logout: cleared cookie with options', cookieOptions);
+  }
   res.status(200).json({ message: 'Logged out successfully' });
 };
 interface IAuthRequest extends Request {

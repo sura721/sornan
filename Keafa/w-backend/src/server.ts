@@ -25,26 +25,26 @@ if (!process.env.FRONTEND_URL) {
   console.warn('WARNING: FRONTEND_URL environment variable not set. CORS may block requests from the frontend.');
 }
 // -
+// Allow common dev origins (Vite, localhost) plus any FRONTEND_URL provided in env
 const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
   'http://localhost:8080',
-  process.env.FRONTEND_URL
-];
-
-// In src/server.ts
+  'http://127.0.0.1:8080',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // Check if the origin is in our allowed list
-    if (allowedOrigins.indexOf(origin!) !== -1 || !origin) {
-      callback(null, true); // Origin is allowed
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
     } else {
-      // --- THIS IS THE NEW LOGGING ---
-      // If it's not allowed, log the failing origin to the console
       console.error(`CORS Error: The origin '${origin}' was blocked.`);
-      callback(new Error('This origin is not allowed by CORS')); // Block the request
+      callback(new Error('This origin is not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
 };
 // Use the cors middleware with your new options.
 app.use(cors(corsOptions));

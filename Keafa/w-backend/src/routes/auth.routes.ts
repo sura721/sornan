@@ -7,6 +7,7 @@ import {
   updateUserProfile,
   getUserProfile,
 } from '../controllers/auth.controller';
+import { logoutUser } from '../controllers/auth.controller';
 import authMiddleware from '../middleware/auth.middleware';
 
 // Create a new router instance from Express
@@ -14,6 +15,7 @@ const router = express.Router();
  
  
 router.post('/login', loginUser);
+router.post('/logout', logoutUser);
 
  
 router.post('/add', authMiddleware, addUser);

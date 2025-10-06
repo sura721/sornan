@@ -578,19 +578,19 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                             )}
                             {clothDetails.sholder && (
                               <DetailRow
-                                label="Sholder"
+                                label="Shoulder"
                                 value={clothDetails.sholder}
                               />
                             )}
                             {clothDetails.wegeb && (
                               <DetailRow
-                                label="Wegeb"
+                                label="Waist"
                                 value={clothDetails.wegeb}
                               />
                             )}
                             {clothDetails.rist && (
                               <DetailRow
-                                label="Rist"
+                                label="Wrist"
                                 value={clothDetails.rist}
                               />
                             )}
@@ -604,7 +604,7 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                                 )}
                                 {clothDetails.sliveLength && (
                                   <DetailRow
-                                    label="Slive Length"
+                                    label="Sleeve Length"
                                     value={clothDetails.sliveLength}
                                   />
                                 )}
@@ -628,13 +628,13 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                                 )}
                                 {clothDetails.femaleSliveType && (
                                   <DetailRow
-                                    label="Slive Type"
+                                    label="Sleeve Type"
                                     value={clothDetails.femaleSliveType}
                                   />
                                 )}
                                 {clothDetails.femaleWegebType && (
                                   <DetailRow
-                                    label="Wegeb Type"
+                                    label="Waist Type"
                                     value={clothDetails.femaleWegebType}
                                   />
                                 )}
@@ -644,13 +644,13 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                               <>
                                 {clothDetails.deret && (
                                   <DetailRow
-                                    label="Deret"
+                                    label="Chest"
                                     value={clothDetails.deret}
                                   />
                                 )}
                                 {clothDetails.anget && (
                                   <DetailRow
-                                    label="Anget"
+                                    label="Neck"
                                     value={clothDetails.anget}
                                   />
                                 )}
@@ -662,7 +662,7 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                                 )}
                                 {clothDetails.maleSliveType && (
                                   <DetailRow
-                                    label="Slive Type"
+                                    label="Sleeve Type"
                                     value={clothDetails.maleSliveType}
                                   />
                                 )}

@@ -122,19 +122,19 @@ const IndividualOrders = () => {
       {/* --- Common measurements --- */}
       {isNumberValue(clothDetails.shirtLength) && <DetailRow label="Shirt Length" value={clothDetails.shirtLength} />}
       {isNumberValue(clothDetails.sholder) && <DetailRow label="Sholder" value={clothDetails.sholder} />}
-      {isNumberValue(clothDetails.wegeb) && <DetailRow label="Wegeb" value={clothDetails.wegeb} />}
-      {isNumberValue(clothDetails.rist) && <DetailRow label="Rist" value={clothDetails.rist} />}
+      {isNumberValue(clothDetails.wegeb) && <DetailRow label="Waist" value={clothDetails.wegeb} />}
+      {isNumberValue(clothDetails.rist) && <DetailRow label="Wrist" value={clothDetails.rist} />}
 
       {/* --- Female-specific --- */}
       {order.sex === 'Female' && (
         <>
           {isNumberValue(clothDetails.dressLength) && <DetailRow label="Dress Length" value={clothDetails.dressLength} />}
-          {isNumberValue(clothDetails.sliveLength) && <DetailRow label="Slive Length" value={clothDetails.sliveLength} />}
+          {isNumberValue(clothDetails.sliveLength) && <DetailRow label="Sleeve Length" value={clothDetails.sliveLength} />}
           {isNumberValue(clothDetails.breast) && <DetailRow label="Breast" value={clothDetails.breast} />}
           {isNumberValue(clothDetails.overBreast) && <DetailRow label="Over Breast" value={clothDetails.overBreast} />}
           {isNumberValue(clothDetails.underBreast) && <DetailRow label="Under Breast" value={clothDetails.underBreast} />}
-          {clothDetails.femaleSliveType && <DetailRow label="Slive Type" value={clothDetails.femaleSliveType} />}
-          {clothDetails.femaleWegebType && <DetailRow label="Wegeb Type" value={clothDetails.femaleWegebType} />}
+          {clothDetails.femaleSliveType && <DetailRow label="Sleeve Type" value={clothDetails.femaleSliveType} />}
+          {clothDetails.femaleWegebType && <DetailRow label="Waist Type" value={clothDetails.femaleWegebType} />}
         </>
       )}
 
@@ -142,9 +142,9 @@ const IndividualOrders = () => {
       {order.sex === 'Male' && (
         <>
           {isNumberValue(clothDetails.deret) && <DetailRow label="Deret" value={clothDetails.deret} />}
-          {isNumberValue(clothDetails.anget) && <DetailRow label="Anget" value={clothDetails.anget} />}
+          {isNumberValue(clothDetails.anget) && <DetailRow label="Neck" value={clothDetails.anget} />}
           {clothDetails.maleClothType && <DetailRow label="Cloth Type" value={clothDetails.maleClothType} />}
-          {clothDetails.maleSliveType && <DetailRow label="Slive Type" value={clothDetails.maleSliveType} />}
+          {clothDetails.maleSliveType && <DetailRow label="Sleeve Type" value={clothDetails.maleSliveType} />}
           {clothDetails.netela && <DetailRow label="Netela" value={clothDetails.netela} />}
         </>
       )}

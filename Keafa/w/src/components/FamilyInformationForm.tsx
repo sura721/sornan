@@ -114,7 +114,7 @@ export const FamilyInformationForm = ({
           </div>
         </div>
         <div className="space-y-2 md:col-span-2">
-          <Label>Upload 'Tilef' Image</Label>
+          <Label>Upload 'ጥልፍ ' Image</Label>
           <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
             <input
               type="file"
@@ -142,7 +142,7 @@ export const FamilyInformationForm = ({
                 <div className="space-y-2">
                   <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
                   <p className="text-muted-foreground">
-                    Click to upload Tilef pattern
+                    Click to upload ጥልፍ  pattern
                   </p>
                 </div>
               )}

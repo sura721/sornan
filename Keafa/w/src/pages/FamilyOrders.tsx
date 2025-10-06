@@ -403,11 +403,11 @@ const FamilyOrders = () => {
                             value={clothDetails.shirtLength}
                           />
                           <DetailRow
-                            label="Sholder"
+                            label="Shoulder"
                             value={clothDetails.sholder}
                           />
-                          <DetailRow label="Wegeb" value={clothDetails.wegeb} />
-                          <DetailRow label="Rist" value={clothDetails.rist} />
+                          <DetailRow label="Waist" value={clothDetails.wegeb} />
+                          <DetailRow label="Wrist" value={clothDetails.rist} />
 
                           {selectedMember.sex === "Female" && (
                             <>
@@ -416,7 +416,7 @@ const FamilyOrders = () => {
                                 value={clothDetails.dressLength}
                               />
                               <DetailRow
-                                label="Slive Length"
+                                label="Sleeve Length"
                                 value={clothDetails.sliveLength}
                               />
                               <DetailRow
@@ -432,11 +432,11 @@ const FamilyOrders = () => {
                                 value={clothDetails.underBreast}
                               />
                               <DetailRow
-                                label="Slive Type"
+                                label="Sleeve Type"
                                 value={clothDetails.femaleSliveType}
                               />
                               <DetailRow
-                                label="Wegeb Type"
+                                label="Waist Type"
                                 value={clothDetails.femaleWegebType}
                               />
                             </>
@@ -445,11 +445,11 @@ const FamilyOrders = () => {
                           {selectedMember.sex === "Male" && (
                             <>
                               <DetailRow
-                                label="Deret"
+                                label="Chest"
                                 value={clothDetails.deret}
                               />
                               <DetailRow
-                                label="Anget"
+                                label="Neck"
                                 value={clothDetails.anget}
                               />
                               <DetailRow
@@ -457,7 +457,7 @@ const FamilyOrders = () => {
                                 value={clothDetails.maleClothType}
                               />
                               <DetailRow
-                                label="Slive Type"
+                                label="Sleeve Type"
                                 value={clothDetails.maleSliveType}
                               />
                               <DetailRow

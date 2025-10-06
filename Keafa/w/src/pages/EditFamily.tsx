@@ -378,7 +378,7 @@ const handleFamilyChange = (
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label>Upload 'Tilef' Image</Label>
+              <Label>Upload 'ጥልፍ' Image</Label>
               <div className="border-2 border-dashed border-border rounded-lg p-6 text-center relative">
                 <input
                   type="file"
@@ -705,7 +705,7 @@ const handleFamilyChange = (
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Wegeb</Label>
+                          <Label>Waist</Label>
                           <Input
                             type="text"
                             value={memberFormData.wegeb}
@@ -718,7 +718,7 @@ const handleFamilyChange = (
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Rist</Label>
+                          <Label>Wrist</Label>
                           <Input
                             type="text"
                             value={memberFormData.rist}
@@ -746,7 +746,7 @@ const handleFamilyChange = (
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Slive length</Label>
+                              <Label>Sleeve length</Label>
                               <Input
                                 type="text"
                                 value={memberFormData.sliveLength}
@@ -759,7 +759,7 @@ const handleFamilyChange = (
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Brest</Label>
+                              <Label>Breast</Label>
                               <Input
                                 type="text"
                                 value={memberFormData.breast}
@@ -772,7 +772,7 @@ const handleFamilyChange = (
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Over brest</Label>
+                              <Label>Over Breast</Label>
                               <Input
                                 type="text"
                                 value={memberFormData.overBreast}
@@ -785,7 +785,7 @@ const handleFamilyChange = (
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Under brest</Label>
+                              <Label>Under Breast</Label>
                               <Input
                                 type="text"
                                 value={memberFormData.underBreast}
@@ -798,7 +798,7 @@ const handleFamilyChange = (
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Slive type</Label>
+                              <Label>Sleeve type</Label>
                               <Select
                                 value={memberFormData.femaleSliveType}
                                 onValueChange={(v) =>
@@ -812,17 +812,17 @@ const handleFamilyChange = (
                                   <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="Thin">A Thin</SelectItem>
-                                  <SelectItem value="Short">B Short</SelectItem>
+                                  <SelectItem value="Thin"> Thin</SelectItem>
+                                  <SelectItem value="Short"> Short</SelectItem>
                                   <SelectItem value="Middle">
-                                    C Middle
+                                     Middle
                                   </SelectItem>
-                                  <SelectItem value="Long">D Long</SelectItem>
+                                  <SelectItem value="Long"> Long</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label>Wegeb type</Label>
+                              <Label>Waist type</Label>
                               <Select
                                 value={memberFormData.femaleWegebType}
                                 onValueChange={(v) =>
@@ -836,11 +836,11 @@ const handleFamilyChange = (
                                   <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="Zrgf">A Zrgf</SelectItem>
+                                  <SelectItem value="Zrgf"> Zrgf</SelectItem>
                                   <SelectItem value="Fitted">
-                                    B Fitted
+                                     Fitted
                                   </SelectItem>
-                                  <SelectItem value="Kbeto">C Kbeto</SelectItem>
+                                  <SelectItem value="Kbeto"> Kbeto</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -849,7 +849,7 @@ const handleFamilyChange = (
                         {memberFormData.sex === "Male" && (
                           <>
                             <div className="space-y-2">
-                              <Label>Deret</Label>
+                              <Label>Chest</Label>
                               <Input
                                 type="text"
                                 value={memberFormData.deret}
@@ -862,7 +862,7 @@ const handleFamilyChange = (
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Anget</Label>
+                              <Label>Neck</Label>
                               <Input
                                 type="text"
                                 value={memberFormData.anget}
@@ -889,19 +889,19 @@ const handleFamilyChange = (
                                   <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="Shirt">A Shirt</SelectItem>
-                                  <SelectItem value="Semiz">B Semiz</SelectItem>
+                                  <SelectItem value="Shirt"> Shirt</SelectItem>
+                                  <SelectItem value="Semiz">Shemiz</SelectItem>
                                   <SelectItem value="T shirt and jacket">
-                                    C T shirt and jacket
+                                     T shirt and jacket
                                   </SelectItem>
                                   <SelectItem value="Shirt only with key">
-                                    D Shirt only with key
+                                    Shirt only with key
                                   </SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label>Type of slive</Label>
+                              <Label>Type of Sleeve </Label>
                               <Select
                                 value={memberFormData.maleSliveType}
                                 onValueChange={(v) =>
@@ -915,8 +915,8 @@ const handleFamilyChange = (
                                   <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="Short">A Short</SelectItem>
-                                  <SelectItem value="Long">B Long</SelectItem>
+                                  <SelectItem value="Short"> Short</SelectItem>
+                                  <SelectItem value="Long">Long</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -935,8 +935,8 @@ const handleFamilyChange = (
                                   <SelectValue placeholder="Select option" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="Yes">A Yes</SelectItem>
-                                  <SelectItem value="No">B No</SelectItem>
+                                  <SelectItem value="Yes"> Yes</SelectItem>
+                                  <SelectItem value="No"> No</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>

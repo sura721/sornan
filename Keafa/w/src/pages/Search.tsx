@@ -251,15 +251,15 @@ const Search = () => {
                       )}
                       {clothDetails.sholder && (
                         <DetailRow
-                          label="Sholder"
+                          label="Shoulder"
                           value={clothDetails.sholder}
                         />
                       )}
                       {clothDetails.wegeb && (
-                        <DetailRow label="Wegeb" value={clothDetails.wegeb} />
+                        <DetailRow label="Waist" value={clothDetails.wegeb} />
                       )}
                       {clothDetails.rist && (
-                        <DetailRow label="Rist" value={clothDetails.rist} />
+                        <DetailRow label="Wrist" value={clothDetails.rist} />
                       )}
                       {order.sex === "Female" && (
                         <>
@@ -271,7 +271,7 @@ const Search = () => {
                           )}
                           {clothDetails.sliveLength && (
                             <DetailRow
-                              label="Slive Length"
+                              label="Sleeve Length"
                               value={clothDetails.sliveLength}
                             />
                           )}
@@ -295,13 +295,13 @@ const Search = () => {
                           )}
                           {clothDetails.femaleSliveType && (
                             <DetailRow
-                              label="Slive Type"
+                              label="Sleeve Type"
                               value={clothDetails.femaleSliveType}
                             />
                           )}
                           {clothDetails.femaleWegebType && (
                             <DetailRow
-                              label="Wegeb Type"
+                              label="Waist Type"
                               value={clothDetails.femaleWegebType}
                             />
                           )}
@@ -311,13 +311,13 @@ const Search = () => {
                         <>
                           {clothDetails.deret && (
                             <DetailRow
-                              label="Deret"
+                              label="Chest"
                               value={clothDetails.deret}
                             />
                           )}
                           {clothDetails.anget && (
                             <DetailRow
-                              label="Anget"
+                              label="Neck"
                               value={clothDetails.anget}
                             />
                           )}
@@ -329,7 +329,7 @@ const Search = () => {
                           )}
                           {clothDetails.maleSliveType && (
                             <DetailRow
-                              label="Slive Type"
+                              label="Sleeve Type"
                               value={clothDetails.maleSliveType}
                             />
                           )}
@@ -622,7 +622,7 @@ const Search = () => {
               return (
                 <><DialogHeader><DialogTitle>{selectedMember.firstName} {selectedMember.lastName} - Member Details</DialogTitle></DialogHeader><div className="space-y-4 py-4">
                   <Card><CardHeader><DialogTitle className="text-base">Personal Info</DialogTitle></CardHeader><CardContent><DetailRow label="Sex" value={selectedMember.sex} /><DetailRow label="Age" value={selectedMember.age} /></CardContent></Card>
-                  <Card><CardHeader><DialogTitle className="text-base">Measurements</DialogTitle></CardHeader><CardContent><div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">{clothDetails.shirtLength && <DetailRow label="Shirt Length" value={clothDetails.shirtLength} />}{clothDetails.sholder && <DetailRow label="Sholder" value={clothDetails.sholder} />}{clothDetails.wegeb && <DetailRow label="Wegeb" value={clothDetails.wegeb} />}{clothDetails.rist && <DetailRow label="Rist" value={clothDetails.rist} />}{selectedMember.sex === 'Female' && (<>{clothDetails.dressLength && <DetailRow label="Dress Length" value={clothDetails.dressLength} />}{clothDetails.sliveLength && <DetailRow label="Slive Length" value={clothDetails.sliveLength} />}{clothDetails.breast && <DetailRow label="Breast" value={clothDetails.breast} />}{clothDetails.overBreast && <DetailRow label="Over Breast" value={clothDetails.overBreast} />}{clothDetails.underBreast && <DetailRow label="Under Breast" value={clothDetails.underBreast} />}{clothDetails.femaleSliveType && <DetailRow label="Slive Type" value={clothDetails.femaleSliveType} />}{clothDetails.femaleWegebType && <DetailRow label="Wegeb Type" value={clothDetails.femaleWegebType} />}</>)}{selectedMember.sex === 'Male' && (<>{clothDetails.deret && <DetailRow label="Deret" value={clothDetails.deret} />}{clothDetails.anget && <DetailRow label="Anget" value={clothDetails.anget} />}{clothDetails.maleClothType && <DetailRow label="Cloth Type" value={clothDetails.maleClothType} />}{clothDetails.maleSliveType && <DetailRow label="Slive Type" value={clothDetails.maleSliveType} />}{clothDetails.netela && <DetailRow label="Netela" value={clothDetails.netela} />}</>)}</div></CardContent></Card>
+                  <Card><CardHeader><DialogTitle className="text-base">Measurements</DialogTitle></CardHeader><CardContent><div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">{clothDetails.shirtLength && <DetailRow label="Shirt Length" value={clothDetails.shirtLength} />}{clothDetails.sholder && <DetailRow label="Sholder" value={clothDetails.sholder} />}{clothDetails.wegeb && <DetailRow label="Waist" value={clothDetails.wegeb} />}{clothDetails.rist && <DetailRow label="Wrist" value={clothDetails.rist} />}{selectedMember.sex === 'Female' && (<>{clothDetails.dressLength && <DetailRow label="Dress Length" value={clothDetails.dressLength} />}{clothDetails.sliveLength && <DetailRow label="Sleeve Length" value={clothDetails.sliveLength} />}{clothDetails.breast && <DetailRow label="Breast" value={clothDetails.breast} />}{clothDetails.overBreast && <DetailRow label="Over Breast" value={clothDetails.overBreast} />}{clothDetails.underBreast && <DetailRow label="Under Breast" value={clothDetails.underBreast} />}{clothDetails.femaleSliveType && <DetailRow label="Sleeve Type" value={clothDetails.femaleSliveType} />}{clothDetails.femaleWegebType && <DetailRow label="Waist Type" value={clothDetails.femaleWegebType} />}</>)}{selectedMember.sex === 'Male' && (<>{clothDetails.deret && <DetailRow label="Deret" value={clothDetails.deret} />}{clothDetails.anget && <DetailRow label="Neck" value={clothDetails.anget} />}{clothDetails.maleClothType && <DetailRow label="Cloth Type" value={clothDetails.maleClothType} />}{clothDetails.maleSliveType && <DetailRow label="Sleeve Type" value={clothDetails.maleSliveType} />}{clothDetails.netela && <DetailRow label="Netela" value={clothDetails.netela} />}</>)}</div></CardContent></Card>
                 </div></>
               );
             })()}

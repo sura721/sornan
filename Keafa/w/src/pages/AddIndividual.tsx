@@ -394,7 +394,7 @@ newIndividualData.append("notes", formData.notes);
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sholder">Sholder</Label>
+                <Label htmlFor="sholder">Shoulder</Label>
                 <Input
                   id="sholder"
                   type="text"
@@ -405,7 +405,7 @@ newIndividualData.append("notes", formData.notes);
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="wegeb">Wegeb</Label>
+                <Label htmlFor="wegeb">Waist</Label>
                 <Input
                   id="wegeb"
                   type="text"
@@ -416,7 +416,7 @@ newIndividualData.append("notes", formData.notes);
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="rist">Rist</Label>
+                <Label htmlFor="rist">Wrist</Label>
                 <Input
                   id="rist"
                   type="text"
@@ -444,7 +444,7 @@ newIndividualData.append("notes", formData.notes);
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="sliveLength">Slive length</Label>
+                    <Label htmlFor="sliveLength">Sleeve length</Label>
                     <Input
                       id="sliveLength"
                   type="text"
@@ -458,7 +458,7 @@ newIndividualData.append("notes", formData.notes);
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="breast">Brest</Label>
+                    <Label htmlFor="breast">Breast</Label>
                     <Input
                       id="breast"
                   type="text"
@@ -469,7 +469,7 @@ newIndividualData.append("notes", formData.notes);
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="overBreast">Over brest</Label>
+                    <Label htmlFor="overBreast">Over Breast</Label>
                     <Input
                       id="overBreast"
                   type="text"
@@ -480,7 +480,7 @@ newIndividualData.append("notes", formData.notes);
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="underBreast">Under brest</Label>
+                    <Label htmlFor="underBreast">Under Breast</Label>
                     <Input
                       id="underBreast"
                   type="text"
@@ -494,7 +494,7 @@ newIndividualData.append("notes", formData.notes);
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Slive type</Label>
+                    <Label>Sleeve type</Label>
                     <Select
                       value={formData.femaleSliveType}
                       onValueChange={(value) =>
@@ -505,15 +505,15 @@ newIndividualData.append("notes", formData.notes);
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Thin">A Thin</SelectItem>
-                        <SelectItem value="Short">B Short</SelectItem>
-                        <SelectItem value="Middle">C Middle</SelectItem>
-                        <SelectItem value="Long">D Long</SelectItem>
+                        <SelectItem value="Thin"> Thin</SelectItem>
+                        <SelectItem value="Short"> Short</SelectItem>
+                        <SelectItem value="Middle"> Middle</SelectItem>
+                        <SelectItem value="Long"> Long</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Wegeb type</Label>
+                    <Label>Waist type</Label>
                     <Select
                       value={formData.femaleWegebType}
                       onValueChange={(value) =>
@@ -524,9 +524,9 @@ newIndividualData.append("notes", formData.notes);
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Zrgf">A Zrgf</SelectItem>
-                        <SelectItem value="Fitted">B Fitted</SelectItem>
-                        <SelectItem value="Kbeto">C Kbeto</SelectItem>
+                        <SelectItem value="Zrgf"> Zrgf</SelectItem>
+                        <SelectItem value="Fitted"> Fitted</SelectItem>
+                        <SelectItem value="Kbeto"> Kbeto</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -536,7 +536,7 @@ newIndividualData.append("notes", formData.notes);
                 <>
                   {" "}
                   <div className="space-y-2">
-                    <Label htmlFor="deret">Deret</Label>
+                    <Label htmlFor="deret">Chest</Label>
                     <Input
                       id="deret"
                       type="text"
@@ -547,7 +547,7 @@ newIndividualData.append("notes", formData.notes);
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="anget">Anget</Label>
+                    <Label htmlFor="anget">Neck</Label>
                     <Input
                       id="anget"
                   type="text"
@@ -569,19 +569,19 @@ newIndividualData.append("notes", formData.notes);
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Shirt">A Shirt</SelectItem>
-                        <SelectItem value="Semiz">B Semiz</SelectItem>
+                        <SelectItem value="Shirt">Shirt</SelectItem>
+                        <SelectItem value="Semiz"> Shemiz</SelectItem>
                         <SelectItem value="T shirt and jacket">
-                          C T shirt and jacket
+                 T shirt and jacket
                         </SelectItem>
                         <SelectItem value="Shirt only with key">
-                          D Shirt only with key
+                    Shirt only with key
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Type of slive</Label>
+                    <Label>Type of Sleeve </Label>
                     <Select
                       value={formData.maleSliveType}
                       onValueChange={(value) =>
@@ -592,8 +592,8 @@ newIndividualData.append("notes", formData.notes);
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Short">A Short</SelectItem>
-                        <SelectItem value="Long">B Long</SelectItem>
+                        <SelectItem value="Short"> Short</SelectItem>
+                        <SelectItem value="Long"> Long</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -609,8 +609,8 @@ newIndividualData.append("notes", formData.notes);
                         <SelectValue placeholder="Select option" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Yes">A Yes</SelectItem>
-                        <SelectItem value="No">B No</SelectItem>
+                        <SelectItem value="Yes"> Yes</SelectItem>
+                        <SelectItem value="No"> No</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -619,7 +619,7 @@ newIndividualData.append("notes", formData.notes);
             </div>
             <div className="border-t border-border pt-6 space-y-6">
               <div className="space-y-2">
-                <Label>Upload 'Tilef' Image</Label>
+                <Label>Upload 'ጥልፍ' Image</Label>
                 <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                   <input
                     type="file"
@@ -644,7 +644,7 @@ newIndividualData.append("notes", formData.notes);
                       <div className="space-y-2">
                         <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
                         <p className="text-muted-foreground">
-                          Click to upload Tilef pattern
+                          Click to upload ጥልፍ  pattern
                         </p>
                       </div>
                     )}

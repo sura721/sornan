@@ -371,7 +371,7 @@ const updateFamily = async (family: Family, tilefFile: File | null) => {
     // Send full objects for existing members; only strip temporary ids from new ones
     const memberIdsForUpdate = family.memberIds.map((member) => {
       if (typeof member === 'string') return member;
-      const obj: any = { ...(member as any) };
+      const obj: Partial<Individual> = { ...(member as Partial<Individual>) };
       if (obj._id && /^mock_mem_/.test(obj._id)) {
         delete obj._id;
         // mark as new family member and align required fields

@@ -296,20 +296,20 @@ export const updateUserProfile = async (req: IAuthRequest, res: Response) => {
 
 
 export const getUserProfile = async (req: IAuthRequest, res: Response) => {
- 
   try {
-    const user = await User.findById(req.user?.id).select('-password');
-
-    if (user) {
-      res.json({
-        _id: user.id,
-        username: user.username,
-      });
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    // Stateless profile: return the decoded JWT claims attached by auth middleware.
+    // This avoids a DB lookup on every profile call and keeps requests fast.
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized' });
     }
+
+    // Ensure we return the same shape the frontend expects
+    return res.json({
+      _id: req.user.id,
+      username: req.user.username,
+    });
   } catch (error) {
-    console.error(error);
+    console.error('Failed to return profile:', error);
     res.status(500).send('Server Error');
   }
 };

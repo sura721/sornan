@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useEffect } from 'react';
 
 interface PaymentDetailsFormProps {
   paymentTotal: string;
@@ -23,6 +24,29 @@ export const PaymentDetailsForm = ({
   secondHalfPaid, setSecondHalfPaid,
   secondHalfAmount, setSecondHalfAmount,
 }: PaymentDetailsFormProps) => {
+  // When total or first half changes, auto-calc the second half
+  useEffect(() => {
+    // If both fields are empty, keep second half empty
+    if (!paymentTotal && !firstHalfAmount) {
+      setSecondHalfAmount('');
+      return;
+    }
+
+    const totalNum = parseFloat(paymentTotal as unknown as string);
+    const firstNum = parseFloat(firstHalfAmount as unknown as string);
+
+    const t = isNaN(totalNum) ? 0 : totalNum;
+    const f = isNaN(firstNum) ? 0 : firstNum;
+
+    const second = t - f;
+
+    // If result is negative, clamp to 0
+    const secondVal = second <= 0 ? 0 : second;
+
+    // Keep integer if inputs are integers, otherwise show up to 2 decimals
+    const formatted = Number.isInteger(secondVal) ? String(secondVal) : String(Number(secondVal.toFixed(2)));
+    setSecondHalfAmount(formatted);
+  }, [paymentTotal, firstHalfAmount, setSecondHalfAmount]);
   return (
     <Card className="shadow-card border-0">
       <CardHeader>

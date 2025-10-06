@@ -12,7 +12,7 @@ cloudinary.config({
 
 // Create a new storage engine for Multer
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary: cloudinary, 
   params: {
     folder: 'keafa_tilef_images', // The name of the folder in Cloudinary where images will be stored
     allowedFormats: ['jpeg', 'png', 'jpg'],

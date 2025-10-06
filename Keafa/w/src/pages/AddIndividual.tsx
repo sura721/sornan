@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,35 @@ const AddIndividual = () => {
 
   const [deliveryDate, setDeliveryDate] = useState<Date>();
   const [tilefFile, setTilefFile] = useState<File | null>(null);
+
+  // Auto-calc second half amount whenever total or first half changes
+  useEffect(() => {
+    const totalRaw = formData.total;
+    const firstRaw = formData.firstHalfAmount;
+
+    if (!totalRaw && !firstRaw) {
+      // keep it empty when nothing entered
+      if (formData.secondHalfAmount !== "") {
+        setFormData(prev => ({ ...prev, secondHalfAmount: "" }));
+      }
+      return;
+    }
+
+    const totalNum = parseFloat(String(totalRaw));
+    const firstNum = parseFloat(String(firstRaw));
+
+    const t = isNaN(totalNum) ? 0 : totalNum;
+    const f = isNaN(firstNum) ? 0 : firstNum;
+
+    let second = t - f;
+    if (second <= 0) second = 0;
+
+    const formatted = Number.isInteger(second) ? String(second) : String(Number(second.toFixed(2)));
+
+    if (formData.secondHalfAmount !== formatted) {
+      setFormData(prev => ({ ...prev, secondHalfAmount: formatted }));
+    }
+  }, [formData.total, formData.firstHalfAmount, formData.secondHalfAmount]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

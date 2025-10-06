@@ -32,7 +32,9 @@ export function AppSidebar() {
     <Sidebar className="w-64" collapsible="icon">
       <SidebarContent className="bg-card border-r flex flex-col">
         <div className="flex-grow">
-      <img src="\logo2.png" alt="" />
+    <Link to={'/'} >
+      <img src="\logo2.png" alt="keafa logo" />
+    </Link>
 
           <SidebarGroup>
             <SidebarGroupLabel>Navigation</SidebarGroupLabel>

@@ -529,6 +529,14 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                         {clothDetails.rist && (
                           <DetailRow label="Wrist" value={clothDetails.rist} />
                         )}
+                         <DetailRow label="Sleeve" value={clothDetails.sleeve} /> {/* <-- HERE IT IS! */}
+
+                        {clothDetails.sleeve && (
+                              <DetailRow
+                                label="Sleeve"
+                                value={clothDetails.sleeve}
+                              />
+                            )}
                         {order.sex === "Female" && (
                           <>
                             {clothDetails.dressLength && (
@@ -994,7 +1002,14 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                                 label="Wrist"
                                 value={clothDetails.rist}
                               />
+                              
                             )}
+                            {clothDetails.sleeve && (
+                          <DetailRow
+                            label="Sleeve"
+                            value={clothDetails.sleeve}
+                          />
+                        )}
                             {selectedMember.sex === "Female" && (
                               <>
                                 {clothDetails.dressLength && (

@@ -34,6 +34,7 @@ const AddIndividual = () => {
     lastName: "",
     primaryPhone: "",
     secondaryPhone: "",
+    
     sex: "",
     age: "",
     telegramUsername: "",
@@ -60,7 +61,8 @@ const AddIndividual = () => {
     maleSliveType: "",
     netela: "",
     colorCodes: "",
-    notes:""
+    notes:"",
+    sleeve:" "
   });
 
   const [deliveryDate, setDeliveryDate] = useState<Date>();
@@ -154,6 +156,7 @@ const AddIndividual = () => {
     newIndividualData.append("clothDetails[sholder]", formData.sholder);
     newIndividualData.append("clothDetails[wegeb]", formData.wegeb);
     newIndividualData.append("clothDetails[rist]", formData.rist);
+    newIndividualData.append("clothDetails[sleeve]", formData.sleeve); 
 newIndividualData.append("notes", formData.notes);
 
     // Gender-specific Cloth Details
@@ -455,6 +458,18 @@ newIndividualData.append("notes", formData.notes);
                   }
                 />
               </div>
+
+               <div className="space-y-2">
+        <Label htmlFor="sleeve">Sleeve</Label>
+        <Input
+            id="sleeve"
+            type="text"
+            value={formData.sleeve}
+            onChange={(e) =>
+                setFormData({ ...formData, sleeve: e.target.value })
+            }
+        />
+    </div>
               {formData.sex === "Female" && (
                 <>
                   {" "}
@@ -541,6 +556,19 @@ newIndividualData.append("notes", formData.notes);
                       </SelectContent>
                     </Select>
                   </div>
+
+<div className="space-y-2">
+                    <Label htmlFor="overBreast">Sleeve</Label>
+                    <Input
+                      id="overBreast"
+                  type="text"
+                      value={formData.sleeve}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sleeve: e.target.value })
+                      }
+                    />
+                  </div>
+
                   <div className="space-y-2">
                     <Label>Waist type</Label>
                     <Select

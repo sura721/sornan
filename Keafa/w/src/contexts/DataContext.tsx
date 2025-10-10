@@ -48,6 +48,7 @@ export interface Individual {
     maleClothType?: string;
     maleSliveType?: string;
     netela?: 'Yes' | 'No';
+    sleeve?:string
   };
   payment?: {
     total?: number;
@@ -56,6 +57,7 @@ export interface Individual {
   };
   deliveryDate?: string;
   notes?: string;
+  
 }
 
 interface UpdateUserPayload {

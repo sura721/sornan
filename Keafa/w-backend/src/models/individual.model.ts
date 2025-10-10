@@ -20,7 +20,7 @@ const ClothDetailsSchema = new Schema({
   shirtLength: { type: String, required: false },
   sholder: { type: String, required: false },
   wegeb: { type: String, required: false },
-   
+    sleeve: { type: String }, 
   rist: { type: String, required: false },
   // Female-specific measurements
   dressLength: { type: String, required: false },

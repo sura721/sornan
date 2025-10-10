@@ -408,6 +408,7 @@ const FamilyOrders = () => {
                           />
                           <DetailRow label="Waist" value={clothDetails.wegeb} />
                           <DetailRow label="Wrist" value={clothDetails.rist} />
+                         <DetailRow label="Sleeve" value={clothDetails.sleeve} /> {/* <-- HERE IT IS! */}
 
                           {selectedMember.sex === "Female" && (
                             <>

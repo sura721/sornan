@@ -35,8 +35,7 @@ export const getIndividualById = async (req: Request, res: Response) => {
   }
 };
 
- 
-export const createIndividual = async (req: Request, res: Response) => {
+ export const createIndividual = async (req: Request, res: Response) => {
  
   try {
     const { body, file } = req;
@@ -60,27 +59,28 @@ export const createIndividual = async (req: Request, res: Response) => {
         instagram: body.socials.instagram || undefined,
       },
       clothDetails: {
-    colors: body.clothDetails.colors ? body.clothDetails.colors.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
-    tilefImageUrl: file ? file.path : undefined,
-    
-     shirtLength: body.clothDetails.shirtLength || undefined,
-    sholder: body.clothDetails.sholder || undefined,
-    wegeb: body.clothDetails.wegeb || undefined,
-    rist: body.clothDetails.rist || undefined,
-    dressLength: body.clothDetails.dressLength || undefined,
-    sliveLength: body.clothDetails.sliveLength || undefined,
-    breast: body.clothDetails.breast || undefined,
-    overBreast: body.clothDetails.overBreast || undefined,
-    underBreast: body.clothDetails.underBreast || undefined,
-    deret: body.clothDetails.deret || undefined,
-    anget: body.clothDetails.anget || undefined,
-     
-    femaleSliveType: body.clothDetails.femaleSliveType || undefined,
-    femaleWegebType: body.clothDetails.femaleWegebType || undefined,
-    maleClothType: body.clothDetails.maleClothType || undefined,
-    maleSliveType: body.clothDetails.maleSliveType || undefined,
-    netela: body.clothDetails.netela || undefined,
-},
+        colors: body.clothDetails.colors ? body.clothDetails.colors.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+        tilefImageUrl: file ? file.path : undefined,
+        
+        shirtLength: body.clothDetails.shirtLength || undefined,
+        sholder: body.clothDetails.sholder || undefined,
+        wegeb: body.clothDetails.wegeb || undefined,
+        rist: body.clothDetails.rist || undefined,
+        sleeve: body.clothDetails.sleeve || undefined, // <-- Added line
+        dressLength: body.clothDetails.dressLength || undefined,
+        sliveLength: body.clothDetails.sliveLength || undefined,
+        breast: body.clothDetails.breast || undefined,
+        overBreast: body.clothDetails.overBreast || undefined,
+        underBreast: body.clothDetails.underBreast || undefined,
+        deret: body.clothDetails.deret || undefined,
+        anget: body.clothDetails.anget || undefined,
+        
+        femaleSliveType: body.clothDetails.femaleSliveType || undefined,
+        femaleWegebType: body.clothDetails.femaleWegebType || undefined,
+        maleClothType: body.clothDetails.maleClothType || undefined,
+        maleSliveType: body.clothDetails.maleSliveType || undefined,
+        netela: body.clothDetails.netela || undefined,
+      },
       payment: {
         total: body.payment.total ? parseFloat(body.payment.total) : undefined,
         firstHalf: {
@@ -112,7 +112,6 @@ export const createIndividual = async (req: Request, res: Response) => {
     res.status(500).send('Server Error');
   }
 };
- 
 
 export const updateIndividual = async (req: Request, res: Response) => {
   try {

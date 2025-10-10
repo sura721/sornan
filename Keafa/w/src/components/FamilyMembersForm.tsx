@@ -37,6 +37,7 @@ export type MemberFormState = {
   sholder: string;
   wegeb: string;
   rist: string;
+  sleeve:string;
   dressLength: string;
   sliveLength: string;
   breast: string;
@@ -69,6 +70,7 @@ const initialMemberFormState: MemberFormState = {
   rist: "",
   dressLength: "",
   sliveLength: "",
+  sleeve:" ",
   breast: "",
   overBreast: "",
   underBreast: "",
@@ -118,18 +120,15 @@ export const FamilyMembersForm = ({
       firstName: memberFormData.firstName,
       lastName: memberFormData.lastName,
       sex: memberFormData.sex as "Male" | "Female",
-      // CORRECT: `age` is a Number in the schema, so parseInt is correct.
+ 
       age: memberFormData.age ? parseInt(memberFormData.age, 10) : undefined,
       clothDetails: {
-        colors: [], // Assuming this is populated elsewhere or is intentionally empty
-        
-        // CORRECTED: These are all Strings in the schema. Do not parse them.
-        // Use `|| undefined` to avoid sending empty strings.
+        colors: [], 
         shirtLength: memberFormData.shirtLength || undefined,
         sholder: memberFormData.sholder || undefined,
         wegeb: memberFormData.wegeb || undefined,
         rist: memberFormData.rist || undefined,
-
+        sleeve: memberFormData.sleeve || undefined,
         // Female Measurements (as Strings)
         dressLength: memberFormData.sex === "Female" ? (memberFormData.dressLength || undefined) : undefined,
         sliveLength: memberFormData.sex === "Female" ? (memberFormData.sliveLength || undefined) : undefined,

@@ -131,6 +131,16 @@ export const MemberForm = ({
                   onChange={(e) => handleInputChange("rist", e.target.value)}
                 />
               </div>
+                  <div className="space-y-2">
+        <Label>Sleeve</Label>
+        <Input
+          type="text"
+          value={memberFormData.sleeve}
+          onChange={(e) =>
+            handleInputChange("sleeve", e.target.value)
+          }
+        />
+      </div>
 
               {/* FEMALE SPECIFIC FIELDS */}
               {memberFormData.sex === "Female" && (

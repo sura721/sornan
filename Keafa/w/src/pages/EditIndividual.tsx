@@ -36,6 +36,7 @@ const EditIndividual = () => {
     secondaryPhone: "",
     sex: "",
     age: "",
+    sleeve: " ",
     telegramUsername: "",
     instagramUsername: "",
     total: "",
@@ -95,8 +96,8 @@ const EditIndividual = () => {
           rist: individualData.clothDetails.rist?.toString() || "",
           dressLength:
             individualData.clothDetails.dressLength?.toString() || "",
-          sliveLength:
-            individualData.clothDetails.sliveLength?.toString() || "",
+          sliveLength:individualData.clothDetails.sliveLength?.toString() || "",
+           sleeve: individualData.clothDetails.sleeve?.toString() || "",  
           breast: individualData.clothDetails.breast?.toString() || "",
           overBreast: individualData.clothDetails.overBreast?.toString() || "",
           underBreast:
@@ -159,6 +160,7 @@ const EditIndividual = () => {
     updatedData.append("clothDetails[sholder]", formData.sholder);
     updatedData.append("clothDetails[wegeb]", formData.wegeb);
     updatedData.append("clothDetails[rist]", formData.rist);
+    updatedData.append("clothDetails[sleeve]", formData.sleeve);
 
     if (formData.sex === "Female") {
       updatedData.append("clothDetails[dressLength]", formData.dressLength);
@@ -453,6 +455,17 @@ const EditIndividual = () => {
                   }
                 />
               </div>
+              <div className="space-y-2">
+            <Label htmlFor="sleeve">Sleeve</Label>
+            <Input
+              id="sleeve"
+              type="text"
+              value={formData.sleeve}
+              onChange={(e) =>
+                setFormData({ ...formData, sleeve: e.target.value })
+              }
+            />
+          </div>
               {formData.sex === "Female" && (
                 <>
                   {" "}

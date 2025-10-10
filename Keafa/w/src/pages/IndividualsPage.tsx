@@ -387,6 +387,11 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                         )}
                         {clothDetails.rist && (
                           <DetailRow label="Wrist" value={clothDetails.rist} />
+                          
+                        )}
+                         {clothDetails.sleeve && (
+                          <DetailRow label="sleeve" value={clothDetails.sleeve} />
+                          
                         )}
                         {order.sex === "Female" && (
                           <>

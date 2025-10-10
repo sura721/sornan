@@ -32,6 +32,7 @@ const initialMemberFormState = {
   sholder: "",
   wegeb: "",
   rist: "",
+  sleeve:" ",
   dressLength: "",
   sliveLength: "",
   breast: "",
@@ -150,6 +151,7 @@ const handleFamilyChange = (
           paymentFirstHalfPaid: member.payment?.firstHalf.paid || false,
           paymentFirstHalfAmount:
             member.payment?.firstHalf.amount?.toString() || "",
+                    sleeve: member.clothDetails.sleeve?.toString() || "", 
           paymentSecondHalfPaid: member.payment?.secondHalf.paid || false,
           paymentSecondHalfAmount:
             member.payment?.secondHalf.amount?.toString() || "",
@@ -184,7 +186,7 @@ const handleFamilyChange = (
             sholder: memberFormData.sholder || undefined,
             wegeb: memberFormData.wegeb || undefined,
             rist: memberFormData.rist || undefined,
-            
+                sleeve: memberFormData.sleeve || undefined, 
             dressLength: memberFormData.dressLength || undefined,
             sliveLength: memberFormData.sliveLength || undefined,
             breast: memberFormData.breast || undefined,
@@ -730,6 +732,19 @@ const handleFamilyChange = (
                             }
                           />
                         </div>
+                         <div className="space-y-2">
+            <Label>Sleeve</Label>
+            <Input
+              type="text"
+              value={memberFormData.sleeve}
+              onChange={(e) =>
+                setMemberFormData({
+                  ...memberFormData,
+                  sleeve: e.target.value,
+                })
+              }
+            />
+          </div>
                         {memberFormData.sex === "Female" && (
                           <>
                             <div className="space-y-2">

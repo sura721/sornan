@@ -440,6 +440,10 @@ const FamilyOrders = () => {
                                 label="Waist Type"
                                 value={clothDetails.femaleWegebType}
                               />
+                              <DetailRow
+                                label="sleeve"
+                                value={clothDetails.sleeve}
+                              />
                             </>
                           )}
 

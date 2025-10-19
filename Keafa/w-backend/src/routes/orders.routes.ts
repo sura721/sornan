@@ -28,8 +28,9 @@ router.post('/individuals',authMiddleware, upload.array('tilefImages', 4), creat
 router.get('/individuals/:id', authMiddleware, getIndividualById);
 
  
-router.put('/individuals/:id', authMiddleware, upload.single('tilefImage'), updateIndividual);
-
+// router.put('/individuals/:id', authMiddleware, upload.single('tilefImage'), updateIndividual);
+// AFTER (The Fix)
+router.put('/individuals/:id',authMiddleware, upload.array('tilefImages', 4), updateIndividual);
  
 router.delete('/individuals/:id', authMiddleware, deleteIndividual);
 

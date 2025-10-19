@@ -107,10 +107,12 @@ export const createIndividual = async (req: Request, res: Response) => {
 }
 export const updateIndividual = async (req: Request, res: Response) => {
   try {
+    const { body, files } = req as { body: any; files: Express.Multer.File[] };
     const {
-      firstName, lastName, sex, age, deliveryDate,
-      phoneNumbers, socials, clothDetails, payment
-    } = req.body;
+      firstName, lastName, sex, age, deliveryDate, notes,
+      phoneNumbers, socials, clothDetails, payment,
+      existingTilefUrls
+    } = body;
 
     const updateData: { [key: string]: any } = {};
 
@@ -120,59 +122,72 @@ export const updateIndividual = async (req: Request, res: Response) => {
     if (sex) updateData.sex = sex;
     if (age) updateData.age = age;
     if (deliveryDate) updateData.deliveryDate = deliveryDate;
+    if (notes) updateData.notes = notes;
 
-    // --- 2. Handle Nested "phoneNumbers" Object ---
+    // --- 2. Handle Nested Objects (Phone, Socials, Payment) ---
     if (phoneNumbers) {
-      if (phoneNumbers.primary) updateData['phoneNumbers.primary'] = phoneNumbers.primary;
-      if (phoneNumbers.secondary) updateData['phoneNumbers.secondary'] = phoneNumbers.secondary;
+      updateData['phoneNumbers.primary'] = phoneNumbers.primary || "";
+      updateData['phoneNumbers.secondary'] = phoneNumbers.secondary || "";
     }
-    
-    // --- 3. Handle Nested "socials" Object --- (This will fix your Telegram issue)
     if (socials) {
-      if (socials.telegram) updateData['socials.telegram'] = socials.telegram;
-      if (socials.instagram) updateData['socials.instagram'] = socials.instagram;
+      updateData['socials.telegram'] = socials.telegram || "";
+      updateData['socials.instagram'] = socials.instagram || "";
     }
-
-    // --- 4. Handle Nested "clothDetails" Object ---
-    if (clothDetails) {
-      // Handle all string/number fields
-      for (const key of Object.keys(clothDetails)) {
-        if (key !== 'colors' && clothDetails[key]) {
-          updateData[`clothDetails.${key}`] = clothDetails[key];
-        }
-      }
-      // Handle the 'colors' array specifically
-      if (clothDetails.colors && typeof clothDetails.colors === 'string') {
-        updateData['clothDetails.colors'] = clothDetails.colors.split(',').map((s: string) => s.trim());
-      }
-    }
-    
-    // --- 5. Handle Nested "payment" Object ---
     if (payment) {
-      if (payment.total) updateData['payment.total'] = payment.total;
+      if (payment.total) updateData['payment.total'] = parseFloat(payment.total);
       if (payment.firstHalf) {
-        updateData['payment.firstHalf.paid'] = payment.firstHalf.paid === 'true';
-        if (payment.firstHalf.amount) updateData['payment.firstHalf.amount'] = payment.firstHalf.amount;
+        updateData['payment.firstHalf.paid'] = String(payment.firstHalf.paid) === 'true';
+        if (payment.firstHalf.amount) updateData['payment.firstHalf.amount'] = parseFloat(payment.firstHalf.amount);
       }
       if (payment.secondHalf) {
-        updateData['payment.secondHalf.paid'] = payment.secondHalf.paid === 'true';
-        if (payment.secondHalf.amount) updateData['payment.secondHalf.amount'] = payment.secondHalf.amount;
+        updateData['payment.secondHalf.paid'] = String(payment.secondHalf.paid) === 'true';
+        if (payment.secondHalf.amount) updateData['payment.secondHalf.amount'] = parseFloat(payment.secondHalf.amount);
       }
     }
 
-    // --- 6. Handle File Upload ---
-    // This overrides any URL from the form if a new file is uploaded.
-    if (req.file) {
-      updateData['clothDetails.tilefImageUrl'] = req.file.path;
-    }
+    // ===================================================================
+    // MODIFICATION: Smarter handling of clothDetails to avoid enum errors
+    // ===================================================================
+    if (clothDetails) {
+      // A) Handle regular string/number fields that can be empty
+      const simpleFields = ['shirtLength', 'sholder', 'wegeb', 'rist', 'sleeve', 'dressLength', 'sliveLength', 'breast', 'overBreast', 'underBreast', 'deret', 'anget'];
+      simpleFields.forEach(key => {
+        // Only set the field if it's actually sent from the form
+        if (clothDetails[key] !== undefined) {
+          updateData[`clothDetails.${key}`] = clothDetails[key];
+        }
+      });
 
-    // For debugging: check the final flattened object
-    console.log('Final Data for $set:', updateData);
+      // B) Handle enum fields: ONLY set them if they have a valid, non-empty value
+      const enumFields = ['femaleSliveType', 'femaleWegebType', 'maleClothType', 'maleSliveType', 'netela'];
+      enumFields.forEach(key => {
+        if (clothDetails[key]) { // This checks for non-empty strings
+          updateData[`clothDetails.${key}`] = clothDetails[key];
+        }
+      });
+
+      // C) Handle colors array
+      if (clothDetails.colors && typeof clothDetails.colors === 'string') {
+        updateData['clothDetails.colors'] = clothDetails.colors.split(',').map((s: string) => s.trim()).filter(Boolean);
+      }
+    }
+    // ===================================================================
+
+    // --- Handle Multiple Images ---
+    let finalImageUrls = existingTilefUrls ? JSON.parse(existingTilefUrls) : [];
+    if (files && files.length > 0) {
+      const newImageUrls = files.map(f => f.path);
+      finalImageUrls = [...finalImageUrls, ...newImageUrls];
+    }
+    updateData['clothDetails.tilefImageUrls'] = finalImageUrls;
+    
+    // --- Final Database Query ---
+    const unsetData: { [key: string]: any } = { 'clothDetails.tilefImageUrl': '' };
 
     const individual = await Individual.findByIdAndUpdate(
       req.params.id,
-      { $set: updateData },
-      { new: true, runValidators: true, omitUndefined: true } // omitUndefined is a good practice
+      { $set: updateData, $unset: unsetData },
+      { new: true, runValidators: true, omitUndefined: true }
     );
 
     if (!individual) {

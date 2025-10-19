@@ -62,12 +62,12 @@ const EditIndividual = () => {
     netela: "",
     colorCodes: "",
   });
+const [newTilefFiles, setNewTilefFiles] = useState<(File | null)[]>(Array(4).fill(null));
 
   const [deliveryDate, setDeliveryDate] = useState<Date>();
   const [tilefFile, setTilefFile] = useState<File | null>(null);
-  const [existingTilefUrl, setExistingTilefUrl] = useState<string | undefined>(
-    undefined
-  );
+ const [existingTilefUrls, setExistingTilefUrls] = useState<string[]>([]);
+
 
   useEffect(() => {
     if (id) {
@@ -111,8 +111,7 @@ const EditIndividual = () => {
           netela: individualData.clothDetails.netela || "",
           colorCodes: (individualData.clothDetails.colors || []).join(", "),
         });
-        setExistingTilefUrl(individualData.clothDetails.tilefImageUrl);
-        if (individualData.deliveryDate) {
+setExistingTilefUrls(individualData.clothDetails.tilefImageUrls || []);        if (individualData.deliveryDate) {
           setDeliveryDate(new Date(individualData.deliveryDate));
         }
       } else {
@@ -126,18 +125,25 @@ const EditIndividual = () => {
     }
   }, [id, getIndividual, navigate]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setTilefFile(file);
-      setExistingTilefUrl(undefined); // Clear existing image if new one is selected
-    }
-  };
+const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    const newFiles = [...newTilefFiles];
+    newFiles[index] = file;
+    setNewTilefFiles(newFiles);
+  }
+};
 
-  const handleRemoveImage = () => {
-    setTilefFile(null);
-    setExistingTilefUrl(undefined);
-  };
+// Handles removing an EXISTING image (by its URL)
+const handleRemoveExistingImage = (urlToRemove: string) => {
+  setExistingTilefUrls(existingTilefUrls.filter(url => url !== urlToRemove));
+};
+const handleRemoveNewImage = (index: number) => {
+  const newFiles = [...newTilefFiles];
+  newFiles[index] = null;
+  setNewTilefFiles(newFiles);
+};
+
  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,11 +212,15 @@ const EditIndividual = () => {
       );
     }
 
-    if (tilefFile) {
-      updatedData.append("tilefImage", tilefFile);
-    } else if (existingTilefUrl) {
-      updatedData.append("clothDetails[tilefImageUrl]", existingTilefUrl);
-    }
+   // 1. Append the list of existing URLs that were NOT deleted
+updatedData.append('existingTilefUrls', JSON.stringify(existingTilefUrls));
+
+// 2. Append any NEW files that have been selected for upload
+newTilefFiles.forEach(file => {
+  if (file) {
+    updatedData.append('tilefImages', file);
+  }
+});
 
     console.log(
       "Data being sent to backend:",
@@ -657,68 +667,73 @@ const EditIndividual = () => {
                 </>
               )}
             </div>
-            <div className="border-t border-border pt-6 space-y-6">
-              <div className="space-y-2">
-                <Label>Upload 'ጥልፍ' Image</Label>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    id="tilef-upload"
-                  />
-                  <label htmlFor="tilef-upload" className="cursor-pointer">
-                    {existingTilefUrl || tilefFile ? (
-                      <>
-                        {" "}
-                        {existingTilefUrl && !tilefFile && (
-                          <img
-                            src={getImageUrl(existingTilefUrl)}
-                            alt="Existing Tilef"
-                            className="w-24 h-24 object-cover rounded-lg mx-auto"
-                          />
-                        )}{" "}
-                        {tilefFile && (
-                          <img
-                            src={URL.createObjectURL(tilefFile)}
-                            alt="Tilef Preview"
-                            className="w-24 h-24 object-cover rounded-lg mx-auto"
-                          />
-                        )}{" "}
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-2 right-2 w-6 h-6"
-                          onClick={handleRemoveImage}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </>
-                    ) : (
-                      <div className="space-y-2">
-                        <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
-                        <p className="text-muted-foreground">
-                          Click to upload new Tilef pattern
-                        </p>
-                      </div>
-                    )}
-                  </label>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="color-codes">Colors</Label>
-                <Input
-                  id="color-codes"
-                  placeholder="Enter color codes, separated by commas (e.g. 15, 66, 76)"
-                  value={formData.colorCodes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, colorCodes: e.target.value })
-                  }
+           <div className="space-y-2">
+  <Label>Tilef Images</Label>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {/* Render existing images first */}
+    {existingTilefUrls.map((url, index) => (
+      <div key={url} className="relative">
+        <img
+          src={getImageUrl(url)}
+          alt={`Existing Tilef ${index + 1}`}
+          className="w-32 h-32 object-cover rounded-lg"
+        />
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          className="absolute top-1 right-1 h-6 w-6"
+          onClick={() => handleRemoveExistingImage(url)}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    ))}
+
+    {/* Render boxes for new uploads */}
+    {Array(4 - existingTilefUrls.length).fill(0).map((_, index) => {
+      const newFile = newTilefFiles[index];
+      return (
+        <div key={index} className="w-32 h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center text-center relative">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileUpload(e, index)}
+            className="hidden"
+            id={`tilef-upload-${index}`}
+          />
+          <label htmlFor={`tilef-upload-${index}`} className="cursor-pointer w-full h-full flex flex-col justify-center items-center">
+            {newFile ? (
+              <>
+                <img
+                  src={URL.createObjectURL(newFile)}
+                  alt={`New Preview ${index + 1}`}
+                  className="w-full h-full object-cover rounded-lg"
                 />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-1 right-1 h-6 w-6"
+                  onClick={() => handleRemoveNewImage(index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <div className="space-y-1">
+                <Upload className="w-6 h-6 text-muted-foreground mx-auto" />
+                <p className="text-muted-foreground text-xs">
+                  Add Image
+                </p>
               </div>
-            </div>
+            )}
+          </label>
+        </div>
+      );
+    })}
+  </div>
+</div>
           </CardContent>
         </Card>
         <Card className="shadow-card border-0">

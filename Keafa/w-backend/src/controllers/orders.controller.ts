@@ -35,10 +35,10 @@ export const getIndividualById = async (req: Request, res: Response) => {
   }
 };
 
- export const createIndividual = async (req: Request, res: Response) => {
- 
+export const createIndividual = async (req: Request, res: Response) => {
   try {
-    const { body, file } = req;
+    // MODIFICATION 1: Changed `file` to `files`
+    const { body, files } = req as { body: any; files: Express.Multer.File[] };
 
     const individualData = {
       firstName: body.firstName,
@@ -46,10 +46,7 @@ export const getIndividualById = async (req: Request, res: Response) => {
       sex: body.sex,
       age: body.age ? parseInt(body.age, 10) : undefined,
       deliveryDate: body.deliveryDate,
-
-      
       notes: body.notes || undefined,
- 
       phoneNumbers: {
         primary: body.phoneNumbers.primary,
         secondary: body.phoneNumbers.secondary || undefined,
@@ -60,13 +57,15 @@ export const getIndividualById = async (req: Request, res: Response) => {
       },
       clothDetails: {
         colors: body.clothDetails.colors ? body.clothDetails.colors.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
-        tilefImageUrl: file ? file.path : undefined,
         
+        // MODIFICATION 2: Changed `tilefImageUrl` logic to handle the array
+        tilefImageUrls: files && files.length > 0 ? files.map(f => f.path) : [],
+
         shirtLength: body.clothDetails.shirtLength || undefined,
         sholder: body.clothDetails.sholder || undefined,
         wegeb: body.clothDetails.wegeb || undefined,
         rist: body.clothDetails.rist || undefined,
-        sleeve: body.clothDetails.sleeve || undefined, // <-- Added line
+        sleeve: body.clothDetails.sleeve || undefined,
         dressLength: body.clothDetails.dressLength || undefined,
         sliveLength: body.clothDetails.sliveLength || undefined,
         breast: body.clothDetails.breast || undefined,
@@ -74,7 +73,6 @@ export const getIndividualById = async (req: Request, res: Response) => {
         underBreast: body.clothDetails.underBreast || undefined,
         deret: body.clothDetails.deret || undefined,
         anget: body.clothDetails.anget || undefined,
-        
         femaleSliveType: body.clothDetails.femaleSliveType || undefined,
         femaleWegebType: body.clothDetails.femaleWegebType || undefined,
         maleClothType: body.clothDetails.maleClothType || undefined,
@@ -94,11 +92,6 @@ export const getIndividualById = async (req: Request, res: Response) => {
       },
     };
 
-    // DEBUGGER #2: Log the final object before it's saved
-    console.log("--- Final Object for Database ---");
-    console.log(individualData);
-    console.log("---------------------------------");
-
     const newIndividual = new Individual(individualData);
     const savedIndividual = await newIndividual.save();
     res.status(201).json(savedIndividual);
@@ -111,8 +104,7 @@ export const getIndividualById = async (req: Request, res: Response) => {
     console.error("API call failed. Full error:", error);
     res.status(500).send('Server Error');
   }
-};
-
+}
 export const updateIndividual = async (req: Request, res: Response) => {
   try {
     const {

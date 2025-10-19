@@ -66,8 +66,7 @@ const AddIndividual = () => {
   });
 
   const [deliveryDate, setDeliveryDate] = useState<Date>();
-  const [tilefFile, setTilefFile] = useState<File | null>(null);
-
+const [tilefFiles, setTilefFiles] = useState<(File | null)[]>(Array(4).fill(null));
   // Auto-calc second half amount whenever total or first half changes
   useEffect(() => {
     const totalRaw = formData.total;
@@ -97,10 +96,14 @@ const AddIndividual = () => {
     }
   }, [formData.total, formData.firstHalfAmount, formData.secondHalfAmount]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setTilefFile(file);
-  };
+const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    const newFiles = [...tilefFiles]; // Create a copy of the array
+    newFiles[index] = file; // Update the file at the specific index
+    setTilefFiles(newFiles); // Set the new array as the state
+  }
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,9 +152,11 @@ const AddIndividual = () => {
         .filter((code) => code !== "")
         .join(",")
     );
-    if (tilefFile) {
-      newIndividualData.append("tilefImage", tilefFile);
-    }
+    tilefFiles.forEach(file => {
+  if (file) {
+    newIndividualData.append('tilefImages', file);
+  }
+});
     newIndividualData.append("clothDetails[shirtLength]", formData.shirtLength);
     newIndividualData.append("clothDetails[sholder]", formData.sholder);
     newIndividualData.append("clothDetails[wegeb]", formData.wegeb);
@@ -677,36 +682,40 @@ newIndividualData.append("notes", formData.notes);
             <div className="border-t border-border pt-6 space-y-6">
               <div className="space-y-2">
                 <Label>Upload 'ጥልፍ' Image</Label>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    id="tilef-upload"
-                  />
-                  <label htmlFor="tilef-upload" className="cursor-pointer">
-                    {tilefFile ? (
-                      <div className="space-y-2">
-                        <img
-                          src={URL.createObjectURL(tilefFile)}
-                          alt="Tilef Preview"
-                          className="w-24 h-24 object-cover rounded-lg mx-auto"
-                        />
-                        <p className="text-sm text-muted-foreground">
-                          {tilefFile.name}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
-                        <p className="text-muted-foreground">
-                          Click to upload ጥልፍ  pattern
-                        </p>
-                      </div>
-                    )}
-                  </label>
-                </div>
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+  {tilefFiles.map((file, index) => (
+    <div key={index} className="border-2 border-dashed border-border rounded-lg p-4 text-center flex items-center justify-center h-32">
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => handleFileUpload(e, index)}
+        className="hidden"
+        id={`tilef-upload-${index}`}
+      />
+      <label htmlFor={`tilef-upload-${index}`} className="cursor-pointer w-full h-full flex flex-col justify-center items-center">
+        {file ? (
+          <div className="space-y-2">
+            <img
+              src={URL.createObjectURL(file)}
+              alt={`Tilef Preview ${index + 1}`}
+              className="w-24 h-24 object-cover rounded-lg mx-auto"
+            />
+            <p className="text-sm text-muted-foreground truncate w-24">
+              {file.name}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
+            <p className="text-muted-foreground text-sm">
+              Upload Image
+            </p>
+          </div>
+        )}
+      </label>
+    </div>
+  ))}
+</div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="color-codes">Colors</Label>

@@ -31,7 +31,7 @@ export interface Individual {
   socials?: { telegram?: string; instagram?:string; };
   clothDetails: {
     colors: string[];
-    tilefImageUrl?: string;
+tilefImageUrls?: string[];
     shirtLength?: string;
     sholder?: string;
     wegeb?: string;

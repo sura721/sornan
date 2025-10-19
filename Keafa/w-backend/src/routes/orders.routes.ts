@@ -21,7 +21,8 @@ import upload from '../middleware/upload.middleware';
 router.get('/individuals', authMiddleware, getIndividuals);
 import { /*...,*/ updateFamilyAndMembers, /*...*/ } from '../controllers/orders.controller';
  
-router.post('/individuals', authMiddleware, upload.single('tilefImage'), createIndividual);
+// router.post('/individuals', authMiddleware, upload.single('tilefImage'), createIndividual);
+router.post('/individuals',authMiddleware, upload.array('tilefImages', 4), createIndividual);
 
   
 router.get('/individuals/:id', authMiddleware, getIndividualById);

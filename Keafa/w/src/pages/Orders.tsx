@@ -619,23 +619,23 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                         )}
                       </div>
                       <div className="mt-4 pt-4 border-t">
-                        {clothDetails.tilefImageUrl && (
-                          <DetailRow
-                            label="Tilef Image"
-                            value={
-                              <img
-                                src={getImageUrl(clothDetails.tilefImageUrl)}
-                                alt="Tilef Pattern"
-                                className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer"
-                                onClick={() =>
-                                  setFullScreenImageUrl(
-                                    getImageUrl(clothDetails.tilefImageUrl)!
-                                  )
-                                }
-                              />
-                            }
-                          />
-                        )}
+                        {/* --- NEW MULTI-IMAGE DISPLAY --- */}
+{clothDetails.tilefImageUrls && clothDetails.tilefImageUrls.length > 0 && (
+  <div className="py-2 px-3 flex flex-col space-y-2">
+    <p className="text-sm font-medium text-muted-foreground">Tilef Images</p>
+    <div className="flex flex-wrap gap-2 justify-start">
+      {clothDetails.tilefImageUrls.map((url, index) => (
+        <img
+          key={index}
+          src={getImageUrl(url)}
+          alt={`Tilef Pattern ${index + 1}`}
+          className="h-24 w-24 object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => setFullScreenImageUrl(getImageUrl(url)!)}
+        />
+      ))}
+    </div>
+  </div>
+)}
                         {clothDetails.colors &&
                           clothDetails.colors.length > 0 &&
                           clothDetails.colors[0] !== "" && (

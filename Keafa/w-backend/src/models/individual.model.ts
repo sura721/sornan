@@ -15,8 +15,7 @@ const SocialsSchema = new Schema({
 
 const ClothDetailsSchema = new Schema({
   colors: { type: [String], required: true },
-  tilefImageUrl: { type: String, required: false },
-  // Common measurements
+tilefImageUrls: [{ type: String, required: false }], // Note the []  // Common measurements
   shirtLength: { type: String, required: false },
   sholder: { type: String, required: false },
   wegeb: { type: String, required: false },
@@ -61,8 +60,7 @@ export interface IIndividual extends Document {
   socials?: { telegram?: string; instagram?: string };
   clothDetails: {
     colors: string[];
-    tilefImageUrl?: string;
-    shirtLength?: string;
+tilefImageUrls?: string[];    shirtLength?: string;
     sholder?: string;
     wegeb?: string;
     rist?: string;

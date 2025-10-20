@@ -65,17 +65,23 @@ const EditFamily = () => {
   const [activeMemberForm, setActiveMemberForm] = useState<string | null>(null); // "new" or member's ID
   const [memberFormData, setMemberFormData] = useState(initialMemberFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tilefFile, setTilefFile] = useState<File | null>(null);
-  const [existingTilefUrl, setExistingTilefUrl] = useState<string | undefined>(
-    undefined
-  );
+ const [newTilefFiles, setNewTilefFiles] = useState<(File | null)[]>(Array(4).fill(null));
+  const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(Array(4).fill(null));
 
   useEffect(() => {
     if (id) {
       const currentFamily = getFamily(id);
       if (currentFamily) {
         setFamilyData(currentFamily);
-        setExistingTilefUrl(currentFamily.tilefImageUrl);
+ if (currentFamily.tilefImageUrls) {
+  const previews = Array(4).fill(null);
+  currentFamily.tilefImageUrls.forEach((url, index) => {
+    if (index < 4) {
+      previews[index] = url;
+    }
+  });
+  setImagePreviews(previews);
+}
         if (!currentFamily.paymentMethod) {
         currentFamily.paymentMethod = 'family'; // Set a sensible default
       }
@@ -281,43 +287,112 @@ const handleFamilyChange = (
       });
     }
   };
-  const handleFamilySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!familyData) return;
+  // In EditFamily.tsx
 
-    setIsSubmitting(true);
-    try {
-      await updateFamily(familyData, tilefFile);
+const handleFamilySubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!familyData) return;
 
-      toast({
-        title: "Success",
-        description: "Family group updated successfully",
-      });
-      navigate("/orders");
-    } catch (error) {
-      toast({
-        title: "Update Failed",
-        description: "Could not save changes to the family.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  setIsSubmitting(true);
+  const updatedFamilyData = new FormData();
+
+  // 1. Append all the Family fields in the nested format
+  updatedFamilyData.append('familyName', familyData.familyName);
+  updatedFamilyData.append('deliveryDate', familyData.deliveryDate);
+  updatedFamilyData.append('paymentMethod', familyData.paymentMethod);
+  if (familyData.notes) {
+    updatedFamilyData.append('notes', familyData.notes);
+  }
+
+  // Nested objects
+  updatedFamilyData.append('phoneNumbers[primary]', familyData.phoneNumbers?.primary || '');
+  updatedFamilyData.append('phoneNumbers[secondary]', familyData.phoneNumbers?.secondary || '');
+  updatedFamilyData.append('socials[telegram]', familyData.socials?.telegram || '');
+  
+  // Arrays are sent as comma-separated strings
+  updatedFamilyData.append('colors', (familyData.colors || []).join(','));
+
+  // Nested payment object
+  if (familyData.payment) {
+    updatedFamilyData.append('payment[total]', familyData.payment.total?.toString() || '');
+    updatedFamilyData.append('payment[firstHalf][paid]', String(familyData.payment.firstHalf.paid));
+    updatedFamilyData.append('payment[firstHalf][amount]', familyData.payment.firstHalf.amount?.toString() || '');
+    updatedFamilyData.append('payment[secondHalf][paid]', String(familyData.payment.secondHalf.paid));
+    updatedFamilyData.append('payment[secondHalf][amount]', familyData.payment.secondHalf.amount?.toString() || '');
+  }
+
+  // CRITICAL: Append members as a JSON string.
+  // This is the one place where a stringified array is necessary for complex objects.
+  updatedFamilyData.append('memberIds', JSON.stringify(familyData.memberIds));
+
+  // 2. Handle the images exactly like in updateIndividual
+  const existingUrlsToKeep = imagePreviews.filter(url => url && !url.startsWith('blob:'));
+  updatedFamilyData.append('existingImageUrls', JSON.stringify(existingUrlsToKeep));
+
+  newTilefFiles.forEach(file => {
     if (file) {
-      setTilefFile(file);
-      setExistingTilefUrl(URL.createObjectURL(file));
+      updatedFamilyData.append('tilefImages', file);
     }
-  };
-  const handleRemoveImage = () => {
-    setTilefFile(null);
-    setExistingTilefUrl(undefined);
-        handleFamilyChange("tilefImageUrl", ""); // Also clear it from the data
+  });
 
-  };
+  // 3. Call the API
+  try {
+    // You'll need a new updateFamily function in your DataContext
+    await updateFamily(familyData._id, updatedFamilyData);
 
+    toast({
+      title: "Success",
+      description: "Family group updated successfully",
+    });
+    navigate("/orders");
+  } catch (error) {
+    toast({
+      title: "Update Failed",
+      description: "Could not save changes to the family.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    // Update the state for NEW files
+    const updatedNewFiles = [...newTilefFiles];
+    updatedNewFiles[index] = file;
+    setNewTilefFiles(updatedNewFiles);
+
+    // Update the UI preview state
+    const updatedPreviews = [...imagePreviews];
+    updatedPreviews[index] = URL.createObjectURL(file);
+    setImagePreviews(updatedPreviews);
+  }
+};
+
+const handleRemoveImage = (index: number) => {
+  // The URL of the image being removed (could be an existing URL or a temporary blob URL)
+  const urlToRemove = imagePreviews[index];
+
+  // Clear the preview for this slot
+  const updatedPreviews = [...imagePreviews];
+  updatedPreviews[index] = null;
+  setImagePreviews(updatedPreviews);
+  
+  // Clear any NEW file that was in that slot
+  const updatedNewFiles = [...newTilefFiles];
+  updatedNewFiles[index] = null;
+  setNewTilefFiles(updatedNewFiles);
+
+  // CRITICAL: If the removed image was an EXISTING one, remove its URL from the main familyData state.
+  // This tells the backend to delete the file from the server.
+  if (urlToRemove && familyData?.tilefImageUrls?.includes(urlToRemove)) {
+    handleFamilyChange(
+      "tilefImageUrls",
+      familyData.tilefImageUrls.filter(url => url !== urlToRemove)
+    );
+  }
+};
   if (!familyData)
     return <div className="text-center p-10">Loading family details...</div>;
 
@@ -379,50 +454,58 @@ const handleFamilyChange = (
                 }
               />
             </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label>Upload 'ጥልፍ' Image</Label>
-              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="tilef-upload"
-                />
-                <label htmlFor="tilef-upload" className="cursor-pointer">
-                  {existingTilefUrl || tilefFile ? (
-                    <>
-                      {existingTilefUrl && (
-                        <img
-                          src={getImageUrl(existingTilefUrl)}
-                          alt="Tilef Preview"
-                          className="w-24 h-24 object-cover rounded-lg mx-auto"
-                        />
-                      )}
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 w-6 h-6 z-10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveImage();
-                        }}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="space-y-2">
-                      <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
-                      <p className="text-muted-foreground">
-                        Click to upload new Tilef pattern
-                      </p>
-                    </div>
-                  )}
-                </label>
-              </div>
+          <div className="space-y-2 md:col-span-2">
+  <Label>Upload 'ጥልፍ' Images (up to 4)</Label>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {imagePreviews.map((previewUrl, index) => (
+      <div
+        key={index}
+        className="border-2 border-dashed border-border rounded-lg p-4 text-center aspect-square flex items-center justify-center relative"
+      >
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleImageSelect(e, index)}
+          className="hidden"
+          id={`tilef-upload-${index}`}
+        />
+        <label
+          htmlFor={`tilef-upload-${index}`}
+          className="cursor-pointer w-full h-full flex flex-col justify-center items-center"
+        >
+          {previewUrl ? (
+            <>
+              <img
+                src={getImageUrl(previewUrl)} // getImageUrl handles blob URLs and server paths
+                alt={`Preview ${index + 1}`}
+                className="w-full h-full object-cover rounded-lg"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleRemoveImage(index);
+                }}
+                className="absolute top-1 right-1 h-6 w-6"
+              >
+                <X size={16} />
+              </Button>
+            </>
+          ) : (
+            <div className="space-y-2">
+              <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
+              <p className="text-muted-foreground text-xs">
+                Image {index + 1}
+              </p>
             </div>
+          )}
+        </label>
+      </div>
+    ))}
+  </div>
+</div>
             <div className="space-y-2 md:col-span-2">
               <Label>Colors</Label>
               <Input

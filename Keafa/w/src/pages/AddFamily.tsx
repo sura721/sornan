@@ -39,7 +39,7 @@ const AddFamily = () => {
   const [primaryPhone, setPrimaryPhone] = useState("");
   const [secondaryPhone, setSecondaryPhone] = useState("");
   const [telegramUsername, setTelegramUsername] = useState("");
-  const [tilefFile, setTilefFile] = useState<File | null>(null);
+const [tilefFiles, setTilefFiles] = useState<(File | null)[]>(Array(4).fill(null));
   const [colorCodes, setColorCodes] = useState("");
 
   // NEW: State to manage the payment choice. Defaults to 'family' (Pay Once).
@@ -57,57 +57,75 @@ const AddFamily = () => {
   const [numberOfMembers, setNumberOfMembers] = useState<number>(0);
   const [members, setMembers] = useState<MemberData[]>([]);
 
-  const handleFamilySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!familyName || !primaryPhone || !deliveryDate) {
-      toast({ title: "Error", description: "Family Name, Primary Phone, and Delivery Date are required.", variant: "destructive" });
-      return;
+ const handleFamilySubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  // --- Validation checks (no changes here) ---
+  if (!familyName || !primaryPhone || !deliveryDate) {
+    toast({
+      title: "Error",
+      description: "Family Name, Primary Phone, and Delivery Date are required.",
+      variant: "destructive",
+    });
+    return;
+  }
+  if (members.length !== numberOfMembers || numberOfMembers === 0) {
+    toast({
+      title: "Error",
+      description: `Please add details for all ${numberOfMembers} family members.`,
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setIsSubmitting(true);
+  const formData = new FormData();
+
+  // --- Append standard family data (no changes here) ---
+  formData.append("familyName", familyName);
+  formData.append("phoneNumbers", JSON.stringify({ primary: primaryPhone, secondary: secondaryPhone }));
+  formData.append("socials", JSON.stringify({ telegram: telegramUsername }));
+  formData.append("colors", JSON.stringify(colorCodes.split(",").map((c) => c.trim()).filter(Boolean)));
+  formData.append("deliveryDate", deliveryDate.toISOString().split("T")[0]);
+  formData.append("notes", notes);
+  formData.append("paymentMethod", paymentMethod);
+
+  if (paymentMethod === 'family') {
+    formData.append("payment", JSON.stringify({
+      total: parseFloat(paymentTotal) || undefined,
+      firstHalf: { paid: firstHalfPaid, amount: parseFloat(firstHalfAmount) || undefined },
+      secondHalf: { paid: secondHalfPaid, amount: parseFloat(secondHalfAmount) || undefined },
+    }));
+  }
+  
+  formData.append("memberIds", JSON.stringify(members));
+
+  // --- THIS IS THE UPDATED SECTION ---
+  // Replace the single file logic with a loop for multiple files.
+  // We iterate over the `tilefFiles` state array.
+  tilefFiles.forEach((file) => {
+    // Check if a file exists in the slot before appending
+    if (file) {
+      // Append each file. The backend will receive an array of files under the key "tilefImages".
+      // Ensure your backend is configured to handle an array for this key.
+      formData.append("tilefImages", file);
     }
-    if (members.length !== numberOfMembers || numberOfMembers === 0) {
-      toast({ title: "Error", description: `Please add details for all ${numberOfMembers} family members.`, variant: "destructive" });
-      return;
-    }
+  });
+  // --- END OF UPDATED SECTION ---
 
-    setIsSubmitting(true);
-    const formData = new FormData();
+  console.log("Submitting family with data:", formData);
 
-    // Append standard family data
-    formData.append("familyName", familyName);
-    formData.append("phoneNumbers", JSON.stringify({ primary: primaryPhone, secondary: secondaryPhone }));
-    formData.append("socials", JSON.stringify({ telegram: telegramUsername }));
-    formData.append("colors", JSON.stringify(colorCodes.split(",").map((c) => c.trim()).filter(Boolean)));
-    formData.append("deliveryDate", deliveryDate.toISOString().split("T")[0]);
- formData.append("notes", notes);
-     formData.append("paymentMethod", paymentMethod); 
-    if (paymentMethod === 'family') {
-      formData.append("payment", JSON.stringify({
-        total: parseFloat(paymentTotal) || undefined,
-        firstHalf: { paid: firstHalfPaid, amount: parseFloat(firstHalfAmount) || undefined },
-        secondHalf: { paid: secondHalfPaid, amount: parseFloat(secondHalfAmount) || undefined },
-      }));
-    }
-    
-    // This is always sent. The 'members' array will either contain payment info or not,
-    // which is determined by the FamilyMembersForm component.
-    formData.append("memberIds", JSON.stringify(members));
-
-    if (tilefFile) {
-      formData.append("tilefImage", tilefFile);
-    }
-
-
-    console.log("Submitting family with data:",formData)
-    try {
-      await addFamily(formData);
-      toast({ title: "Success", description: "Family group created successfully" });
-      navigate("/orders");
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to create family group.", variant: "destructive" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
+  // --- API call and response handling (no changes here) ---
+  try {
+    await addFamily(formData);
+    toast({ title: "Success", description: "Family group created successfully" });
+    navigate("/orders");
+  } catch (error) {
+    toast({ title: "Error", description: "Failed to create family group.", variant: "destructive" });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
@@ -123,7 +141,7 @@ const AddFamily = () => {
           primaryPhone={primaryPhone} setPrimaryPhone={setPrimaryPhone}
           secondaryPhone={secondaryPhone} setSecondaryPhone={setSecondaryPhone}
           telegramUsername={telegramUsername} setTelegramUsername={setTelegramUsername}
-          tilefFile={tilefFile} setTilefFile={setTilefFile}
+          tilefFiles={tilefFiles} setTilefFiles={setTilefFiles}
           colorCodes={colorCodes} setColorCodes={setColorCodes}
           
         />

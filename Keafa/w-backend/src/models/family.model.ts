@@ -32,7 +32,7 @@ export interface IFamily extends Document {
   socials?: {
     telegram?: string;
   };
-  tilefImageUrl?: string;
+tilefImageUrls?: string[];
   colors: string[];
     payment?: {
     total?: number;
@@ -70,10 +70,10 @@ export interface IFamily extends Document {
       required: true,
       enum: ['family', 'member'],
     },
-    tilefImageUrl: {
-      type: String,
-      required: false,
-    },
+   tilefImageUrls: { // Renamed to plural
+  type: [String], // Changed to an array of strings
+  required: false,
+},
     colors: {
       type: [String],
       required: false,

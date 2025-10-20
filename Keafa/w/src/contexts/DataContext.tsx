@@ -73,7 +73,7 @@ export interface Family {
   memberIds: (string | Individual)[];
   phoneNumbers: { primary: string; secondary?: string; };
   socials?: { telegram?: string; };
-  tilefImageUrl?: string;
+  tilefImageUrls?: string[];
   colors: string[];
   paymentMethod: 'family' | 'member'
   payment: {
@@ -106,7 +106,8 @@ interface DataContextType {
    updateIndividual: (id: string, data: FormData) => Promise<void>;
   deleteIndividual: (id: string) => Promise<void>;
   addFamily: (familyData: FormData) => Promise<void>; 
-  updateFamily: (family: Family, tilefFile: File | null) => Promise<void>;  deleteFamily: (id: string) => Promise<void>;
+  updateFamily: (id: string, data: FormData) => Promise<void>;
+   deleteFamily: (id: string) => Promise<void>;
   getIndividual: (id: string) => Individual | undefined;
   getFamily: (id: string) => Family | undefined;
   notificationCount: number;
@@ -356,51 +357,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
   
- // The NEW and CORRECT function to paste
-const updateFamily = async (family: Family, tilefFile: File | null) => {
+const updateFamily = async (id: string, data: FormData) => {
   try {
-    const formData = new FormData();
-
-    // This part packages all your text data into the form
-    formData.append('familyName', family.familyName);
-    formData.append('phoneNumbers', JSON.stringify(family.phoneNumbers));
-    formData.append('socials', JSON.stringify(family.socials || {}));
-    formData.append('colors', JSON.stringify(family.colors || []));
-    if (family.payment) {
-      formData.append('payment', JSON.stringify(family.payment));
-    }
-    formData.append('deliveryDate', family.deliveryDate);
-    // Send full objects for existing members; only strip temporary ids from new ones
-    const memberIdsForUpdate = family.memberIds.map((member) => {
-      if (typeof member === 'string') return member;
-      const obj: Partial<Individual> = { ...(member as Partial<Individual>) };
-      if (obj._id && /^mock_mem_/.test(obj._id)) {
-        delete obj._id;
-        // mark as new family member and align required fields
-        obj.isFamilyMember = true;
-        if (!obj.deliveryDate && family.deliveryDate) {
-          obj.deliveryDate = family.deliveryDate;
-        }
-      }
-      return obj;
-    });
-    formData.append('memberIds', JSON.stringify(memberIdsForUpdate));
- formData.append('paymentMethod', family.paymentMethod);   
-    if (family.tilefImageUrl) {
-      formData.append('tilefImageUrl', family.tilefImageUrl);
-    }
+    // This function now correctly accepts the ID and the FormData object.
+    // It simply passes them along to the API service.
+    const updatedFamily = await updateFamilyApi(id, data);
     
-    // This is the image logic: if a new file exists, add it
-    if (tilefFile) {
-formData.append('tilefImage', tilefFile);    }
-
-    // This now calls the API with the ID and the FormData object
-    const updatedFamily = await updateFamilyApi(family._id, formData);
+    // Update the local state with the new data from the server.
     setFamilies(prev => prev.map(fam => (fam._id === updatedFamily._id ? updatedFamily : fam)));
 
   } catch (error) {
     toast({ title: "API Error", description: "Could not update family.", variant: "destructive" });
-    throw error;
+    throw error; // Re-throw the error so the component can catch it.
   }
 };
   const deleteFamily = async (id: string) => {

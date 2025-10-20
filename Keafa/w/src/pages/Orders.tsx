@@ -325,63 +325,51 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                             : "N/A"}
                         </p>
                         {/* --- COUNTDOWN LOGIC START --- */}
-                        {family.deliveryDate &&
-                          (() => {
-                            const delivery = toZonedTime(
-                              new Date(family.deliveryDate),
-                              "UTC"
-                            );
-                            const daysLeft = differenceInCalendarDays(
-                              delivery,
-                              today
-                            );
+ {family.deliveryDate && (() => {
+  const delivery = toZonedTime(new Date(family.deliveryDate), "UTC");
+  const daysLeft = differenceInCalendarDays(delivery, today);
+  const daysAgo = Math.abs(daysLeft);
 
-                            if (daysLeft < 0) {
-                              return (
-                                <span className="text-xs font-medium text-gray-500">
-                                  (Past Due)
-                                </span>
-                              );
-                            }
-                            if (daysLeft === 0) {
-                              return (
-                                <span className="text-xs font-bold text-green-600">
-                                  (Due Today)
-                                </span>
-                              );
-                            }
-                            if (daysLeft <= 3) {
-                              return (
-                                <span className="text-xs font-medium text-red-600">
-                                  (
-                                  <span className="text-lg font-bold">
-                                    {daysLeft}
-                                  </span>{" "}
-                                  {daysLeft === 1 ? "day" : "days"} left)
-                                </span>
-                              );
-                            }
-                            if (daysLeft <= 7) {
-                              return (
-                                <span className="font-medium text-yellow-600">
-                                  (
-                                  <span className="text-xl font-bold">
-                                    {daysLeft}
-                                  </span>{" "}
-                                  days left)
-                                </span>
-                              );
-                            }
-                            return (
-                              <span className="font-medium text-yellow-600">
-                                (
-                                <span className="text-xl font-bold">
-                                  {daysLeft}
-                                </span>{" "}
-                                days left)
-                              </span>
-                            );
-                          })()}
+  if (daysLeft < 0) {
+    return (
+      <span className="text-xs font-bold text-gray-500">
+        (<span className="text-lg font-bold">{daysAgo}</span> {daysAgo === 1 ? "day" : "days"} ago)
+      </span>
+    );
+  }
+
+  if (daysLeft === 0) {
+    return (
+      <span className="text-xs font-bold text-green-600">
+        (Due Today)
+      </span>
+    );
+  }
+
+  if (daysLeft <= 3) {
+    return (
+      <span className="text-xs font-medium text-red-600">
+        (<span className="text-lg font-bold">{daysLeft}</span>{" "}
+        {daysLeft === 1 ? "day" : "days"} left)
+      </span>
+    );
+  }
+
+  if (daysLeft <= 7) {
+    return (
+      <span className="font-medium text-yellow-600">
+        (<span className="text-xl font-bold">{daysLeft}</span> days left)
+      </span>
+    );
+  }
+
+  return (
+    <span className="font-medium text-gray-600">
+      (<span className="font-bold">{daysLeft}</span> days left)
+    </span>
+  );
+})()}
+
                         {/* --- COUNTDOWN LOGIC END --- */}
                       </div>
                     </div>
@@ -779,25 +767,23 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                       </DialogTitle>
                     </CardHeader>
                     <CardContent>
-                      <DetailRow
-                        label="Tilef Image"
-                        value={
-                          order.tilefImageUrl ? (
-                            <img
-                              src={getImageUrl(order.tilefImageUrl)}
-                              alt="Tilef"
-                              className="h-20 w-20 object-cover rounded-md ml-auto cursor-pointer"
-                              onClick={() =>
-                                setFullScreenImageUrl(
-                                  getImageUrl(order.tilefImageUrl!)
-                                )
-                              }
-                            />
-                          ) : (
-                            "No Image"
-                          )
-                        }
-                      />
+                 {/* --- UPDATED: Display Multiple Tilef Images --- */}
+{order.tilefImageUrls && order.tilefImageUrls.length > 0 && (
+  <div className="py-2 px-3 flex flex-col space-y-2 odd:bg-muted/50 rounded-md">
+    <p className="text-sm font-medium text-muted-foreground">Tilef Images</p>
+    <div className="flex flex-wrap gap-2 justify-start">
+      {order.tilefImageUrls.map((url, index) => (
+        <img
+          key={index}
+          src={getImageUrl(url)}
+          alt={`Tilef Pattern ${index + 1}`}
+          className="h-24 w-24 object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => setFullScreenImageUrl(getImageUrl(url)!)}
+        />
+      ))}
+    </div>
+  </div>
+)}
                       {order.colors && order.colors.length > 0 && (
                         <DetailRow
                           label="Color Codes"

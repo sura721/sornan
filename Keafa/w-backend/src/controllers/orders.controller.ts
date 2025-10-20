@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import Individual from '../models/individual.model';
 import Family from '../models/family.model';
 import mongoose from 'mongoose';
-
+import fs from 'fs/promises'; // Import the file system module
+import path from 'path';    
 
 
 export const getIndividuals = async (req: Request, res: Response) => {
@@ -255,16 +256,19 @@ export const getFamilyById = async (req: Request, res: Response) => {
 };
 
  
+
 export const createFamily = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
- 
   console.log("--- Raw Request Body for createFamily ---");
   console.log(req.body);
+  console.log("--- Uploaded Files ---");
+  console.log(req.files); // Log req.files to debug
   console.log("-----------------------------------------");
 
   try {
+    // --- No changes to parsing member and family data ---
     const memberData = JSON.parse(req.body.memberIds);
     
     const familyData: any = {
@@ -281,28 +285,38 @@ export const createFamily = async (req: Request, res: Response) => {
       familyData.payment = JSON.parse(req.body.payment);
     }
 
+    // --- No changes to creating members ---
     const membersToCreate = memberData.map((member: any) => ({
       ...member,
       isFamilyMember: true,
     }));
 
-    const newMembers = await Individual.create(membersToCreate, { session, ordered: true });
+    const newMembers = await Individual.create(membersToCreate, { session });
     const newMemberIds = newMembers.map(member => member._id);
+
+    // --- THIS IS THE UPDATED SECTION ---
+    // Change `req.file` to `req.files` and save an array of paths
+    
+    // 1. Check if req.files exists (it's an array from multer's .array() middleware)
+    const imagePaths = req.files 
+      ? (req.files as Express.Multer.File[]).map(file => file.path) 
+      : []; // Default to an empty array if no files are uploaded
 
     const newFamilyData = {
       ...familyData,
       memberIds: newMemberIds,
-      tilefImageUrl: req.file ? req.file.path : undefined,
+      // 2. Use the new schema field `tilefImageUrls` and assign the array of paths
+      tilefImageUrls: imagePaths, 
     };
+    // --- END OF UPDATED SECTION ---
 
-  
     console.log("--- Final Family Object for Database ---");
     console.log(newFamilyData);
     console.log("----------------------------------------");
     
     const newFamily = new Family(newFamilyData);
-
     const savedFamily = await newFamily.save({ session });
+
     await session.commitTransaction();
 
     const populatedFamily = await Family.findById(savedFamily._id).populate('memberIds');
@@ -311,30 +325,105 @@ export const createFamily = async (req: Request, res: Response) => {
   } catch (error) {
     await session.abortTransaction();
     console.error("Family creation failed:", error);
-    res.status(500).send('Server Error');
+    // Provide a more descriptive error in the response
+    res.status(500).json({ message: 'Server Error: Failed to create family.', error });
   } finally {
     session.endSession();
   }
 };
 
 
+
 export const updateFamily = async (req: Request, res: Response) => {
   try {
-    const family = await Family.findByIdAndUpdate(
-      req.params.id, 
-      req.body,
+    const { id } = req.params;
+    const { body, files } = req as { body: any; files: Express.Multer.File[] };
+    const {
+      familyName, deliveryDate, notes, paymentMethod,
+      phoneNumbers, socials, colors, payment,
+      memberIds, // This is the JSON string of members
+      existingImageUrls // JSON string of old URLs to keep
+    } = body;
+    
+    // --- 1. Build the update object using dot notation ---
+    const updateData: { [key: string]: any } = {};
+
+    // Simple fields
+    if (familyName) updateData.familyName = familyName;
+    if (deliveryDate) updateData.deliveryDate = deliveryDate;
+    if (notes) updateData.notes = notes;
+    if (paymentMethod) updateData.paymentMethod = paymentMethod;
+
+    // Handle nested objects
+    if (phoneNumbers) {
+      updateData['phoneNumbers.primary'] = phoneNumbers.primary || "";
+      updateData['phoneNumbers.secondary'] = phoneNumbers.secondary || "";
+    }
+    if (socials) {
+      updateData['socials.telegram'] = socials.telegram || "";
+    }
+    if (colors) {
+        updateData.colors = colors.split(',').map((c: string) => c.trim()).filter(Boolean);
+    }
+    if (payment) {
+      if (payment.total) updateData['payment.total'] = parseFloat(payment.total);
+      if (payment.firstHalf) {
+        updateData['payment.firstHalf.paid'] = String(payment.firstHalf.paid) === 'true';
+        if (payment.firstHalf.amount) updateData['payment.firstHalf.amount'] = parseFloat(payment.firstHalf.amount);
+      }
+      if (payment.secondHalf) {
+        updateData['payment.secondHalf.paid'] = String(payment.secondHalf.paid) === 'true';
+        if (payment.secondHalf.amount) updateData['payment.secondHalf.amount'] = parseFloat(payment.secondHalf.amount);
+      }
+    }
+
+    // --- 2. Process Members: Update existing, create new ---
+    const finalMemberIds = [];
+    if (memberIds) {
+      const members = JSON.parse(memberIds);
+      for (const member of members) {
+        if (member._id && !member._id.startsWith('mock_mem_')) {
+          // EXISTING MEMBER: Update and add ID to our list
+          await Individual.findByIdAndUpdate(member._id, member);
+          finalMemberIds.push(member._id);
+        } else {
+          // NEW MEMBER: Create and add ID to our list
+          delete member._id;
+          const newMember = new Individual(member);
+          await newMember.save();
+          finalMemberIds.push(newMember._id);
+        }
+      }
+      updateData.memberIds = finalMemberIds;
+    }
+
+    // --- 3. Handle Images ---
+    const existingUrls = existingImageUrls ? JSON.parse(existingImageUrls) : [];
+    const newImageUrls = (files || []).map(f => f.path); // Multer gives us the path/URL
+    updateData.tilefImageUrls = [...existingUrls, ...newImageUrls];
+
+    // --- 4. Final Database Query ---
+    const updatedFamily = await Family.findByIdAndUpdate(
+      id,
+      { 
+        $set: updateData,
+        $unset: { tilefImageUrl: "" } // Clean up the old single image field
+      },
       { new: true, runValidators: true }
     );
-    if (!family) {
+
+    if (!updatedFamily) {
       return res.status(404).json({ message: 'Family order not found.' });
     }
-    res.json(family);
+    
+    const populatedFamily = await updatedFamily.populate('memberIds');
+    res.json(populatedFamily);
+
   } catch (error) {
-    console.error(error);
+    console.error("Family update failed:", error);
     res.status(500).send('Server Error');
   }
-};
-
+}
 export const deleteFamily = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
   session.startTransaction();

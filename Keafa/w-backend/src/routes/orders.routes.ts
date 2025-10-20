@@ -37,12 +37,12 @@ router.delete('/individuals/:id', authMiddleware, deleteIndividual);
  
 router.get('/families', authMiddleware, getFamilies);
  
-router.post('/families', authMiddleware, upload.single('tilefImage'), createFamily);
+router.post('/families', authMiddleware, upload.array('tilefImages', 4), createFamily);
  
 router.get('/families/:id', authMiddleware, getFamilyById);
 
  
-router.put('/families/update/:id', authMiddleware, upload.single('tilefImage'), updateFamilyAndMembers);
+router.put('/families/update/:id', authMiddleware, upload.array('tilefImages', 4), updateFamily);
 router.get('/search', authMiddleware, searchOrders);
 router.delete('/families/:id', authMiddleware, deleteFamily);
 

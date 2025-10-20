@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, ArrowUpRight } from "lucide-react";
+import { Upload, ArrowUpRight, X } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 
 interface FamilyInformationFormProps {
@@ -15,8 +15,8 @@ interface FamilyInformationFormProps {
   setSecondaryPhone: (value: string) => void;
   telegramUsername: string;
   setTelegramUsername: (value: string) => void;
-  tilefFile: File | null;
-  setTilefFile: (file: File | null) => void;
+tilefFiles: (File | null)[];
+  setTilefFiles: (files: (File | null)[]) => void;
   colorCodes: string;
   setColorCodes: (value: string) => void;
   notes: string;
@@ -43,13 +43,31 @@ export const FamilyInformationForm = ({
   setSecondaryPhone,
   telegramUsername,
   setTelegramUsername,
-  tilefFile,
-  setTilefFile,
+  tilefFiles,
+  setTilefFiles,
   colorCodes,
    notes,
   setNotes,
   setColorCodes,
 }: FamilyInformationFormProps) => {
+
+   const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const newFiles = [...tilefFiles];
+      newFiles[index] = file;
+      setTilefFiles(newFiles);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const newFiles = [...tilefFiles];
+    newFiles[index] = null;
+    setTilefFiles(newFiles);
+  };
   return (
     <Card className="shadow-card border-0">
       <CardHeader>
@@ -113,42 +131,58 @@ export const FamilyInformationForm = ({
             )}
           </div>
         </div>
-        <div className="space-y-2 md:col-span-2">
-          <Label>Upload 'ጥልፍ ' Image</Label>
-          <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) setTilefFile(file);
-              }}
-              className="hidden"
-              id="tilef-upload"
-            />
-            <label htmlFor="tilef-upload" className="cursor-pointer">
-              {tilefFile ? (
-                <div className="space-y-2">
-                  <img
-                    src={URL.createObjectURL(tilefFile)}
-                    alt="Tilef Preview"
-                    className="w-24 h-24 object-cover rounded-lg mx-auto"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    {tilefFile.name}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
-                  <p className="text-muted-foreground">
-                    Click to upload ጥልፍ  pattern
-                  </p>
-                </div>
-              )}
-            </label>
-          </div>
-        </div>
+       <div className="space-y-2 md:col-span-2">
+  <Label>Upload 'ጥልፍ' Images (up to 4)</Label>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {Array.from({ length: 4 }).map((_, index) => (
+      <div
+        key={index}
+        className="border-2 border-dashed border-border rounded-lg p-4 text-center aspect-square flex items-center justify-center relative"
+      >
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleFileChange(e, index)}
+          className="hidden"
+          id={`tilef-upload-${index}`}
+        />
+        <label
+          htmlFor={`tilef-upload-${index}`}
+          className="cursor-pointer w-full h-full flex flex-col justify-center items-center"
+        >
+          {tilefFiles[index] ? (
+            <>
+              <img
+                src={URL.createObjectURL(tilefFiles[index] as File)}
+                alt={`Preview ${index + 1}`}
+                className="w-full h-full object-cover rounded-lg"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault(); // prevent triggering the file input
+                  handleRemoveImage(index);
+                }}
+                className="absolute top-1 right-1 h-6 w-6"
+              >
+                <X size={16} />
+              </Button>
+            </>
+          ) : (
+            <div className="space-y-2">
+              <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
+              <p className="text-muted-foreground text-xs">
+                Image {index + 1}
+              </p>
+            </div>
+          )}
+        </label>
+      </div>
+    ))}
+  </div>
+</div>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="color-codes">Colors</Label>
           <Input

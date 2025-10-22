@@ -155,7 +155,7 @@ export const updateIndividual = async (req: Request, res: Response) => {
     // ===================================================================
     if (clothDetails) {
       // A) Handle regular string/number fields that can be empty
-      const simpleFields = ['shirtLength', 'sholder', 'wegeb', 'rist', 'sleeve', 'dressLength', 'sliveLength', 'breast', 'overBreast', 'underBreast', 'deret', 'anget'];
+      const simpleFields = ['shirtLength', 'sholder', 'wegeb', 'rist', 'sleeve','pantWaist', 'dressLength', 'sliveLength', 'breast', 'overBreast', 'underBreast', 'deret', 'anget'];
       simpleFields.forEach(key => {
         // Only set the field if it's actually sent from the form
         if (clothDetails[key] !== undefined) {

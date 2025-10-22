@@ -42,6 +42,7 @@ const initialMemberFormState = {
   underBreast: "",
   femaleSliveType: "",
   femaleWegebType: "",
+  pantWaist: "",
   deret: "",
   anget: "",
   maleClothType: "",
@@ -161,6 +162,7 @@ const handleFamilyChange = (
             member.payment?.firstHalf.amount?.toString() || "",
                     sleeve: member.clothDetails.sleeve?.toString() || "", 
           paymentSecondHalfPaid: member.payment?.secondHalf.paid || false,
+           pantWaist: member.clothDetails.pantWaist || "", 
           paymentSecondHalfAmount:
             member.payment?.secondHalf.amount?.toString() || "",
         });
@@ -196,6 +198,7 @@ const handleFamilyChange = (
             rist: memberFormData.rist || undefined,
                 sleeve: memberFormData.sleeve || undefined, 
             dressLength: memberFormData.dressLength || undefined,
+            pantWaist: memberFormData.pantWaist || undefined, 
             sliveLength: memberFormData.sliveLength || undefined,
             breast: memberFormData.breast || undefined,
             overBreast: memberFormData.overBreast || undefined,
@@ -985,6 +988,20 @@ const handleRemoveImage = (index: number) => {
                                   setMemberFormData({
                                     ...memberFormData,
                                     anget: e.target.value,
+                                  })
+                                }
+                              />
+                            </div>
+                              {/* =================== NEW FIELD TO ADD =================== */}
+                            <div className="space-y-2">
+                              <Label>Pant Waist</Label>
+                              <Input
+                                type="text"
+                                value={memberFormData.pantWaist}
+                                onChange={(e) =>
+                                  setMemberFormData({
+                                    ...memberFormData,
+                                    pantWaist: e.target.value,
                                   })
                                 }
                               />

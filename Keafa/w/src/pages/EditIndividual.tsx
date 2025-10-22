@@ -48,6 +48,7 @@ const EditIndividual = () => {
     secondHalfPaid: false,
     secondHalfAmount: "",
     shirtLength: "",
+      pantWaist: "", 
     sholder: "",
     wegeb: "",
     rist: "",
@@ -89,6 +90,7 @@ const [newTilefFiles, setNewTilefFiles] = useState<(File | null)[]>(Array(4).fil
           firstHalfPaid: individualData.payment?.firstHalf.paid || false,
           firstHalfAmount:
             individualData.payment?.firstHalf.amount?.toString() || "",
+             pantWaist: individualData.clothDetails.pantWaist || "",
           secondHalfPaid: individualData.payment?.secondHalf.paid || false,
           secondHalfAmount:
             individualData.payment?.secondHalf.amount?.toString() || "",
@@ -173,6 +175,7 @@ const handleRemoveNewImage = (index: number) => {
     updatedData.append("clothDetails[rist]", formData.rist);
     updatedData.append("clothDetails[sleeve]", formData.sleeve);
     updatedData.append("notes", formData.notes); 
+     updatedData.append("clothDetails[pantWaist]", formData.pantWaist); 
 
     if (formData.sex === "Female") {
       updatedData.append("clothDetails[dressLength]", formData.dressLength);
@@ -610,6 +613,17 @@ newTilefFiles.forEach(file => {
                       value={formData.anget}
                       onChange={(e) =>
                         setFormData({ ...formData, anget: e.target.value })
+                      }
+                    />
+                  </div>
+                     <div className="space-y-2">
+                    <Label htmlFor="pantWaist">Pant Waist</Label>
+                    <Input
+                      id="pantWaist"
+                      type="text"
+                      value={formData.pantWaist}
+                      onChange={(e) =>
+                        setFormData({ ...formData, pantWaist: e.target.value })
                       }
                     />
                   </div>

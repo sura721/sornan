@@ -443,14 +443,8 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                         label="Secondary Phone"
                         value={order.phoneNumbers?.secondary}
                       />
-                       <DetailRow
-                        label="pantWaist"
-                        value={order.clothDetails.pantWaist}
-                      />
-                      <DetailRow
-                        label="Secondary Phone"
-                        value={order.phoneNumbers?.secondary}
-                      />
+                      
+                     
                       <DetailRow
                         label="Telegram"
                         value={order.socials?.telegram}
@@ -594,6 +588,13 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                                 value={clothDetails.anget}
                               />
                             )}
+                             {clothDetails.pantWaist && (
+                              <DetailRow
+                                label="Neck"
+                                value={clothDetails.pantWaist}
+                              />
+                            )}
+                            
                             {clothDetails.maleClothType && (
                               <DetailRow
                                 label="Cloth Type"
@@ -990,6 +991,12 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                               <DetailRow
                                 label="Waist"
                                 value={clothDetails.wegeb}
+                              />
+                            )}
+                            {clothDetails.pantWaist && (
+                              <DetailRow
+                                label="pantWaist"
+                                value={clothDetails.pantWaist}
                               />
                             )}
                             {clothDetails.rist && (

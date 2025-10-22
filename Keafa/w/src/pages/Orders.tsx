@@ -433,10 +433,19 @@ const getTelegramUsername = (telegramInput?: string): string | null => {
                       <DetailRow label="First Name" value={order.firstName} />
                       <DetailRow label="Last Name" value={order.lastName} />
                       <DetailRow label="Sex" value={order.sex} />
+                      
                       <DetailRow label="Age" value={order.age} />
                       <DetailRow
                         label="Primary Phone"
                         value={order.phoneNumbers?.primary}
+                      />
+                      <DetailRow
+                        label="Secondary Phone"
+                        value={order.phoneNumbers?.secondary}
+                      />
+                       <DetailRow
+                        label="pantWaist"
+                        value={order.clothDetails.pantWaist}
                       />
                       <DetailRow
                         label="Secondary Phone"

@@ -44,7 +44,7 @@ export const createIndividual = async (req: Request, res: Response) => {
     const individualData = {
       firstName: body.firstName,
       lastName: body.lastName,
-      sex: body.sex,
+       sex: body.sex,
       age: body.age ? parseInt(body.age, 10) : undefined,
       deliveryDate: body.deliveryDate,
       notes: body.notes || undefined,
@@ -70,10 +70,13 @@ export const createIndividual = async (req: Request, res: Response) => {
         dressLength: body.clothDetails.dressLength || undefined,
         sliveLength: body.clothDetails.sliveLength || undefined,
         breast: body.clothDetails.breast || undefined,
+         pantWaist: body.clothDetails.pantWaist || undefined,
         overBreast: body.clothDetails.overBreast || undefined,
         underBreast: body.clothDetails.underBreast || undefined,
+        
         deret: body.clothDetails.deret || undefined,
         anget: body.clothDetails.anget || undefined,
+        
         femaleSliveType: body.clothDetails.femaleSliveType || undefined,
         femaleWegebType: body.clothDetails.femaleWegebType || undefined,
         maleClothType: body.clothDetails.maleClothType || undefined,
@@ -95,6 +98,7 @@ export const createIndividual = async (req: Request, res: Response) => {
 
     const newIndividual = new Individual(individualData);
     const savedIndividual = await newIndividual.save();
+    console.log(savedIndividual)
     res.status(201).json(savedIndividual);
 
   } catch (error: any) {
@@ -291,7 +295,7 @@ export const createFamily = async (req: Request, res: Response) => {
       isFamilyMember: true,
     }));
 
-    const newMembers = await Individual.create(membersToCreate, { session });
+    const newMembers = await Individual.create(membersToCreate, { session, ordered: true });
     const newMemberIds = newMembers.map(member => member._id);
 
     // --- THIS IS THE UPDATED SECTION ---

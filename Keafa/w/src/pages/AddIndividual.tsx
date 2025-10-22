@@ -56,6 +56,7 @@ const AddIndividual = () => {
     femaleSliveType: "",
     femaleWegebType: "",
     deret: "",
+  pantWaist: "" ,
     anget: "",
     maleClothType: "",
     maleSliveType: "",
@@ -192,6 +193,7 @@ newIndividualData.append("notes", formData.notes);
     if (formData.sex === "Male") {
       newIndividualData.append("clothDetails[deret]", formData.deret);
       newIndividualData.append("clothDetails[anget]", formData.anget);
+      newIndividualData.append("clothDetails[pantWaist]", formData.pantWaist); 
       newIndividualData.append(
         "clothDetails[maleClothType]",
         formData.maleClothType
@@ -616,6 +618,17 @@ newIndividualData.append("notes", formData.notes);
                       value={formData.anget}
                       onChange={(e) =>
                         setFormData({ ...formData, anget: e.target.value })
+                      }
+                    />
+                  </div>
+                   <div className="space-y-2">
+                    <Label htmlFor="pantWaist">Pant Waist</Label>
+                    <Input
+                      id="pantWaist"
+                      type="text"
+                      value={formData.pantWaist}
+                      onChange={(e) =>
+                        setFormData({ ...formData, pantWaist: e.target.value })
                       }
                     />
                   </div>

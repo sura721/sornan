@@ -27,9 +27,11 @@ export interface Individual {
   lastName: string;
   sex: 'Male' | 'Female';
   age?: number;
+ 
   phoneNumbers?: { primary: string; secondary?: string; };
   socials?: { telegram?: string; instagram?:string; };
   clothDetails: {
+     pantWaist?:string;
     colors: string[];
 tilefImageUrls?: string[];
     shirtLength?: string;

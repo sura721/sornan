@@ -43,6 +43,7 @@ export type MemberFormState = {
   breast: string;
   overBreast: string;
   underBreast: string;
+    pantWaist?:string;
   femaleSliveType: string;
   femaleWegebType: string;
 
@@ -73,6 +74,7 @@ const initialMemberFormState: MemberFormState = {
   sleeve:" ",
   breast: "",
   overBreast: "",
+    pantWaist: "",
   underBreast: "",
   femaleSliveType: "",
   femaleWegebType: "",
@@ -139,7 +141,7 @@ export const FamilyMembersForm = ({
         // Male Measurements (as Strings)
         deret: memberFormData.sex === "Male" ? (memberFormData.deret || undefined) : undefined,
         anget: memberFormData.sex === "Male" ? (memberFormData.anget || undefined) : undefined,
-
+  pantWaist: memberFormData.sex === "Male" ? (memberFormData.pantWaist || undefined) : undefined,
         // Dropdown Selections (already correct)
         femaleSliveType: memberFormData.sex === "Female" ? (memberFormData.femaleSliveType || undefined) : undefined,
         femaleWegebType: memberFormData.sex === "Female" ? (memberFormData.femaleWegebType || undefined) : undefined,

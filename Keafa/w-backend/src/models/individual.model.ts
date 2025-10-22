@@ -34,6 +34,7 @@ tilefImageUrls: [{ type: String, required: false }], // Note the []  // Common m
   anget: { type: String, required: false },
   maleClothType: { type: String, required: false },
   maleSliveType: { type: String, required: false },
+  pantWaist: { type: String, required: false }, 
   netela: { type: String, enum: ['Yes', 'No'], required: false },
 }, { _id: false });
 
@@ -63,7 +64,7 @@ export interface IIndividual extends Document {
 tilefImageUrls?: string[];    shirtLength?: string;
     sholder?: string;
     wegeb?: string;
-    rist?: string;
+     rist?: string;
     dressLength?: string;
     sliveLength?: string;
     breast?: string;
@@ -74,6 +75,7 @@ tilefImageUrls?: string[];    shirtLength?: string;
     deret?: string;
     anget?: string;
     maleClothType?: string;
+    pantWaist?: string; 
     maleSliveType?: string;
     netela?: 'Yes' | 'No';
     };

@@ -258,6 +258,16 @@ export const MemberForm = ({
                       }
                     />
                   </div>
+                   <div className="space-y-2">
+                    <Label>Pant Waist</Label>
+                    <Input
+                      type="text"
+                      value={memberFormData.pantWaist || ""}
+                      onChange={(e) =>
+                        handleInputChange("pantWaist", e.target.value)
+                      }
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label>Type cloth</Label>
                     <Select

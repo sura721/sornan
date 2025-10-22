@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";  
+
 import {
   Select,
   SelectContent,
@@ -519,6 +521,21 @@ const handleRemoveImage = (index: number) => {
                 }
               />
             </div>
+          </CardContent>
+        </Card>
+         <Card className="shadow-card border-0">
+          <CardHeader>
+            <CardTitle className="text-primary font-serif">
+              Notes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              placeholder="Add any additional notes for this family order..."
+              value={familyData.notes || ""}
+              onChange={(e) => handleFamilyChange("notes", e.target.value)}
+              rows={4}
+            />
           </CardContent>
         </Card>
         <Card className="shadow-card border-0">

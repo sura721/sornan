@@ -11,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea"; 
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -40,6 +42,7 @@ const EditIndividual = () => {
     telegramUsername: "",
     instagramUsername: "",
     total: "",
+    notes: " ",
     firstHalfPaid: false,
     firstHalfAmount: "",
     secondHalfPaid: false,
@@ -91,6 +94,7 @@ const [newTilefFiles, setNewTilefFiles] = useState<(File | null)[]>(Array(4).fil
             individualData.payment?.secondHalf.amount?.toString() || "",
           shirtLength:
             individualData.clothDetails.shirtLength?.toString() || "",
+            notes: individualData.notes || "", 
           sholder: individualData.clothDetails.sholder?.toString() || "",
           wegeb: individualData.clothDetails.wegeb?.toString() || "",
           rist: individualData.clothDetails.rist?.toString() || "",
@@ -102,6 +106,7 @@ const [newTilefFiles, setNewTilefFiles] = useState<(File | null)[]>(Array(4).fil
           overBreast: individualData.clothDetails.overBreast?.toString() || "",
           underBreast:
             individualData.clothDetails.underBreast?.toString() || "",
+            
           femaleSliveType: individualData.clothDetails.femaleSliveType || "",
           femaleWegebType: individualData.clothDetails.femaleWegebType || "",
           deret: individualData.clothDetails.deret?.toString() || "",
@@ -167,6 +172,7 @@ const handleRemoveNewImage = (index: number) => {
     updatedData.append("clothDetails[wegeb]", formData.wegeb);
     updatedData.append("clothDetails[rist]", formData.rist);
     updatedData.append("clothDetails[sleeve]", formData.sleeve);
+    updatedData.append("notes", formData.notes); 
 
     if (formData.sex === "Female") {
       updatedData.append("clothDetails[dressLength]", formData.dressLength);
@@ -734,6 +740,23 @@ newTilefFiles.forEach(file => {
     })}
   </div>
 </div>
+          </CardContent>
+        </Card>
+         <Card className="shadow-card border-0">
+          <CardHeader>
+            <CardTitle className="text-primary font-serif">
+              Notes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              placeholder="Add any additional notes for this order..."
+              value={formData.notes}
+              onChange={(e) =>
+                setFormData({ ...formData, notes: e.target.value })
+              }
+              rows={4}
+            />
           </CardContent>
         </Card>
         <Card className="shadow-card border-0">

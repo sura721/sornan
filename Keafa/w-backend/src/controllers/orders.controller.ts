@@ -393,7 +393,9 @@ export const updateFamily = async (req: Request, res: Response) => {
         } else {
           // NEW MEMBER: Create and add ID to our list
           delete member._id;
-          const newMember = new Individual(member);
+          // --- THIS IS THE FIX ---
+          // Now it behaves exactly like your createFamily function
+          const newMember = new Individual({ ...member, isFamilyMember: true });
           await newMember.save();
           finalMemberIds.push(newMember._id);
         }

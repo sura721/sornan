@@ -239,7 +239,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       return true;
     } catch (error) {
-      toast({ title: "Login Failed", description: "Invalid credentials.", variant: "destructive" });
+      // Prefer the backend-provided message when available so users see the server's reason.
+      let message = 'Login failed.';
+      if (error && typeof error === 'object' && 'response' in error) {
+        const resp = (error as any).response;
+        message = resp?.data?.message || resp?.data || message;
+      }
+      toast({ title: 'Login Failed', description: message, variant: 'destructive' });
       return false;
     }
   };

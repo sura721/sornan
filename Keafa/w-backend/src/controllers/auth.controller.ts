@@ -81,8 +81,15 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 
   try {
-    // Check if user exists
-    const user = await User.findOne({ username });
+    // Check if user exists (case-insensitive lookup to tolerate capitalization differences from clients)
+    // Escape the username for use in a RegExp to avoid accidental regex injection
+    const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const usernameRegex = new RegExp(`^${escapeRegExp(username)}$`, 'i');
+    const user = await User.findOne({ username: usernameRegex });
+    // Helpful debug log for deployed environments — avoid logging passwords.
+    if (!user) {
+      console.warn(`Login attempt failed: user not found for username='${username}'`);
+    }
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }

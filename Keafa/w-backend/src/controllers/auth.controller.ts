@@ -81,6 +81,14 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 
   try {
+    // Log an incoming login attempt (do NOT log passwords)
+    try {
+      const ip = (req.ip || (req.headers['x-forwarded-for'] as string) || req.connection?.remoteAddress || 'unknown');
+      const ua = req.headers['user-agent'] || 'unknown';
+      console.info(`Login attempt for username='${username}' from=${ip} ua='${String(ua)}'`);
+    } catch (e) {
+      // swallow any logging errors
+    }
     // Check if user exists (case-insensitive lookup to tolerate capitalization differences from clients)
     // Escape the username for use in a RegExp to avoid accidental regex injection
     const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -89,6 +97,7 @@ export const loginUser = async (req: Request, res: Response) => {
     // Helpful debug log for deployed environments — avoid logging passwords.
     if (!user) {
       console.warn(`Login attempt failed: user not found for username='${username}'`);
+      return res.status(401).json({ message: 'Invalid credentials.' });
     }
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials.' });
@@ -97,6 +106,11 @@ export const loginUser = async (req: Request, res: Response) => {
     // Check if password matches the hashed password in the database
     const isMatch = await bcrypt.compare(password, user.password!);
     if (!isMatch) {
+      // Incorrect password
+      try {
+        const ip = (req.ip || (req.headers['x-forwarded-for'] as string) || req.connection?.remoteAddress || 'unknown');
+        console.warn(`Login failed: invalid password for username='${username}' from=${ip}`);
+      } catch (e) {}
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
@@ -117,6 +131,12 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
 
+    // At this point authentication succeeded. Log success (no sensitive data).
+    try {
+      const ip = (req.ip || (req.headers['x-forwarded-for'] as string) || req.connection?.remoteAddress || 'unknown');
+      console.info(`Login succeeded for username='${username}' id='${user.id}' from=${ip}`);
+    } catch (e) {}
+
     // Use explicit cookie options so clearing the cookie later matches exactly.
     const cookieOptions = {
       httpOnly: true,
@@ -128,6 +148,9 @@ export const loginUser = async (req: Request, res: Response) => {
 
     // --- Set JWT in an httpOnly cookie ---
     res.cookie('token', token, cookieOptions);
+    try {
+      console.debug(`Set auth cookie for username='${username}' id='${user.id}'`);
+    } catch (e) {}
 
     // Respond with user data (without password)
     res.json({

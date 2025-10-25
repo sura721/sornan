@@ -227,6 +227,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsAuthenticated(true);
       setCurrentUser(userData);
 
+      // Log success and server response for easier debugging on deployed envs
+      try {
+        console.log('Login succeeded:', { username: userData?.username, _id: userData?._id });
+      } catch (e) {
+        // ignore console errors in very locked-down environments
+      }
+
       // After a successful login, we must fetch the app's data.
       const [individualsData, familiesData, usersData] = await Promise.all([
         fetchIndividualsApi(),
@@ -244,6 +251,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (error && typeof error === 'object' && 'response' in error) {
         const resp = (error as any).response;
         message = resp?.data?.message || resp?.data || message;
+      }
+      // Show toast (backend message) and print it to console for diagnostics
+      try {
+        console.warn('Login failed:', message);
+        if ((error as any).response) console.debug('Login error response:', (error as any).response?.data);
+      } catch (e) {
+        // swallow any console errors
       }
       toast({ title: 'Login Failed', description: message, variant: 'destructive' });
       return false;

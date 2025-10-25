@@ -29,11 +29,8 @@ const Login = () => {
       // so we can navigate to the home page.
       navigate("/");
     } else {
-      toast({
-        title: "Login Failed",
-        description: "Incorrect username or password. Please try again.",
-        variant: "destructive",
-      });
+      // `login` already shows the backend message in a toast and logs details to the console.
+      // Here we just stop the loading spinner so the user can try again.
       setIsLoading(false);
     }
   };

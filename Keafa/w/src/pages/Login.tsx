@@ -58,6 +58,11 @@ const Login = () => {
                 placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                // Prevent iOS from auto-capitalizing or autocorrecting the username
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                autoComplete="username"
                 required
                 disabled={isLoading}
               />
@@ -70,6 +75,11 @@ const Login = () => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                // Prevent iOS from trying to correct or auto-capitalize passwords
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                autoComplete="current-password"
                 required
                 disabled={isLoading}
                 className="pr-10"

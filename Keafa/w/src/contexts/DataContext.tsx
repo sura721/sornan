@@ -89,6 +89,7 @@ export interface Family {
 export interface User {
   _id: string;
   username: string;
+  token:string;
 }
 type FamilyPayload = Omit<Family, '_id' | 'memberIds'> & { memberIds: Omit<Individual, '_id'>[] };
 
@@ -217,53 +218,56 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
- const login = async (username: string, password: string): Promise<boolean> => {
+const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      // The loginUserApi call now just returns user data.
-      // The server handles setting the httpOnly cookie.
-      const userData = await loginUserApi(username, password);
-      
-      // We no longer handle a token here. Just set the user state.
-      setIsAuthenticated(true);
-      setCurrentUser(userData);
+        // 1. Call API. The userData will now contain the 'token' field.
+        const userData = await loginUserApi(username, password);
+        const { token, _id, username: loggedInUsername } = userData;
 
-      // Log success and server response for easier debugging on deployed envs
-      try {
-        console.log('Login succeeded:', { username: userData?.username, _id: userData?._id });
-      } catch (e) {
-        // ignore console errors in very locked-down environments
-      }
+        if (!token) {
+            // Should not happen if backend is correct, but safe check
+            throw new Error('Server did not provide an authentication token.');
+        }
 
-      // After a successful login, we must fetch the app's data.
-      const [individualsData, familiesData, usersData] = await Promise.all([
-        fetchIndividualsApi(),
-        fetchFamiliesApi(),
-        fetchUsersApi(),
-      ]);
-      setIndividuals(individualsData);
-      setFamilies(familiesData);
-      setUsers(usersData);
+        // 2. 🔑 Store the token in Local Storage
+        // This is necessary for the Axios interceptor (Step 2) to pick it up.
+        localStorage.setItem('authToken', token);
 
-      return true;
+        // 3. Set user state
+        setIsAuthenticated(true);
+        setCurrentUser({ _id, username: loggedInUsername, token }); // Update currentUser state with token
+
+        // Log success
+        console.log('Login succeeded, token stored:', { loggedInUsername, _id });
+
+        // 4. Fetch the app's data. 
+        //    All subsequent API calls (fetchIndividualsApi, etc.) will 
+        //    automatically include the token via the Axios interceptor.
+        const [individualsData, familiesData, usersData] = await Promise.all([
+            fetchIndividualsApi(),
+            fetchFamiliesApi(),
+            fetchUsersApi(),
+        ]);
+        setIndividuals(individualsData);
+        setFamilies(familiesData);
+        setUsers(usersData);
+
+        return true;
     } catch (error) {
-      // Prefer the backend-provided message when available so users see the server's reason.
-      let message = 'Login failed.';
-      if (error && typeof error === 'object' && 'response' in error) {
-        const resp = (error as any).response;
-        message = resp?.data?.message || resp?.data || message;
-      }
-      // Show toast (backend message) and print it to console for diagnostics
-      try {
+        // Clear token if login fails
+        localStorage.removeItem('authToken'); 
+        
+        let message = 'Login failed.';
+        if (error && typeof error === 'object' && 'response' in error) {
+            const resp = (error as any).response;
+            message = resp?.data?.message || resp?.data || message;
+        }
+        
         console.warn('Login failed:', message);
-        if ((error as any).response) console.debug('Login error response:', (error as any).response?.data);
-      } catch (e) {
-        // swallow any console errors
-      }
-      toast({ title: 'Login Failed', description: message, variant: 'destructive' });
-      return false;
+        toast({ title: 'Login Failed', description: message, variant: 'destructive' });
+        return false;
     }
-  };
-
+};
  const logout = async () => {
     try {
       // Call the backend endpoint to clear the httpOnly cookie.
@@ -279,6 +283,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIndividuals([]);
       setFamilies([]);
       
+      // IMPORTANT: remove any stored bearer token so a page refresh doesn't
+      // silently re-authenticate the user from localStorage.
+      try {
+        localStorage.removeItem('authToken');
+        console.log('Removed authToken from localStorage during logout');
+      } catch (e) {
+        // ignore
+      }
+
       // This is UI state, so keeping it in localStorage is fine.
       localStorage.removeItem('dismissedNotifications'); 
       setDismissedNotificationIds([]);

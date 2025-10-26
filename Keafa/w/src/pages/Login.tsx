@@ -17,24 +17,42 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);  
-    
-   
-    const success = await login(username, password);
+  // Inside your Login component (where you had the original handleLogin)
 
-    if (success) {
-      // On successful login, the server sets the cookie,
-      // so we can navigate to the home page.
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+
+  try {
+    // Assuming 'login' in useData calls your 'loginUserApi' and may return either
+    // a boolean true on success or an object containing a token.
+    const response = await login(username, password) as unknown;
+
+    // If the login returned an object with a token, persist it
+    if (response && typeof response === "object" && "token" in (response as Record<string, unknown>)) {
+      const token = (response as any).token;
+      if (typeof token === "string") {
+        localStorage.setItem("authToken", token);
+      }
+      // On successful login and token storage, navigate
+      navigate("/");
+    } else if (response === true) {
+      // Legacy boolean success; navigate without token
       navigate("/");
     } else {
-      // `login` already shows the backend message in a toast and logs details to the console.
-      // Here we just stop the loading spinner so the user can try again.
+      // Login failed (message handled by `login` utility)
       setIsLoading(false);
     }
-  };
-
+  } catch (error) {
+    // Handle any network/API errors that 'login' didn't already catch
+    setIsLoading(false);
+    toast({
+      title: "Login Failed",
+      description: "Could not connect to the server or process credentials.",
+      variant: "destructive"
+    });
+  }
+};
   return (
     <div
       className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center"
